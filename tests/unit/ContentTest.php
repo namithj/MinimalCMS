@@ -55,7 +55,7 @@ class ContentTest extends TestCase {
 
 	public function test_register_content_type_creates_directory(): void {
 		mc_register_content_type( 'article' );
-		$this->assertDirectoryExists( MC_CONTENT_DIR . 'article/' );
+		$this->assertDirectoryExists( MC_CONTENT_DIR . 'articles/' );
 	}
 
 	public function test_register_content_type_defaults(): void {
@@ -384,7 +384,7 @@ class ContentTest extends TestCase {
 
 	public function test_content_item_dir(): void {
 		$dir = mc_content_item_dir( 'page', 'my-slug' );
-		$this->assertStringEndsWith( 'page/my-slug/', $dir );
+		$this->assertStringEndsWith( 'pages/my-slug/', $dir );
 	}
 
 	public function test_content_md_path(): void {

@@ -34,3 +34,4 @@ composer.phar
 /coverage/
 wp-config.php
 config.json
+.phpunit.cache/*
