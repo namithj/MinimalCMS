@@ -1,0 +1,14 @@
+# MinimalCMS Rewrite Rules
+# Route all requests to the front controller unless they match a real file/directory.
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /minimal/
+
+# If the requested file or directory exists, serve it directly.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Otherwise send everything to index.php.
+RewriteRule . index.php [L]
+</IfModule>

@@ -1,0 +1,311 @@
+/*
+ * Default Theme Stylesheet
+ *
+ * Theme Name: Default
+ * Version:    1.0.0
+ * Author:     MinimalCMS
+ */
+
+@use "variables" as *;
+
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: $font-size-base;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: $font-family;
+  line-height: $line-height;
+  color: $color-text;
+  background: $color-bg;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.site-header {
+  background: $color-header-bg;
+  color: $color-white;
+  padding: 1rem 0;
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+.site-branding {
+  a {
+    color: $color-white;
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .site-description {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+}
+
+/* ── Navigation ───────────────────────────────────────────────────────────── */
+
+.main-navigation {
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  a {
+    color: rgba($color-white, 0.85);
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+
+    &:hover,
+    &.active {
+      background: rgba($color-white, 0.15);
+      color: $color-white;
+    }
+  }
+}
+
+/* ── Container ────────────────────────────────────────────────────────────── */
+
+.container {
+  width: 100%;
+  max-width: $container-max;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: $container-pad;
+  padding-right: $container-pad;
+}
+
+/* ── Main Content ─────────────────────────────────────────────────────────── */
+
+.site-main {
+  flex: 1;
+  padding: $section-pad 0;
+}
+
+.entry-header {
+  margin-bottom: 2rem;
+}
+
+.entry-title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: $color-heading;
+}
+
+.entry-content {
+  font-size: 1.05rem;
+
+  h1, h2, h3, h4, h5, h6 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $color-heading;
+  }
+
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+
+  p { margin-bottom: 1.25rem; }
+
+  ul, ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  li { margin-bottom: 0.3rem; }
+
+  a {
+    color: $color-link;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+
+    &:hover { color: $color-link-hover; }
+  }
+
+  blockquote {
+    border-left: 4px solid $color-blockquote-border;
+    padding: 0.5rem 1rem;
+    margin: 1.5rem 0;
+    color: #555;
+    background: #f9f9f9;
+  }
+
+  code {
+    background: $color-code-bg;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-family: $font-mono;
+  }
+
+  pre {
+    background: $color-code-bg;
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+
+    th, td {
+      border: 1px solid $color-border;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+
+    th {
+      background: $color-code-bg;
+      font-weight: 600;
+    }
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid $color-blockquote-border;
+    margin: 2rem 0;
+  }
+}
+
+/* ── Archive Listing ──────────────────────────────────────────────────────── */
+
+.archive-list {
+  list-style: none;
+
+  li {
+    padding: 1rem 0;
+    border-bottom: 1px solid $color-border-light;
+
+    &:last-child { border-bottom: none; }
+  }
+
+  a {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: $color-heading;
+    text-decoration: none;
+
+    &:hover { color: $color-link; }
+  }
+
+  .excerpt {
+    font-size: 0.9rem;
+    color: $color-muted;
+    margin-top: 0.25rem;
+  }
+}
+
+/* ── 404 ──────────────────────────────────────────────────────────────────── */
+
+.error-404 {
+  text-align: center;
+  padding: 4rem 0;
+
+  h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: $color-muted;
+  }
+
+  a { color: $color-link; }
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+
+.site-footer {
+  background: $color-footer-bg;
+  border-top: 1px solid $color-footer-border;
+  padding: 1.5rem 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: $color-light;
+
+  a {
+    color: $color-muted;
+    text-decoration: none;
+
+    &:hover { color: $color-heading; }
+  }
+}
+
+/* ── Admin Bar ────────────────────────────────────────────────────────────── */
+
+.mc-admin-bar {
+  background: $color-admin-bar-bg;
+  color: $color-white;
+  font-size: 0.8rem;
+  padding: 0.4rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  a {
+    color: rgba($color-white, 0.8);
+    text-decoration: none;
+    margin-left: 1rem;
+
+    &:hover { color: $color-white; }
+  }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .site-header .container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .main-navigation ul { flex-wrap: wrap; }
+  .entry-title        { font-size: 1.5rem; }
+}

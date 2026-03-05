@@ -1,0 +1,35 @@
+# Dependencies
+/mc-includes/vendor/
+/node_modules/
+
+# Build output
+/mc-admin/assets/css/*.css
+/mc-admin/assets/css/*.css.map
+/mc-admin/assets/vendor/
+/mc-content/themes/default/*.css
+/mc-content/themes/default/*.css.map
+
+# IDE
+/.idea/
+/.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (sensitive)
+/mc-data/users.php
+/mc-data/sessions/
+
+# Cache
+/mc-content/cache/
+
+# Composer
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+/coverage/
+wp-config.php

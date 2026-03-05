@@ -1,0 +1,511 @@
+/**
+ * MinimalCMS Admin Stylesheet
+ *
+ * @package MinimalCMS
+ * @since   1.0.0
+ */
+
+@use "variables" as *;
+@use "mixins" as *;
+
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.mc-admin {
+  font-family: $font-family;
+  font-size: $font-size-base;
+  line-height: $line-height;
+  color: $color-text;
+  background: $color-body-bg;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+
+  &:hover {
+    color: $color-primary-hover;
+    text-decoration: underline;
+  }
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+
+.admin-sidebar {
+  width: $sidebar-width;
+  background: $color-sidebar-bg;
+  color: $color-sidebar-text;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: transform $transition-base;
+
+  .sidebar-header {
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $color-sidebar-border;
+
+    .brand {
+      color: $color-white;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: -.3px;
+    }
+  }
+}
+
+.admin-menu {
+  ul {
+    list-style: none;
+    padding: $spacing-sm 0;
+  }
+
+  li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px $spacing-lg;
+    color: $color-sidebar-text;
+    text-decoration: none;
+    font-size: .9rem;
+    @include transition(background, color);
+
+    &:hover {
+      background: $color-sidebar-hover;
+      color: $color-white;
+      text-decoration: none;
+    }
+  }
+
+  li.active a {
+    background: $color-sidebar-active;
+    color: $color-white;
+  }
+
+  .icon {
+    font-size: 1.1rem;
+    width: 22px;
+    text-align: center;
+  }
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px $spacing-lg;
+  border-top: 1px solid $color-sidebar-border;
+  font-size: .8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .current-user { color: $color-sidebar-text; }
+  .logout-link  { color: $color-danger; }
+}
+
+/* ── Main ─────────────────────────────────────────────────────────────────── */
+
+.admin-main {
+  flex: 1;
+  margin-left: $sidebar-width;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  padding: 12px $spacing-xl;
+  background: $color-white;
+  border-bottom: 1px solid $color-border;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  .page-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    flex: 1;
+  }
+
+  .view-site { font-size: .85rem; }
+}
+
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  margin-right: 12px;
+  color: $color-text;
+}
+
+.admin-content {
+  flex: 1;
+  padding: $spacing-xl;
+}
+
+.admin-footer-bar {
+  padding: 12px $spacing-xl;
+  text-align: center;
+  font-size: .8rem;
+  color: $color-text-light;
+  border-top: 1px solid $color-border-light;
+}
+
+/* ── Notices ──────────────────────────────────────────────────────────────── */
+
+.notice {
+  padding: 12px $spacing-md;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-md;
+  font-size: .9rem;
+
+  &-success { background: $notice-success-bg; border-left: 4px solid $notice-success-border; color: $notice-success-text; }
+  &-error   { background: $notice-error-bg;   border-left: 4px solid $notice-error-border;   color: $notice-error-text;   }
+  &-warning { background: $notice-warning-bg; border-left: 4px solid $notice-warning-border; color: $notice-warning-text; }
+  &-info    { background: $notice-info-bg;    border-left: 4px solid $notice-info-border;    color: $notice-info-text;    }
+}
+
+/* ── Cards / Panels ───────────────────────────────────────────────────────── */
+
+.card {
+  @include card-base;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+
+  &-header {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $color-border-light;
+  }
+}
+
+/* ── Dashboard Grid ───────────────────────────────────────────────────────── */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.stat-card {
+  @include card-base;
+  padding: $spacing-lg;
+  text-align: center;
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: $color-primary;
+  }
+
+  .stat-label {
+    font-size: .85rem;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+/* ── Tables ───────────────────────────────────────────────────────────────── */
+
+.mc-table {
+  width: 100%;
+  border-collapse: collapse;
+  @include card-base;
+  overflow: hidden;
+  margin-bottom: $spacing-lg;
+
+  th,
+  td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid $color-border-light;
+  }
+
+  th {
+    background: $color-surface;
+    font-weight: 600;
+    font-size: .85rem;
+    color: $color-text-secondary;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+
+  tr {
+    &:last-child td { border-bottom: none; }
+    &:hover td      { background: $color-surface; }
+  }
+}
+
+.row-actions {
+  font-size: .85rem;
+  color: $color-text-muted;
+
+  a { margin-right: $spacing-sm; }
+  .delete { color: $color-danger; }
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px $spacing-sm;
+  border-radius: 10px;
+  font-size: .75rem;
+  font-weight: 600;
+
+  &-publish  { background: $notice-success-bg; color: $notice-success-text; }
+  &-draft    { background: $color-body-bg;     color: $color-text-muted; }
+  &-active   { background: $notice-success-bg; color: $notice-success-text; }
+  &-inactive { background: $color-body-bg;     color: $color-text-muted; }
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: $spacing-sm $spacing-md;
+  font-size: .9rem;
+  font-weight: 600;
+  border-radius: $border-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  @include transition(background, border-color);
+  text-decoration: none;
+
+  &:hover { text-decoration: none; }
+
+  &-primary {
+    background: $color-primary;
+    color: $color-white;
+    border-color: $color-primary;
+
+    &:hover { background: $color-primary-hover; color: $color-white; }
+  }
+
+  &-secondary {
+    background: $color-surface;
+    color: $color-sidebar-hover;
+    border-color: $color-border;
+
+    &:hover { background: $color-border-light; color: $color-text; }
+  }
+
+  &-danger {
+    background: $color-danger;
+    color: $color-white;
+    border-color: $color-danger;
+
+    &:hover { background: $color-danger-hover; color: $color-white; }
+  }
+
+  &-sm { padding: $spacing-xs 10px; font-size: .8rem; }
+}
+
+/* ── Forms ────────────────────────────────────────────────────────────────── */
+
+.form-group {
+  margin-bottom: 18px;
+
+  label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: $color-text;
+  }
+
+  .description {
+    font-size: .8rem;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+}
+
+.form-control {
+  width: 100%;
+  padding: $spacing-sm 12px;
+  font-size: .95rem;
+  border: 1px solid $color-text-light;
+  border-radius: $border-radius;
+  outline: none;
+  font-family: inherit;
+  @include transition(border-color);
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 1px $color-primary;
+  }
+
+  &textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  &select {
+    appearance: auto;
+  }
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 120px;
+}
+
+select.form-control {
+  appearance: auto;
+}
+
+.form-actions {
+  padding-top: $spacing-md;
+  border-top: 1px solid $color-border-light;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ── Page header bar ──────────────────────────────────────────────────────── */
+
+.page-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+/* ── Editor ───────────────────────────────────────────────────────────────── */
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: $spacing-lg;
+}
+
+.editor-pane {
+  position: relative;
+
+  textarea {
+    width: 100%;
+    min-height: 400px;
+    font-family: $font-mono;
+    font-size: .9rem;
+    line-height: 1.6;
+    padding: $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: 0 0 $border-radius $border-radius;
+    resize: vertical;
+    tab-size: 4;
+  }
+}
+
+.editor-tabs {
+  display: flex;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-bottom: none;
+  border-radius: $border-radius $border-radius 0 0;
+  overflow: hidden;
+
+  button {
+    padding: $spacing-sm $spacing-md;
+    background: transparent;
+    border: none;
+    border-right: 1px solid $color-border;
+    font-size: .85rem;
+    cursor: pointer;
+    font-weight: 500;
+
+    &.active {
+      background: $color-white;
+      font-weight: 600;
+    }
+  }
+}
+
+.preview-pane {
+  display: none;
+  padding: $spacing-md;
+  border: 1px solid $color-border;
+  border-top: none;
+  border-radius: 0 0 $border-radius $border-radius;
+  min-height: 400px;
+  background: $color-white;
+  overflow-y: auto;
+  line-height: 1.7;
+
+  h1, h2, h3 { margin: .8em 0 .4em; }
+  p          { margin-bottom: .8em; }
+  code       { background: $color-body-bg; padding: 2px 6px; border-radius: 3px; font-size: .9em; }
+  pre        { background: $color-body-bg; padding: 12px; border-radius: $border-radius; overflow-x: auto; margin-bottom: 1em; }
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+
+.empty-state {
+  text-align: center;
+  padding: 48px $spacing-xl;
+  color: $color-text-muted;
+
+  .icon { font-size: 3rem; margin-bottom: 12px; }
+  p     { margin-bottom: $spacing-md; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@include breakpoint-down(960px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include breakpoint-down(782px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+
+    &.open { transform: translateX(0); }
+  }
+
+  .sidebar-toggle { display: block; }
+  .admin-main     { margin-left: 0; }
+  .admin-content  { padding: $spacing-md; }
+}
+
+@include breakpoint-down(480px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+
+  .mc-table {
+    font-size: .85rem;
+
+    th:nth-child(n+3),
+    td:nth-child(n+3) { display: none; }
+  }
+}

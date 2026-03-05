@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<ruleset name="MinimalCMS">
+    <description>PHP CodeSniffer rules for MinimalCMS — WordPress-inspired coding standard.</description>
+
+    <!-- What to scan -->
+    <file>mc-includes</file>
+    <file>mc-admin</file>
+    <file>mc-content/plugins</file>
+    <file>tests</file>
+
+    <!-- Exclusions -->
+    <exclude-pattern>mc-includes/vendor/*</exclude-pattern>
+    <exclude-pattern>mc-admin/assets/vendor/*</exclude-pattern>
+    <exclude-pattern>mc-content/themes/*/assets/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*\.min\.php</exclude-pattern>
+
+    <!-- Show progress and use colours -->
+    <arg value="sp"/>
+    <arg name="colors"/>
+    <arg name="extensions" value="php"/>
+    <arg name="parallel" value="8"/>
+
+    <!-- Base standard: WordPress-Core gives us tabs, spacing rules, and doc-block requirements -->
+    <rule ref="WordPress-Core">
+        <!-- MinimalCMS uses its own prefix (mc_), not WordPress's (wp_) -->
+        <exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
+        <!-- Allow short array syntax [] alongside array() in tests -->
+        <exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+    </rule>
+
+    <!-- Also apply extra WordPress best-practice rules -->
+    <rule ref="WordPress-Extra">
+        <exclude name="WordPress.Files.FileName"/>
+    </rule>
+
+    <!-- Require @since / @package doc-block tags -->
+    <rule ref="WordPress-Docs"/>
+
+    <!-- Enforce the mc_ prefix for all globals defined in mc-includes/ and mc-admin/ -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="mc_"/>
+                <element value="MC_"/>
+                <element value="MinimalCMS"/>
+            </property>
+        </properties>
+        <include-pattern>mc-includes/*</include-pattern>
+        <include-pattern>mc-admin/*</include-pattern>
+        <include-pattern>mc-content/plugins/*</include-pattern>
+    </rule>
+
+    <!-- Minimum supported PHP version for type-hint / deprecation checks -->
+    <config name="minimum_supported_wp_version" value="6.0"/>
+    <config name="testVersion" value="8.0-"/>
+</ruleset>

@@ -1,0 +1,52 @@
+{
+    "name": "minimalcms/minimalcms",
+    "description": "A lightweight flat-file CMS inspired by WordPress architecture.",
+    "version": "0.0.1",
+    "type": "project",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.0",
+        "ext-sodium": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "erusev/parsedown": "^1.7",
+        "erusev/parsedown-extra": "^0.8"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "*",
+        "phpcsstandards/phpcsutils": "*",
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^10.5",
+        "squizlabs/php_codesniffer": "*",
+        "wp-coding-standards/wpcs": "*"
+    },
+    "autoload": {
+        "classmap": [
+            "mc-includes/class-mc-error.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MinimalCMS\\Tests\\Unit\\": "tests/unit/",
+            "MinimalCMS\\Tests\\Integration\\": "tests/integration/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite unit",
+        "test:integration": "phpunit --testsuite integration",
+        "analyse": "phpstan analyse",
+        "cs": "phpcs",
+        "cs:fix": "phpcbf"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "vendor-dir": "mc-includes/vendor",
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

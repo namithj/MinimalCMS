@@ -1,0 +1,38 @@
+// ── Admin Mixins ─────────────────────────────────────────────────────────
+
+@use "variables" as *;
+
+/// Responsive breakpoint (mobile-first: max-width down)
+@mixin breakpoint-down($width) {
+  @media (max-width: $width) {
+    @content;
+  }
+}
+
+/// Truncate text with ellipsis
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Flex centre
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/// Card base style
+@mixin card-base {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-lg;
+}
+
+/// Transition shorthand
+@mixin transition($props...) {
+  transition-property: $props;
+  transition-duration: .15s;
+  transition-timing-function: ease;
+}
