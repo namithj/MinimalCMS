@@ -10,7 +10,5 @@
     "permalink_structure": "/{type}/{slug}",
     "front_page": "home",
     "posts_per_page": 10,
-    "debug": false,
-    "secret_key": "3547d2cfd9632a7bdb8e3bfc134a0af8fbde8fc47af3f738a07cb466e0bd8161",
-    "encryption_key": "7fec2121712595181ca214254960857bdd8e2918e732f0f25aaae297f0e95154"
+    "debug": false
 }
