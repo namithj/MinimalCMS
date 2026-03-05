@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  ARTIFACT_NAME: minimalcms
+
+jobs:
+  # ── 1. Run tests to make sure the tag is healthy ────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.0", "8.1", "8.2", "8.3"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: sodium, json, mbstring
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run unit tests
+        run: composer test:unit
+
+  # ── 2. Build & package the release zip ──────────────────────────────────
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: sodium, json, mbstring
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build front-end assets
+        run: npm run build
+
+      - name: Install production Composer dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-progress
+
+      # ── Create a clean distribution zip ──────────────────────────────────
+      - name: Package release zip
+        run: |
+          DIST_DIR="${{ env.ARTIFACT_NAME }}"
+          mkdir -p "$DIST_DIR"
+
+          # Copy only the files needed in production
+          rsync -a --exclude-from=- . "$DIST_DIR/" <<'EOF'
+          .git
+          .github
+          .gitignore
+          .phpunit.result.cache
+          node_modules
+          tests
+          coverage
+          phpunit.xml
+          phpcs.xml.dist
+          phpstan.neon
+          phpstan.neon.dist
+          package.json
+          package-lock.json
+          composer.json
+          composer.lock
+          mc-admin/assets/src
+          mc-content/themes/default/src
+          mc-content/cache/*
+          mc-data/users.php
+          mc-data/sessions/*
+          EOF
+
+          # Remove dev-only vendor packages that composer --no-dev might leave behind
+          rm -rf "$DIST_DIR/mc-includes/vendor/phpunit" \
+                 "$DIST_DIR/mc-includes/vendor/phpstan" \
+                 "$DIST_DIR/mc-includes/vendor/squizlabs" \
+                 "$DIST_DIR/mc-includes/vendor/wp-coding-standards" \
+                 "$DIST_DIR/mc-includes/vendor/phpcsstandards" \
+                 "$DIST_DIR/mc-includes/vendor/dealerdirect"
+
+          # Remove any config.json — fresh installs use config.sample.json
+          rm -f "$DIST_DIR/config.json"
+
+          # Ensure writable dirs exist with placeholder files
+          mkdir -p "$DIST_DIR/mc-content/cache" \
+                   "$DIST_DIR/mc-content/uploads" \
+                   "$DIST_DIR/mc-content/mu-plugins" \
+                   "$DIST_DIR/mc-data/sessions"
+          touch "$DIST_DIR/mc-content/cache/.gitkeep" \
+                "$DIST_DIR/mc-content/uploads/.gitkeep" \
+                "$DIST_DIR/mc-data/sessions/.gitkeep"
+
+          zip -r "${{ env.ARTIFACT_NAME }}-${{ steps.version.outputs.version }}.zip" "$DIST_DIR/"
+
+      # ── Create the GitHub release ────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "MinimalCMS ${{ steps.version.outputs.version }}"
+          body: |
+            ## MinimalCMS ${{ steps.version.outputs.version }}
+
+            ### Installation
+            1. Download `${{ env.ARTIFACT_NAME }}-${{ steps.version.outputs.version }}.zip` below
+            2. Extract to your web server's document root
+            3. Visit `https://yoursite.com/mc-admin/` to run the setup wizard
+
+            ### Requirements
+            - PHP 8.0+ with the sodium extension
+            - Apache with mod_rewrite enabled
+
+            See the [README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md) for full documentation.
+          files: |
+            ${{ env.ARTIFACT_NAME }}-${{ steps.version.outputs.version }}.zip
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: true

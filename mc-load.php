@@ -25,9 +25,12 @@ require_once MC_ABSPATH . 'mc-includes/load.php';
 // Load version constants.
 require_once MC_ABSPATH . 'mc-includes/version.php';
 
-// Read configuration.
+// Read configuration. Fall back to the sample on a fresh install.
 $config_path = MC_ABSPATH . 'config.json';
-$mc_config   = mc_load_config( $config_path );
+if ( ! is_file( $config_path ) ) {
+	$config_path = MC_ABSPATH . 'config.sample.json';
+}
+$mc_config = mc_load_config( $config_path );
 
 // Auto-detect site URL if not set.
 if ( empty( $mc_config['site_url'] ) ) {

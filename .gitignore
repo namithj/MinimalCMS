@@ -33,4 +33,3 @@ composer.phar
 .phpunit.result.cache
 /coverage/
 wp-config.php
-config.json

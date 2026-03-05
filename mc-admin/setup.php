@@ -50,10 +50,20 @@ if ( 2 === $step && mc_is_post_request() ) {
 	if ( ! $notice ) {
 
 		/*
-		 * 1. Generate cryptographic keys if they are still placeholder/empty.
+		 * 1. Seed config.json from the sample file if it does not exist yet.
 		 */
+		$config_path = MC_ABSPATH . 'config.json';
+		$sample_path = MC_ABSPATH . 'config.sample.json';
+
+		if ( ! is_file( $config_path ) && is_file( $sample_path ) ) {
+			copy( $sample_path, $config_path );
+		}
+
 		$config = $GLOBALS['mc_config'];
 
+		/*
+		 * 2. Generate cryptographic keys if they are still placeholder/empty.
+		 */
 		if ( empty( $config['encryption_key'] ) || 'CHANGE_ME_RANDOM_HEX_64' === $config['encryption_key'] ) {
 			$config['encryption_key'] = bin2hex( random_bytes( 32 ) );
 		}
@@ -65,7 +75,7 @@ if ( 2 === $step && mc_is_post_request() ) {
 		$config['site_name'] = $site_name;
 
 		/*
-		 * 2. Save config first (encryption_key needed for user file).
+		 * 3. Save config first (encryption_key needed for user file).
 		 */
 		$saved = mc_save_config( $config );
 
@@ -76,7 +86,7 @@ if ( 2 === $step && mc_is_post_request() ) {
 			$GLOBALS['mc_config'] = $config;
 
 			/*
-			 * 3. Create admin user.
+			 * 4. Create admin user.
 			 */
 			$user = mc_create_user(
 				array(
