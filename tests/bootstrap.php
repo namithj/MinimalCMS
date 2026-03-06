@@ -30,6 +30,8 @@ $mc_core_files = [
 	'mc-includes/cache.php',
 	'mc-includes/capabilities.php',
 	'mc-includes/user.php',
+	'mc-includes/fields.php',
+	'mc-includes/settings.php',
 	'mc-includes/content.php',
 	'mc-includes/markdown.php',
 	'mc-includes/rewrite.php',

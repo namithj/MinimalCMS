@@ -1,0 +1,10 @@
+{
+    "site_name": "MinimalCMS",
+    "site_description": "",
+    "site_url": "https://minimal-cms.local",
+    "timezone": "UTC",
+    "front_page": "home",
+    "posts_per_page": 10,
+    "permalink_structure": "/{type}/{slug}",
+    "debug": false
+}

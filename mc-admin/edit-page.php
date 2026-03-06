@@ -3,6 +3,8 @@
  * MinimalCMS — Edit / Create Page (Admin)
  *
  * Markdown editor with live-preview and metadata sidebar.
+ * Sidebar fields are rendered through the Fields API so that plugins
+ * and themes can register additional fields per content type.
  *
  * @package MinimalCMS
  * @since   1.0.0
@@ -53,10 +55,115 @@ if ( ! $is_new ) {
 }
 
 /*
+ * ── Build sidebar field definitions via Fields API ─────────────────────────
+ */
+$publish_fields = array(
+	'status' => array(
+		'id'      => 'status',
+		'type'    => 'select',
+		'label'   => 'Status',
+		'default' => 'draft',
+		'options' => array(
+			'choices' => array(
+				'draft'   => 'Draft',
+				'publish' => 'Published',
+			),
+		),
+	),
+);
+
+$attribute_fields = array(
+	'slug' => array(
+		'id'          => 'slug',
+		'type'        => 'text',
+		'label'       => 'Slug',
+		'description' => 'URL-friendly identifier.',
+		'default'     => '',
+		'attributes'  => array_merge(
+			array( 'placeholder' => 'auto-generated' ),
+			! $is_new ? array( 'data-manual' => '1' ) : array()
+		),
+	),
+);
+
+// Parent field — only for hierarchical types.
+if ( $type_obj['hierarchical'] ?? false ) {
+	$all_pages = mc_query_content( array(
+		'type'     => $content_type,
+		'order_by' => 'title',
+		'order'    => 'asc',
+		'status'   => '',
+	) );
+
+	$parent_choices = array( '' => '(none)' );
+	foreach ( $all_pages as $p ) {
+		if ( $p['slug'] !== $edit_slug ) {
+			$parent_choices[ $p['slug'] ] = $p['title'];
+		}
+	}
+
+	$attribute_fields['parent'] = array(
+		'id'      => 'parent',
+		'type'    => 'select',
+		'label'   => 'Parent',
+		'default' => '',
+		'options' => array( 'choices' => $parent_choices ),
+	);
+}
+
+$attribute_fields['template'] = array(
+	'id'          => 'template',
+	'type'        => 'text',
+	'label'       => 'Template',
+	'description' => 'Custom template file name.',
+	'default'     => '',
+	'attributes'  => array( 'placeholder' => 'default' ),
+);
+
+$attribute_fields['order'] = array(
+	'id'      => 'order',
+	'type'    => 'number',
+	'label'   => 'Order',
+	'default' => 0,
+);
+
+/**
+ * Filter the sidebar field definitions for the content editor.
+ *
+ * Plugins can add custom meta fields here. Values for extra fields are
+ * stored in the content item's 'meta' array.
+ *
+ * @since 1.1.0
+ *
+ * @param array  $attribute_fields Field definitions keyed by field ID.
+ * @param string $content_type     Content type slug.
+ * @param array  $item             Current content item data.
+ * @param bool   $is_new           Whether this is a new item.
+ */
+$attribute_fields = mc_apply_filters( 'mc_edit_content_fields', $attribute_fields, $content_type, $item, $is_new );
+
+// Build a map of current values for sidebar fields.
+$sidebar_values = array();
+$core_keys      = array( 'status', 'slug', 'parent', 'template', 'order' );
+
+foreach ( $publish_fields as $fid => $fdef ) {
+	$sidebar_values[ $fid ] = $item[ $fid ] ?? ( $fdef['default'] ?? '' );
+}
+foreach ( $attribute_fields as $fid => $fdef ) {
+	if ( in_array( $fid, $core_keys, true ) ) {
+		$sidebar_values[ $fid ] = $item[ $fid ] ?? ( $fdef['default'] ?? '' );
+	} else {
+		// Custom fields: pull from meta.
+		$sidebar_values[ $fid ] = $item['meta'][ $fid ] ?? ( $fdef['default'] ?? '' );
+	}
+}
+
+/*
  * ── Handle POST ────────────────────────────────────────────────────────────
  */
 $notice      = '';
 $notice_type = 'success';
+$errors      = array();
 
 if ( mc_is_post_request() ) {
 
@@ -64,15 +171,44 @@ if ( mc_is_post_request() ) {
 		$notice      = 'Invalid security token. Please try again.';
 		$notice_type = 'error';
 	} else {
-		$item['title']    = mc_sanitize_text( mc_input( 'title', 'post' ) ?? '' );
-		$item['slug']     = mc_sanitize_slug( mc_input( 'slug', 'post' ) ?? '' );
-		$item['status']   = mc_sanitize_slug( mc_input( 'status', 'post' ) ?? '' ) ?: 'draft';
-		$item['excerpt']  = mc_sanitize_text( mc_input( 'excerpt', 'post' ) ?? '' );
-		$item['parent']   = mc_sanitize_slug( mc_input( 'parent', 'post' ) ?? '' );
-		$item['template'] = mc_sanitize_text( mc_input( 'template', 'post' ) ?? '' );
-		$item['order']    = (int) mc_input( 'order', 'post' );
-		$body             = mc_input( 'body', 'post' ); // Raw markdown.
+		// Process main content fields manually (title, body, excerpt).
+		$item['title']   = mc_sanitize_text( mc_input( 'title', 'post' ) ?? '' );
+		$item['excerpt'] = mc_sanitize_text( mc_input( 'excerpt', 'post' ) ?? '' );
+		$body            = mc_input( 'body', 'post' ) ?? '';
 
+		// Process sidebar fields through the Fields API.
+		$raw_sidebar = array();
+		foreach ( array_merge( $publish_fields, $attribute_fields ) as $fid => $fdef ) {
+			$raw_sidebar[ $fid ] = mc_input( $fid, 'post' );
+		}
+
+		$all_sidebar  = array_merge( $publish_fields, $attribute_fields );
+		$processed    = mc_process_fields( $all_sidebar, $raw_sidebar );
+		$errors       = $processed['errors'];
+
+		// Map processed values back to the item.
+		$item['status']   = $processed['values']['status'] ?? 'draft';
+		$item['slug']     = mc_sanitize_slug( (string) ( $processed['values']['slug'] ?? '' ) );
+		$item['parent']   = $processed['values']['parent'] ?? '';
+		$item['template'] = $processed['values']['template'] ?? '';
+		$item['order']    = (int) ( $processed['values']['order'] ?? 0 );
+
+		// Store any custom (non-core) fields into meta.
+		foreach ( $processed['values'] as $fid => $fval ) {
+			if ( ! in_array( $fid, $core_keys, true ) ) {
+				$item['meta'][ $fid ] = $fval;
+			}
+		}
+
+		// Update sidebar_values for re-render.
+		foreach ( $publish_fields as $fid => $fdef ) {
+			$sidebar_values[ $fid ] = $processed['values'][ $fid ] ?? $sidebar_values[ $fid ];
+		}
+		foreach ( $attribute_fields as $fid => $fdef ) {
+			$sidebar_values[ $fid ] = $processed['values'][ $fid ] ?? $sidebar_values[ $fid ];
+		}
+
+		// Title is required.
 		if ( empty( $item['title'] ) ) {
 			$notice      = 'Title is required.';
 			$notice_type = 'error';
@@ -80,17 +216,16 @@ if ( mc_is_post_request() ) {
 			$item['slug'] = mc_slugify( $item['title'] );
 		}
 
-		if ( 'error' !== $notice_type ) {
+		if ( 'error' !== $notice_type && empty( $errors ) ) {
 			$save_meta = $item;
 
-			// If creating new, set author.
 			if ( $is_new ) {
 				$save_meta['author'] = mc_get_current_user_id();
 			}
 
 			$result = mc_save_content( $content_type, $item['slug'], $save_meta, $body ?? '' );
 
-			// Handle slug rename: if editing and slug changed, delete old directory.
+			// Handle slug rename.
 			if ( true === $result && ! $is_new && $edit_slug !== $item['slug'] ) {
 				mc_delete_content( $content_type, $edit_slug );
 			}
@@ -99,13 +234,12 @@ if ( mc_is_post_request() ) {
 				$notice      = $result->get_error_message();
 				$notice_type = 'error';
 			} else {
-				$notice = $type_single . ' saved.';
-				$is_new = false;
-
-				// Redirect to edit URL with new slug.
 				mc_redirect( mc_admin_url( 'edit-page.php?type=' . urlencode( $content_type ) . '&slug=' . urlencode( $item['slug'] ) . '&saved=1' ) );
 				exit;
 			}
+		} elseif ( ! empty( $errors ) ) {
+			$notice      = 'Please correct the errors below.';
+			$notice_type = 'error';
 		}
 	}
 }
@@ -113,21 +247,6 @@ if ( mc_is_post_request() ) {
 if ( isset( $_GET['saved'] ) ) {
 	$notice      = $type_single . ' saved successfully.';
 	$notice_type = 'success';
-}
-
-/*
- * ── Gather additional data for the form ────────────────────────────────────
- */
-$all_pages = array();
-if ( $type_obj['hierarchical'] ?? false ) {
-	$all_pages = mc_query_content(
-		array(
-			'type'     => $content_type,
-			'order_by' => 'title',
-			'order'    => 'asc',
-			'status'   => '',
-		)
-	);
 }
 
 /*
@@ -151,7 +270,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 	<div class="editor-layout">
 		<!-- Main editor column -->
 		<div class="editor-main">
-			<div class="form-group">
+			<div class="form-group<?php echo isset( $errors['title'] ) ? ' field-has-error' : ''; ?>">
 				<label for="field-title">Title</label>
 				<input type="text" id="field-title" name="title" class="form-control" value="<?php echo mc_esc_attr( $item['title'] ); ?>" placeholder="Enter title…" autofocus>
 			</div>
@@ -165,19 +284,32 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 				<label for="field-excerpt">Excerpt</label>
 				<textarea id="field-excerpt" name="excerpt" class="form-control" rows="3" placeholder="Short summary…"><?php echo mc_esc_textarea( $item['excerpt'] ); ?></textarea>
 			</div>
+
+			<?php
+			/**
+			 * Fires after the main editor fields (below excerpt).
+			 *
+			 * Plugins can output additional full-width fields here.
+			 *
+			 * @since 1.1.0
+			 *
+			 * @param string $content_type Content type slug.
+			 * @param array  $item         Current item data.
+			 */
+			mc_do_action( 'mc_edit_content_after_editor', $content_type, $item );
+			?>
 		</div>
 
 		<!-- Sidebar column -->
 		<div class="editor-sidebar">
 			<div class="card">
 				<div class="card-header">Publish</div>
-				<div class="form-group">
-					<label for="field-status">Status</label>
-					<select id="field-status" name="status" class="form-control">
-						<option value="draft" <?php echo 'draft' === $item['status'] ? 'selected' : ''; ?>>Draft</option>
-						<option value="publish" <?php echo 'publish' === $item['status'] ? 'selected' : ''; ?>>Published</option>
-					</select>
-				</div>
+				<?php
+				foreach ( $publish_fields as $fid => $fdef ) {
+					$fdef['id'] = $fid;
+					mc_render_field( $fdef, $sidebar_values[ $fid ] ?? '', $errors[ $fid ] ?? null );
+				}
+				?>
 				<div class="form-actions">
 					<button type="submit" class="btn btn-primary">Save <?php echo mc_esc_html( $type_single ); ?></button>
 					<?php if ( ! $is_new ) : ?>
@@ -188,44 +320,27 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 			<div class="card">
 				<div class="card-header">Attributes</div>
-				<div class="form-group">
-					<label for="field-slug">Slug</label>
-					<input type="text" id="field-slug" name="slug" class="form-control" value="<?php echo mc_esc_attr( $item['slug'] ); ?>" placeholder="auto-generated"
-						<?php echo ! $is_new ? 'data-manual="1"' : ''; ?>>
-					<p class="description">URL-friendly identifier.</p>
-				</div>
-
-				<?php if ( $type_obj['hierarchical'] ?? false ) : ?>
-					<div class="form-group">
-						<label for="field-parent">Parent</label>
-						<select id="field-parent" name="parent" class="form-control">
-							<option value="">(none)</option>
-							<?php
-							foreach ( $all_pages as $p ) :
-								if ( $p['slug'] === $edit_slug ) {
-									continue;
-								}
-								?>
-								<option value="<?php echo mc_esc_attr( $p['slug'] ); ?>"
-									<?php echo $item['parent'] === $p['slug'] ? 'selected' : ''; ?>>
-									<?php echo mc_esc_html( $p['title'] ); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</div>
-				<?php endif; ?>
-
-				<div class="form-group">
-					<label for="field-template">Template</label>
-					<input type="text" id="field-template" name="template" class="form-control" value="<?php echo mc_esc_attr( $item['template'] ); ?>" placeholder="default">
-					<p class="description">Custom template file name.</p>
-				</div>
-
-				<div class="form-group">
-					<label for="field-order">Order</label>
-					<input type="number" id="field-order" name="order" class="form-control" value="<?php echo (int) $item['order']; ?>">
-				</div>
+				<?php
+				foreach ( $attribute_fields as $fid => $fdef ) {
+					$fdef['id'] = $fid;
+					mc_render_field( $fdef, $sidebar_values[ $fid ] ?? '', $errors[ $fid ] ?? null );
+				}
+				?>
 			</div>
+
+			<?php
+			/**
+			 * Fires after the sidebar attribute cards.
+			 *
+			 * Plugins can output additional sidebar cards here.
+			 *
+			 * @since 1.1.0
+			 *
+			 * @param string $content_type Content type slug.
+			 * @param array  $item         Current item data.
+			 */
+			mc_do_action( 'mc_edit_content_sidebar', $content_type, $item );
+			?>
 		</div>
 	</div>
 </form>

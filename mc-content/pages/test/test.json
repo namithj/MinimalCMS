@@ -1,0 +1,17 @@
+{
+    "title": "Test",
+    "slug": "test",
+    "status": "publish",
+    "author": "admin",
+    "created": "2026-03-06T14:45:13+00:00",
+    "modified": "2026-03-06T14:45:25+00:00",
+    "template": "",
+    "parent": "",
+    "order": 0,
+    "excerpt": "",
+    "featured_image": "",
+    "meta": [],
+    "type": "page",
+    "body_raw": "test",
+    "body_html": ""
+}

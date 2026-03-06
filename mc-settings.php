@@ -31,6 +31,8 @@ require_once MC_INC . 'cache.php';
 
 require_once MC_INC . 'capabilities.php';
 require_once MC_INC . 'user.php';
+require_once MC_INC . 'fields.php';
+require_once MC_INC . 'settings.php';
 require_once MC_INC . 'content.php';
 require_once MC_INC . 'markdown.php';
 require_once MC_INC . 'rewrite.php';
@@ -52,6 +54,11 @@ require_once MC_INC . 'content-types.php';
 // Initialise roles and default content types.
 mc_initialise_roles();
 mc_create_initial_content_types();
+
+// Register core field types and settings pages.
+mc_register_core_field_types();
+mc_register_core_settings_pages();
+mc_maybe_seed_core_settings();
 
 /*
  * -------------------------------------------------------------------------
