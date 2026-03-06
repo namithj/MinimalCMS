@@ -11,7 +11,6 @@
     "vendor:copy": "node mc-includes/scripts/vendor-copy.js",
     "build": "npm run vendor:copy && npm run scss:admin && npm run scss:theme && npm run scss:admin:min && npm run scss:theme:min",
     "watch": "sass --watch mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.css --style=expanded --no-source-map",
-    "demo:wasm": "npx @wp-playground/cli@latest server --auto-mount=. --wordpress-install-mode=do-not-attempt-installing --php=8.3 --port=9400"
   },
   "dependencies": {
     "easymde": "^2.20.0"
