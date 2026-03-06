@@ -37,8 +37,7 @@
 		     conflicts once the tab override corrects the base indentation. -->
 		<exclude name="PEAR.Functions.FunctionCallSignature.Indent"/>
 		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent"/>
-		<!-- MinimalCMS uses WordPress-style naming conventions (snake_case methods,
-		     MC_ClassName class names, no namespace requirement, procedural files). -->
+		<!-- MinimalCMS uses snake_case methods, MC_ClassName class names, no namespace requirement, procedural files). -->
 		<exclude name="PSR1.Methods.CamelCapsMethodName"/>
 		<exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
 		<exclude name="Squiz.Classes.ValidClassName.NotPascalCase"/>

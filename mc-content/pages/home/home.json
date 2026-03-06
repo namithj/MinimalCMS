@@ -1,13 +1,13 @@
 {
-    "title": "Home",
+    "title": "Welcome to MinimalCMS",
     "slug": "home",
     "status": "publish",
-    "excerpt": "Welcome to MinimalCMS.",
+    "excerpt": "Getting started with MinimalCMS — your flat-file PHP CMS.",
     "author": "",
     "template": "",
     "parent": "",
     "order": 0,
     "meta": {},
     "created_at": "2026-03-06T00:00:00+00:00",
-    "updated_at": "2026-03-06T00:00:00+00:00"
+    "updated_at": "2026-03-07T00:00:00+00:00"
 }

@@ -1,12 +1,11 @@
 # MinimalCMS
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue)
-![PHP](https://img.shields.io/badge/PHP-8.0%2B-8892BF)
+![Version](https://img.shields.io/badge/version-0.0.2-blue)
+![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
 ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
 ![Status](https://img.shields.io/badge/status-early%20development-orange)
-[![Live Demo](https://img.shields.io/badge/demo-live-0f766e)](https://namithj.github.io/MinimalCMS/)
 
-> A lightweight, flat-file CMS built with a WordPress-inspired architecture — no database, no bloat, just PHP and Markdown.
+> A lightweight, flat-file CMS built with a familiar hook, plugin, and theme architecture — no database, no bloat, just PHP and Markdown.
 
 ---
 
@@ -25,7 +24,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 | Property | Detail |
 |---|---|
 | **Storage** | Flat files (Markdown + JSON) |
-| **Language** | PHP 8.0+ |
+| **Language** | PHP 8.2+ |
 | **Server** | Apache + `mod_rewrite` |
 | **Dependencies** | Parsedown (Markdown parser) |
 | **Admin UI** | Built-in dashboard with Markdown editor |
@@ -66,7 +65,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 
 | Requirement | Version |
 |---|---|
-| PHP | 8.0+ (sodium bundled since 7.2) |
+| PHP | 8.2+ (sodium bundled since 7.2) |
 | Web server | Apache with `mod_rewrite` |
 | Disk access | Write permission on the project root |
 
@@ -94,21 +93,6 @@ The **setup wizard** runs automatically on the first visit. It will:
 - Generate a `secret_key` and `encryption_key` in `config.json`
 - Create the initial administrator account
 - Redirect you to the dashboard
-
----
-
-## PHP-WASM Demo
-
-For fast browser-based demos (without a local PHP runtime), run:
-
-```bash
-npm run demo:wasm
-```
-
-Then open `http://127.0.0.1:9400/`.
-
-Demo-specific files are stored in `demo/php-wasm/` and are excluded from release archives.
-You can also publish a browser demo to GitHub Pages via `.github/workflows/demo-pages.yml`.
 
 ---
 

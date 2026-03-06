@@ -14,9 +14,6 @@ mc_get_header();
 ?>
 
 <article class="entry">
-	<header class="entry-header">
-		<h1 class="entry-title"><?php mc_the_title(); ?></h1>
-	</header>
 	<div class="entry-content">
 		<?php mc_the_content(); ?>
 	</div>

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MinimalCMS — a lightweight, flat-file CMS with a familiar hook, plugin, and theme architecture. No database. No framework. Pure PHP." />
+  <title>MinimalCMS — Lightweight Flat-File PHP CMS</title>
+  <style>
+    /* ── Reset & tokens ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface2:    #1c2128;
+      --border:      #30363d;
+      --accent:      #0f766e;        /* teal */
+      --accent-lt:   #14b8a6;
+      --accent-dim:  #134e4a;
+      --text:        #e6edf3;
+      --muted:       #8b949e;
+      --code-bg:     #1e2936;
+      --radius:      8px;
+      --radius-lg:   16px;
+      --shadow:      0 4px 24px rgba(0,0,0,.45);
+      --font-sans:   'Segoe UI', system-ui, -apple-system, sans-serif;
+      --font-mono:   'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      --max:         1100px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    a { color: var(--accent-lt); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout helpers ───────────────────────────────────────────── */
+    .container  { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    .section    { padding: 80px 0; }
+    .section--alt { background: var(--surface); }
+
+    h2 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent-lt);
+      margin-bottom: 8px;
+    }
+
+    .section-intro {
+      color: var(--muted);
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    /* ── Nav ──────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,17,23,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .nav-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.5px;
+    }
+    .nav-logo span { color: var(--accent-lt); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: .875rem;
+      color: var(--muted);
+      transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ─────────────────────────────────────────────────────── */
+    .hero {
+      padding: 96px 0 80px;
+      background:
+        radial-gradient(ellipse 60% 60% at 70% 20%, rgba(15,118,110,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(20,184,166,.08) 0%, transparent 70%),
+        var(--bg);
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--accent-lt);
+      background: rgba(15,118,110,.15);
+      border: 1px solid rgba(20,184,166,.3);
+      border-radius: 100px;
+      padding: 4px 12px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -.03em;
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent-lt); }
+
+    .hero-tagline {
+      font-size: 1.125rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); text-decoration: none; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost   { border: 1px solid var(--border); color: var(--text); }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+    .hero-badges img { height: 20px; }
+
+    /* Hero demo card */
+    .hero-demo {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .hero-demo .bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .hero-demo .bar .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .hero-demo pre {
+      margin: 0;
+      padding: 20px 24px;
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      line-height: 1.8;
+      color: #cdd9e5;
+      background: var(--code-bg);
+      overflow-x: auto;
+    }
+    .kw  { color: #f47067; }
+    .fn  { color: #dcbdfb; }
+    .str { color: #96d0ff; }
+    .cm  { color: #6e7681; }
+
+    /* ── At a glance stats ────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .stat {
+      background: var(--surface);
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent-lt);
+      letter-spacing: -.04em;
+    }
+    .stat-label {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Feature cards ────────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: border-color .2s, transform .15s;
+    }
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      font-size: 1.75rem;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .feature-card ul {
+      list-style: none;
+      margin-top: 12px;
+    }
+    .feature-card ul li {
+      font-size: .83rem;
+      color: var(--muted);
+      padding: 2px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+    .feature-card ul li::before {
+      content: '›';
+      position: absolute;
+      left: 0;
+      color: var(--accent-lt);
+    }
+
+    /* ── Screenshots ──────────────────────────────────────────────── */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .screenshot-item { }
+    .screenshot-item h4 {
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .screenshot-placeholder {
+      aspect-ratio: 16/10;
+      background: var(--surface2);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      text-align: center;
+      padding: 24px;
+      transition: border-color .2s;
+    }
+    .screenshot-placeholder:hover { border-color: var(--accent); }
+    .screenshot-placeholder .ph-icon { font-size: 2rem; opacity: .4; }
+    .screenshot-placeholder .ph-label { font-weight: 600; color: var(--text); opacity: .55; }
+    .screenshot-placeholder .ph-hint { font-size: .73rem; opacity: .55; }
+
+    /* ── Lightbox ────────────────────────────────────────────────── */
+    .lb-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.88);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      cursor: zoom-out;
+    }
+    .lb-overlay.is-open { display: flex; }
+    .lb-img {
+      max-width: min(90vw, 1400px);
+      max-height: 90vh;
+      border-radius: var(--radius);
+      box-shadow: 0 24px 80px rgba(0,0,0,.6);
+      object-fit: contain;
+      cursor: default;
+    }
+    .lb-close {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      font-size: 2rem;
+      line-height: 1;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+      opacity: .7;
+      transition: opacity .15s;
+    }
+    .lb-close:hover { opacity: 1; }
+    .lb-caption {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,.75);
+      font-size: .85rem;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .screenshot-thumb {
+      display: block;
+      cursor: zoom-in;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .screenshot-thumb:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    .screenshot-notice {
+      margin-top: 40px;
+      background: rgba(15,118,110,.1);
+      border: 1px solid rgba(20,184,166,.25);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+    }
+    .screenshot-notice h4 {
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--accent-lt);
+      margin-bottom: 8px;
+    }
+    .screenshot-notice ol {
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: .875rem;
+      line-height: 2;
+    }
+    .screenshot-notice code {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--accent-lt);
+    }
+
+    /* ── Architecture ─────────────────────────────────────────────── */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .arch-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-left: 2px solid var(--border);
+      padding-left: 20px;
+      position: relative;
+    }
+    .arch-step::before {
+      content: '';
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: absolute;
+      left: -6px;
+      top: 22px;
+    }
+    .arch-step:last-child { border-left-color: transparent; }
+    .arch-step-title { font-size: .875rem; font-weight: 700; color: var(--text); }
+    .arch-step-desc  { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .arch-step-file  { font-family: var(--font-mono); font-size: .75rem; color: var(--accent-lt); }
+
+    .arch-code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .arch-code-block .code-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-size: .75rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+    .arch-code-block pre {
+      margin: 0;
+      padding: 20px;
+      font-family: var(--font-mono);
+      font-size: .78rem;
+      line-height: 1.9;
+      color: #cdd9e5;
+      overflow-x: auto;
+    }
+
+    /* ── Quick start ──────────────────────────────────────────────── */
+    .quickstart-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .qs-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+    .qs-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent-lt);
+      font-weight: 800;
+      font-size: .875rem;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .qs-step h4 { font-size: .9rem; font-weight: 700; margin-bottom: 6px; }
+    .qs-step p  { font-size: .8rem; color: var(--muted); }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .code-block .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+    }
+    .code-header span { font-size: .75rem; color: var(--muted); font-family: var(--font-mono); }
+    .copy-btn {
+      font-size: .72rem;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .copy-btn:hover { color: var(--text); }
+    .code-block pre {
+      margin: 0;
+      padding: 20px 24px;
+      font-family: var(--font-mono);
+      font-size: .82rem;
+      line-height: 1.9;
+      color: #cdd9e5;
+      overflow-x: auto;
+    }
+
+    /* ── Directory tree ───────────────────────────────────────────── */
+    .dir-tree {
+      font-family: var(--font-mono);
+      font-size: .8rem;
+      line-height: 2;
+      color: #cdd9e5;
+    }
+    .dir-tree .d { color: var(--accent-lt); font-weight: 600; }
+    .dir-tree .cm { color: #6e7681; }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; justify-content: center; gap: 24px; margin-top: 12px; }
+
+    /* ── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero-inner  { grid-template-columns: 1fr; }
+      .hero-demo   { display: none; }
+      .arch-grid   { grid-template-columns: 1fr; }
+      .nav-links   { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">Minimal<span>CMS</span></a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#quickstart">Get Started</a></li>
+      <li><a href="https://github.com/namithj/MinimalCMS">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-badge">&#9670; v0.0.2 &mdash; Early Development</div>
+        <h1>A CMS that gets<br>out of <em>your way</em></h1>
+        <p class="hero-tagline">
+          MinimalCMS is a flat-file PHP CMS with a familiar hook, plugin, and theme architecture &mdash; no database, no framework,
+          no container required.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#quickstart">&#9658; Quick Start</a>
+          <a class="btn btn-ghost"   href="https://github.com/namithj/MinimalCMS">&#8599; View on GitHub</a>
+        </div>
+        <div class="hero-badges">
+          <img src="https://img.shields.io/badge/version-0.0.2-0f766e?style=flat-square" alt="Version 0.0.2" />
+          <img src="https://img.shields.io/badge/PHP-8.2%2B-8892BF?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2+" />
+          <img src="https://img.shields.io/badge/license-GPL--2.0-blue?style=flat-square" alt="GPL-2.0 License" />
+          <img src="https://img.shields.io/badge/status-early%20development-orange?style=flat-square" alt="Early Development" />
+        </div>
+      </div>
+
+      <!-- Fake terminal card -->
+      <div class="hero-demo" aria-hidden="true">
+        <div class="bar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        </div>
+        <pre><span class="cm"># Plugin — appended content</span>
+<span class="fn">mc_add_filter</span>( <span class="str">'mc_the_content'</span>,
+  <span class="kw">function</span>( <span class="kw">string</span> $content ): <span class="kw">string</span> {
+    <span class="kw">return</span> $content
+      . <span class="str">'&lt;p&gt;Added by plugin!&lt;/p&gt;'</span>;
+  }
+);
+
+<span class="cm"># Register a custom content type</span>
+<span class="fn">mc_register_content_type</span>( <span class="str">'portfolio'</span>, [
+  <span class="str">'label'</span>     => <span class="str">'Portfolio'</span>,
+  <span class="str">'slug'</span>      => <span class="str">'portfolio'</span>,
+  <span class="str">'has_archive'</span> => <span class="kw">true</span>,
+] );
+
+<span class="cm"># Shortcode  →  [greeting name="World"]</span>
+<span class="fn">mc_add_shortcode</span>( <span class="str">'greeting'</span>,
+  <span class="kw">fn</span>( $a ) => <span class="str">"Hello, {$a['name']}!"</span>
+);</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── At a glance ──────────────────────────────────────────────────── -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">0</div><div class="stat-label">Database tables</div></div>
+      <div class="stat"><div class="stat-num">PHP&nbsp;8.2</div><div class="stat-label">Minimum version</div></div>
+      <div class="stat"><div class="stat-num">1</div><div class="stat-label">Front controller</div></div>
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">User roles</div></div>
+      <div class="stat"><div class="stat-num">256-bit</div><div class="stat-label">User-data encryption</div></div>
+      <div class="stat"><div class="stat-num">&#8734;</div><div class="stat-label">Plugins &amp; themes</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ─────────────────────────────────────────────────────── -->
+<section class="section" id="features">
+  <div class="container">
+    <span class="section-label">Features</span>
+    <h2>Everything you need, nothing you don't</h2>
+    <p class="section-intro">
+      MinimalCMS borrows the best ideas from multiple sources &mdash; hooks, plugins, themes,
+      a clean admin panel &mdash; and strips away the database dependency entirely.
+    </p>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <span class="feature-icon">&#128196;</span>
+        <h3>Flat-File Content</h3>
+        <p>Write in Markdown. Metadata lives in a JSON sidecar next to each file.
+           No migration scripts, no schema changes &mdash; just folders.</p>
+        <ul>
+          <li>Pages, posts, and custom content types</li>
+          <li>JSON sidecar: title, slug, status, metadata</li>
+          <li>Archive routes with auto-permalink slugs</li>
+          <li>Shortcode parser <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">[tag attr="val"]</code></li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">&#128274;</span>
+        <h3>Security First</h3>
+        <p>Applying security at every layer so you can focus on building, not patching.</p>
+        <ul>
+          <li>User data encrypted with <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">sodium_crypto_secretbox</code> (256-bit)</li>
+          <li>Passwords hashed with bcrypt</li>
+          <li>HMAC-SHA256 nonces on every form and link action</li>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc-data/</code> double-locked: Apache <em>Deny all</em> + PHP die()</li>
+          <li>Full sanitization &amp; escaping API</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">&#129520;</span>
+        <h3>Hook-Driven Architecture</h3>
+        <p>Actions and filters run at well-defined points throughout the request lifecycle.</p>
+        <ul>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc_add_action</code> / <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc_add_filter</code></li>
+          <li>Content, admin, and plugin lifecycle hooks</li>
+          <li>MU-plugins directory for must-run code</li>
+          <li>Settings API for plugin config pages</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">&#127912;</span>
+        <h3>Theme System</h3>
+        <p>A full template hierarchy so themes can override any part of the request,
+           from 404s to custom content-type archives.</p>
+        <ul>
+          <li>Template fallback chain (type → singular → index)</li>
+          <li>Child theme support</li>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">theme.json</code> manifest with metadata</li>
+          <li>Live theme switching from the admin panel</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">&#128101;</span>
+        <h3>User Management</h3>
+        <p>A built-in role &amp; capability system with four built-in roles and
+           full CRUD from the admin panel.</p>
+        <ul>
+          <li>Roles: administrator, editor, author, contributor</li>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc_user_can()</code> / <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc_current_user_can()</code></li>
+          <li>Custom capabilities via <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc_add_cap()</code></li>
+          <li>Encrypted flat-file user store</li>
+        </ul>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">&#128295;</span>
+        <h3>Developer Experience</h3>
+        <p>Pre-configured tooling means you can clone, run tests, and start building
+           within minutes.</p>
+        <ul>
+          <li>PHPUnit test suite — unit &amp; integration</li>
+          <li>PHPStan + MinimalCMS Coding Standards (PHPCS)</li>
+          <li>SCSS build pipeline via npm + Sass</li>
+          <li>File-based PHP cache with configurable TTL</li>
+          <li>PHP-WASM browser demo via npm</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Screenshots ──────────────────────────────────────────────────── -->
+<section class="section section--alt" id="screenshots">
+  <div class="container">
+    <h2>See it in action</h2>
+    <p class="section-intro">
+      A tour of the admin panel and front-end rendering.
+    </p>
+
+    <div class="screenshots-grid">
+
+      <div class="screenshot-item">
+        <h4>Admin Dashboard</h4>
+        <a href="screenshots/dashboard.webp" class="screenshot-thumb" data-lb="Admin Dashboard">
+          <img src="screenshots/dashboard.webp" alt="Admin Dashboard" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+      <div class="screenshot-item">
+        <h4>Markdown Editor</h4>
+        <a href="screenshots/editor.webp" class="screenshot-thumb" data-lb="Markdown Editor">
+          <img src="screenshots/editor.webp" alt="Markdown Editor" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+      <div class="screenshot-item">
+        <h4>Content List</h4>
+        <a href="screenshots/pages.webp" class="screenshot-thumb" data-lb="Content List">
+          <img src="screenshots/pages.webp" alt="Content List" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+      <div class="screenshot-item">
+        <h4>Plugin Manager</h4>
+        <a href="screenshots/plugins.webp" class="screenshot-thumb" data-lb="Plugin Manager">
+          <img src="screenshots/plugins.webp" alt="Plugin Manager" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+      <div class="screenshot-item">
+        <h4>Theme Switcher</h4>
+        <a href="screenshots/themes.webp" class="screenshot-thumb" data-lb="Theme Switcher">
+          <img src="screenshots/themes.webp" alt="Theme Switcher" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+      <div class="screenshot-item">
+        <h4>Settings Page</h4>
+        <a href="screenshots/settings.webp" class="screenshot-thumb" data-lb="Settings Page">
+          <img src="screenshots/settings.webp" alt="Settings Page" class="screenshot-img" width="1280" height="800" />
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ──────────────────────────────────────────────────── -->
+<section class="section" id="architecture">
+  <div class="container">
+    <span class="section-label">Architecture</span>
+    <h2>How it works</h2>
+    <p class="section-intro">
+      Every HTTP request flows through a single front controller.
+      There is no routing framework &mdash; just PHP includes and a clean hook system.
+    </p>
+
+    <div class="arch-grid">
+      <div class="arch-flow">
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">Browser request</div>
+            <div class="arch-step-file">.htaccess</div>
+            <div class="arch-step-desc">Apache rewrites every non-file URL to <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">index.php</code>.</div>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">Front controller</div>
+            <div class="arch-step-file">index.php → mc-blog-header.php</div>
+            <div class="arch-step-desc">Bootstraps the CMS and orchestrates boot → route → render.</div>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">Bootstrap</div>
+            <div class="arch-step-file">mc-load.php · mc-settings.php</div>
+            <div class="arch-step-desc">Defines constants, loads config, fires plugins, activates theme.</div>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">URL routing</div>
+            <div class="arch-step-file">mc-includes/rewrite.php</div>
+            <div class="arch-step-desc">Resolves the request path to a content item (slug, type, archive).</div>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">Template selection</div>
+            <div class="arch-step-file">mc-includes/template-loader.php</div>
+            <div class="arch-step-desc">Walks the template hierarchy to find the most specific match.</div>
+          </div>
+        </div>
+        <div class="arch-step">
+          <div>
+            <div class="arch-step-title">Render</div>
+            <div class="arch-step-file">theme template file</div>
+            <div class="arch-step-desc">Template calls template-tag helpers, Markdown is parsed, content is output.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="arch-code-block">
+          <div class="code-header">Directory structure (abbreviated)</div>
+          <pre class="dir-tree"><span class="d">minimalcms/</span>
+├── index.php          <span class="cm"># front controller</span>
+├── .htaccess          <span class="cm"># rewrite all → index.php</span>
+├── config.json        <span class="cm"># keys, active theme/plugins</span>
+├── mc-load.php        <span class="cm"># constants &amp; autoload</span>
+├── mc-settings.php    <span class="cm"># boot sequence</span>
+├── <span class="d">mc-includes/</span>       <span class="cm"># core libraries</span>
+│   ├── hooks.php
+│   ├── rewrite.php
+│   ├── content.php
+│   ├── user.php
+│   └── …
+├── <span class="d">mc-content/</span>        <span class="cm"># all user data</span>
+│   ├── <span class="d">pages/</span>
+│   ├── <span class="d">plugins/</span>
+│   └── <span class="d">themes/</span>
+│       └── <span class="d">default/</span>
+├── <span class="d">mc-admin/</span>          <span class="cm"># admin panel</span>
+│   ├── login.php
+│   ├── setup.php
+│   ├── index.php      <span class="cm"># dashboard</span>
+│   └── …
+└── <span class="d">mc-data/</span>           <span class="cm"># encrypted; Deny all</span>
+    └── users.php</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quick Start ───────────────────────────────────────────────────── -->
+<section class="section section--alt" id="quickstart">
+  <div class="container">
+    <span class="section-label">Get Started</span>
+    <h2>Up and running in minutes</h2>
+    <p class="section-intro">
+      MinimalCMS requires only PHP 8.2+ and Apache with <code style="font-size:.85rem;background:var(--code-bg);padding:1px 6px;border-radius:4px;color:var(--accent-lt)">mod_rewrite</code>.
+      No database. No container.
+    </p>
+
+    <div class="quickstart-steps">
+      <div class="qs-step"><div class="qs-num">1</div><h4>Clone the repo</h4><p>Download or <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">git clone</code> into your web root.</p></div>
+      <div class="qs-step"><div class="qs-num">2</div><h4>Install deps <em style="font-size:.7rem;font-style:normal;color:var(--muted)">(optional)</em></h4><p>Run <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">composer install</code> for tests &amp; linting. Not needed for production.</p></div>
+      <div class="qs-step"><div class="qs-num">3</div><h4>Point Apache</h4><p>Set the document root to the project folder and enable <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mod_rewrite</code>.</p></div>
+      <div class="qs-step"><div class="qs-num">4</div><h4>Run the wizard</h4><p>Visit <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">/mc-admin/</code> — the setup wizard creates your config and first admin account.</p></div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span>bash</span>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.closest('.code-block').querySelector('pre').textContent)">Copy</button>
+      </div>
+      <pre># 1. Clone
+git clone https://github.com/namithj/MinimalCMS.git my-site
+cd my-site
+
+# 2. Install dev dependencies (tests &amp; linting only)
+composer install
+
+# 3. Point Apache at the project root and enable mod_rewrite
+
+# 4. Open the admin panel — setup wizard runs on first visit
+open http://your-site.local/mc-admin/
+
+# ── Optional: build CSS assets ──────────────────────────────────
+npm install
+npm run build
+
+# ── Optional: run tests ─────────────────────────────────────────
+composer test:unit
+composer test:integration
+    </div>
+  </div>
+</section>
+
+<!-- ── Requirements table ───────────────────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <span class="section-label">Requirements</span>
+    <h2>What you need</h2>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:24px;font-size:.875rem">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:10px 16px;color:var(--muted);font-weight:600">Requirement</th>
+          <th style="text-align:left;padding:10px 16px;color:var(--muted);font-weight:600">Version / Detail</th>
+          <th style="text-align:left;padding:10px 16px;color:var(--muted);font-weight:600">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:12px 16px;font-weight:600">PHP</td>
+          <td style="padding:12px 16px;color:var(--accent-lt)">8.2+</td>
+          <td style="padding:12px 16px;color:var(--muted)">Sodium bundled since 7.2; tested on 8.3</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:12px 16px;font-weight:600">Web server</td>
+          <td style="padding:12px 16px;color:var(--accent-lt)">Apache + mod_rewrite</td>
+          <td style="padding:12px 16px;color:var(--muted)"><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">.htaccess</code> included</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:12px 16px;font-weight:600">Disk access</td>
+          <td style="padding:12px 16px;color:var(--accent-lt)">Write on project root</td>
+          <td style="padding:12px 16px;color:var(--muted)">Config, content, sessions, and cache are written at runtime</td>
+        </tr>
+        <tr>
+          <td style="padding:12px 16px;font-weight:600">Database</td>
+          <td style="padding:12px 16px;color:var(--accent-lt)">None</td>
+          <td style="padding:12px 16px;color:var(--muted)">Flat files only &#10003;</td>
+        </tr>
+      </tbody>
+    </table>d/**
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div>
+      Released under the <a href="https://github.com/namithj/MinimalCMS/blob/main/LICENSE">GPL-2.0-or-later</a> license.
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/namithj/MinimalCMS">GitHub</a>
+      <a href="https://github.com/namithj/MinimalCMS/issues">Issues</a>
+      <a href="https://github.com/namithj/MinimalCMS/releases">Releases</a>
+      <a href="https://namithj.github.io/MinimalCMS/">Live Demo</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── Lightbox ────────────────────────────────────────────────────── -->
+<div id="lb-overlay" class="lb-overlay" role="dialog" aria-modal="true" aria-label="Screenshot lightbox">
+  <button class="lb-close" id="lb-close" aria-label="Close lightbox">&times;</button>
+  <img id="lb-img" class="lb-img" src="" alt="" />
+  <span id="lb-caption" class="lb-caption"></span>
+</div>
+
+<script>
+(function () {
+  var overlay  = document.getElementById('lb-overlay');
+  var lbImg    = document.getElementById('lb-img');
+  var lbCap    = document.getElementById('lb-caption');
+  var lbClose  = document.getElementById('lb-close');
+
+  function open(src, caption) {
+    lbImg.src = src;
+    lbImg.alt = caption;
+    lbCap.textContent = caption;
+    overlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    lbClose.focus();
+  }
+
+  function close() {
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+
+  document.querySelectorAll('.screenshot-thumb').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      open(a.href, a.dataset.lb || '');
+    });
+  });
+
+  lbClose.addEventListener('click', close);
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) close();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
+  });
+}());
+</script>
+
+</body>
+</html>

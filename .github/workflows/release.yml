@@ -111,7 +111,7 @@ jobs:
             3. Visit `https://yoursite.com/mc-admin/` to run the setup wizard
 
             ### Requirements
-            - PHP 8.0+ with the sodium extension
+            - PHP 8.2+ with the sodium extension
             - Apache with mod_rewrite enabled
 
             See the [README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md) for full documentation.

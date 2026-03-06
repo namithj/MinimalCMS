@@ -34,7 +34,7 @@ $admin_page_title = $admin_page_title ?? 'Dashboard';
 <!-- Sidebar -->
 <aside class="admin-sidebar">
 <div class="sidebar-header">
-				<a href="<?php echo mc_esc_url(mc_admin_url()); ?>" class="brand">MinimalCMS</a>
+				<a href="<?php echo mc_esc_url(mc_admin_url()); ?>" class="brand">Minimal<span>CMS</span></a>
 </div>
 <?php mc_render_admin_menu(); ?>
 <div class="sidebar-footer">

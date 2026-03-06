@@ -1,6 +1,6 @@
 {
   "name": "minimalcms",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MinimalCMS build tools",
   "private": true,
   "scripts": {

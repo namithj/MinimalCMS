@@ -17,7 +17,7 @@
 /tests/**               export-ignore
 
 # Demo site
-/demo/**                export-ignore
+/docs/**                export-ignore
 
 # Source assets (compiled output is overlaid separately)
 /mc-admin/assets/src/** export-ignore
