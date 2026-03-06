@@ -1,4 +1,4 @@
-import { PHP } from 'https://cdn.jsdelivr.net/npm/@php-wasm/web@2.0.16/+esm';
+import { PHP } from 'https://esm.sh/@php-wasm/web@2.0.16';
 
 const statusNode = document.getElementById('status');
 const pathNode = document.getElementById('path');
