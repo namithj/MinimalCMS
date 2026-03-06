@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS — Admin Dashboard
  *
@@ -14,7 +15,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 // Gather stats.
 $content_types = mc_get_content_types();
 $users         = mc_get_users();
-$user_count    = is_array( $users ) ? count( $users ) : 0;
+$user_count    = is_array($users) ? count($users) : 0;
 $plugins       = mc_discover_plugins();
 $themes        = mc_discover_themes();
 
@@ -22,12 +23,12 @@ $themes        = mc_discover_themes();
 
 <div class="dashboard-grid">
 	<?php
-	foreach ( $content_types as $slug => $type ) :
-		$count = mc_count_content( $slug );
+	foreach ($content_types as $slug => $type) :
+		$count = mc_count_content($slug);
 		?>
 		<div class="stat-card">
 			<div class="stat-number"><?php echo (int) $count; ?></div>
-			<div class="stat-label"><?php echo mc_esc_html( $type['label'] ?? ucfirst( $slug ) ); ?></div>
+			<div class="stat-label"><?php echo mc_esc_html($type['label'] ?? ucfirst($slug)); ?></div>
 		</div>
 	<?php endforeach; ?>
 
@@ -37,12 +38,12 @@ $themes        = mc_discover_themes();
 	</div>
 
 	<div class="stat-card">
-		<div class="stat-number"><?php echo count( $plugins ); ?></div>
+		<div class="stat-number"><?php echo count($plugins); ?></div>
 		<div class="stat-label">Plugins</div>
 	</div>
 
 	<div class="stat-card">
-		<div class="stat-number"><?php echo count( $themes ); ?></div>
+		<div class="stat-number"><?php echo count($themes); ?></div>
 		<div class="stat-label">Themes</div>
 	</div>
 </div>
@@ -63,17 +64,17 @@ $themes        = mc_discover_themes();
 			)
 		);
 		?>
-		<?php if ( $recent ) : ?>
+		<?php if ($recent) : ?>
 			<table class="mc-table" style="border:none;margin:0;">
-				<?php foreach ( $recent as $item ) : ?>
+				<?php foreach ($recent as $item) : ?>
 					<tr>
 						<td>
-							<a href="<?php echo mc_esc_url( mc_admin_url( 'edit-page.php?type=page&slug=' . urlencode( $item['slug'] ) ) ); ?>">
-								<?php echo mc_esc_html( $item['title'] ); ?>
+							<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=page&slug=' . urlencode($item['slug']))); ?>">
+								<?php echo mc_esc_html($item['title']); ?>
 							</a>
 						</td>
 						<td style="text-align:right;">
-							<span class="badge badge-<?php echo mc_esc_attr( $item['status'] ); ?>"><?php echo mc_esc_html( $item['status'] ); ?></span>
+							<span class="badge badge-<?php echo mc_esc_attr($item['status']); ?>"><?php echo mc_esc_html($item['status']); ?></span>
 						</td>
 					</tr>
 				<?php endforeach; ?>
@@ -87,22 +88,22 @@ $themes        = mc_discover_themes();
 	<div class="card">
 		<div class="card-header">Quick Links</div>
 		<ul style="list-style:none;padding:0;">
-			<?php if ( mc_current_user_can( 'create_content' ) ) : ?>
+			<?php if (mc_current_user_can('create_content')) : ?>
 				<li style="padding:8px 0;border-bottom:1px solid #dcdcde;">
-					<a href="<?php echo mc_esc_url( mc_admin_url( 'edit-page.php?type=page' ) ); ?>">+ Create New Page</a>
+					<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=page')); ?>">+ Create New Page</a>
 				</li>
 			<?php endif; ?>
-			<?php if ( mc_current_user_can( 'manage_users' ) ) : ?>
+			<?php if (mc_current_user_can('manage_users')) : ?>
 				<li style="padding:8px 0;border-bottom:1px solid #dcdcde;">
-					<a href="<?php echo mc_esc_url( mc_admin_url( 'user-edit.php' ) ); ?>">+ Add New User</a>
+					<a href="<?php echo mc_esc_url(mc_admin_url('user-edit.php')); ?>">+ Add New User</a>
 				</li>
 			<?php endif; ?>
 			<li style="padding:8px 0;border-bottom:1px solid #dcdcde;">
-				<a href="<?php echo mc_esc_url( mc_site_url() ); ?>" target="_blank">View Site &rarr;</a>
+				<a href="<?php echo mc_esc_url(mc_site_url()); ?>" target="_blank">View Site &rarr;</a>
 			</li>
-			<?php if ( mc_current_user_can( 'manage_settings' ) ) : ?>
+			<?php if (mc_current_user_can('manage_settings')) : ?>
 				<li style="padding:8px 0;">
-					<a href="<?php echo mc_esc_url( mc_admin_url( 'settings.php' ) ); ?>">Site Settings</a>
+					<a href="<?php echo mc_esc_url(mc_admin_url('settings.php')); ?>">Site Settings</a>
 				</li>
 			<?php endif; ?>
 		</ul>
@@ -111,5 +112,5 @@ $themes        = mc_discover_themes();
 </div>
 
 <?php
-mc_do_action( 'mc_admin_dashboard' );
+mc_do_action('mc_admin_dashboard');
 require MC_ABSPATH . 'mc-admin/admin-footer.php';

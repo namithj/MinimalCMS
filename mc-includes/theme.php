@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Theme System
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * All discovered themes keyed by directory name.
@@ -32,10 +33,11 @@ $mc_themes = array();
  * @param string $dir Absolute path to the theme directory (with trailing slash).
  * @return array Theme metadata.
  */
-function mc_get_theme_data( string $dir ): array {
+function mc_get_theme_data(string $dir): array
+{
 
 	$defaults = array(
-		'name'        => basename( rtrim( $dir, '/' ) ),
+		'name'        => basename(rtrim($dir, '/')),
 		'version'     => '1.0.0',
 		'author'      => '',
 		'description' => '',
@@ -47,18 +49,18 @@ function mc_get_theme_data( string $dir ): array {
 
 	$manifest = $dir . 'theme.json';
 
-	if ( ! is_file( $manifest ) ) {
+	if (! is_file($manifest)) {
 		return $defaults;
 	}
 
-	$raw  = file_get_contents( $manifest );
-	$data = json_decode( $raw, true );
+	$raw  = file_get_contents($manifest);
+	$data = json_decode($raw, true);
 
-	if ( ! is_array( $data ) ) {
+	if (! is_array($data)) {
 		return $defaults;
 	}
 
-	return array_merge( $defaults, $data );
+	return array_merge($defaults, $data);
 }
 
 /**
@@ -70,29 +72,30 @@ function mc_get_theme_data( string $dir ): array {
  *
  * @return array Associative array of slug => metadata.
  */
-function mc_discover_themes(): array {
+function mc_discover_themes(): array
+{
 
 	$dir    = MC_THEME_DIR;
 	$themes = array();
 
-	if ( ! is_dir( $dir ) ) {
+	if (! is_dir($dir)) {
 		return $themes;
 	}
 
-	$entries = array_diff( scandir( $dir ), array( '.', '..' ) );
+	$entries = array_diff(scandir($dir), array( '.', '..' ));
 
-	foreach ( $entries as $entry ) {
+	foreach ($entries as $entry) {
 		$theme_dir = $dir . $entry . '/';
 
-		if ( ! is_dir( $theme_dir ) ) {
+		if (! is_dir($theme_dir)) {
 			continue;
 		}
 
-		if ( ! is_file( $theme_dir . 'theme.json' ) && ! is_file( $theme_dir . 'style.css' ) ) {
+		if (! is_file($theme_dir . 'theme.json') && ! is_file($theme_dir . 'style.css')) {
 			continue;
 		}
 
-		$themes[ $entry ] = mc_get_theme_data( $theme_dir );
+		$themes[ $entry ] = mc_get_theme_data($theme_dir);
 	}
 
 	return $themes;
@@ -111,31 +114,32 @@ function mc_discover_themes(): array {
  *
  * @return void
  */
-function mc_load_theme(): void {
+function mc_load_theme(): void
+{
 
 	global $mc_themes;
 
 	$active_slug = MC_ACTIVE_THEME;
 	$theme_dir   = MC_THEME_DIR . $active_slug . '/';
 
-	if ( ! is_dir( $theme_dir ) ) {
+	if (! is_dir($theme_dir)) {
 		return;
 	}
 
-	$theme_data                = mc_get_theme_data( $theme_dir );
+	$theme_data                = mc_get_theme_data($theme_dir);
 	$mc_themes[ $active_slug ] = $theme_data;
 
 	// If child theme, load parent first.
 	$parent_slug = $theme_data['template'] ?? '';
 
-	if ( '' !== $parent_slug && $parent_slug !== $active_slug ) {
+	if ('' !== $parent_slug && $parent_slug !== $active_slug) {
 		$parent_dir = MC_THEME_DIR . $parent_slug . '/';
 
-		if ( is_dir( $parent_dir ) ) {
-			$mc_themes[ $parent_slug ] = mc_get_theme_data( $parent_dir );
+		if (is_dir($parent_dir)) {
+			$mc_themes[ $parent_slug ] = mc_get_theme_data($parent_dir);
 
 			$parent_functions = $parent_dir . 'functions.php';
-			if ( is_file( $parent_functions ) ) {
+			if (is_file($parent_functions)) {
 				include_once $parent_functions;
 			}
 		}
@@ -143,7 +147,7 @@ function mc_load_theme(): void {
 
 	// Load child (or standalone) theme functions.
 	$functions = $theme_dir . 'functions.php';
-	if ( is_file( $functions ) ) {
+	if (is_file($functions)) {
 		include_once $functions;
 	}
 
@@ -154,7 +158,7 @@ function mc_load_theme(): void {
 	 *
 	 * @param string $active_slug Active theme slug.
 	 */
-	mc_do_action( 'mc_after_setup_theme', $active_slug );
+	mc_do_action('mc_after_setup_theme', $active_slug);
 }
 
 /**
@@ -164,7 +168,8 @@ function mc_load_theme(): void {
  *
  * @return array Theme metadata.
  */
-function mc_get_active_theme(): array {
+function mc_get_active_theme(): array
+{
 
 	global $mc_themes;
 	return $mc_themes[ MC_ACTIVE_THEME ] ?? array();
@@ -177,12 +182,13 @@ function mc_get_active_theme(): array {
  *
  * @return string Directory path or empty string if no parent.
  */
-function mc_get_parent_theme_dir(): string {
+function mc_get_parent_theme_dir(): string
+{
 
 	$theme_data  = mc_get_active_theme();
 	$parent_slug = $theme_data['template'] ?? '';
 
-	if ( '' === $parent_slug || $parent_slug === MC_ACTIVE_THEME ) {
+	if ('' === $parent_slug || $parent_slug === MC_ACTIVE_THEME) {
 		return '';
 	}
 
@@ -197,20 +203,21 @@ function mc_get_parent_theme_dir(): string {
  * @param string $slug Theme directory name to switch to.
  * @return true|MC_Error True on success.
  */
-function mc_switch_theme( string $slug ): true|MC_Error {
+function mc_switch_theme(string $slug): true|MC_Error
+{
 
 	global $mc_config;
 
 	$theme_dir = MC_THEME_DIR . $slug . '/';
 
-	if ( ! is_dir( $theme_dir ) ) {
-		return new MC_Error( 'not_found', 'Theme not found.' );
+	if (! is_dir($theme_dir)) {
+		return new MC_Error('not_found', 'Theme not found.');
 	}
 
 	$mc_config['active_theme'] = $slug;
-	mc_save_config( $mc_config );
+	mc_save_config($mc_config);
 
-	mc_do_action( 'mc_switch_theme', $slug );
+	mc_do_action('mc_switch_theme', $slug);
 
 	return true;
 }

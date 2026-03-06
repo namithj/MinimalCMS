@@ -1,0 +1,171 @@
+/**
+ * Forms Plugin — Frontend Form Styles
+ *
+ * Basic styling for forms rendered on the public site via shortcode or
+ * the /form/{slug} endpoint.
+ *
+ * @package MinimalCMS\Forms
+ * @since   1.0.0
+ */
+
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+.mc-form-wrapper {
+	max-width: 640px;
+}
+
+/* ── Form groups ──────────────────────────────────────────────────────────── */
+.mc-form .mc-field-group {
+	margin-bottom: 1.25rem;
+}
+
+.mc-form label {
+	display: block;
+	margin-bottom: 0.35rem;
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+.mc-form .mc-required-mark {
+	color: #d63638;
+	margin-left: 2px;
+}
+
+/* ── Inputs ───────────────────────────────────────────────────────────────── */
+.mc-form input[type="text"],
+.mc-form input[type="email"],
+.mc-form input[type="number"],
+.mc-form input[type="url"],
+.mc-form textarea,
+.mc-form select {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 0.75rem;
+	font-size: 1rem;
+	line-height: 1.5;
+	color: #1d2327;
+	background-color: #fff;
+	border: 1px solid #8c8f94;
+	border-radius: 4px;
+	box-sizing: border-box;
+	transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.mc-form input[type="text"]:focus,
+.mc-form input[type="email"]:focus,
+.mc-form input[type="number"]:focus,
+.mc-form input[type="url"]:focus,
+.mc-form textarea:focus,
+.mc-form select:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
+	outline: none;
+}
+
+.mc-form textarea {
+	resize: vertical;
+	min-height: 120px;
+}
+
+.mc-form select {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238c8f94' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 0.75rem center;
+	padding-right: 2.25rem;
+}
+
+/* ── Checkbox ─────────────────────────────────────────────────────────────── */
+.mc-form .mc-field-checkbox label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: normal;
+	cursor: pointer;
+}
+
+.mc-form .mc-field-checkbox input[type="checkbox"] {
+	width: 1rem;
+	height: 1rem;
+	flex-shrink: 0;
+	cursor: pointer;
+	accent-color: #2271b1;
+}
+
+/* ── Description text ─────────────────────────────────────────────────────── */
+.mc-form .mc-field-description {
+	display: block;
+	margin-top: 0.25rem;
+	font-size: 0.85rem;
+	color: #646970;
+}
+
+/* ── Actions / submit ─────────────────────────────────────────────────────── */
+.mc-form-actions {
+	margin-top: 1.5rem;
+}
+
+.mc-form-actions button[type="submit"] {
+	display: inline-block;
+	padding: 0.55rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	line-height: 1.5;
+	color: #fff;
+	background-color: #2271b1;
+	border: 1px solid #2271b1;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.mc-form-actions button[type="submit"]:hover,
+.mc-form-actions button[type="submit"]:focus {
+	background-color: #135e96;
+	border-color: #135e96;
+	outline: none;
+}
+
+/* ── Validation errors ────────────────────────────────────────────────────── */
+.mc-form .mc-field-error input,
+.mc-form .mc-field-error textarea,
+.mc-form .mc-field-error select {
+	border-color: #d63638;
+}
+
+.mc-form .mc-field-error-message {
+	display: block;
+	margin-top: 0.25rem;
+	font-size: 0.85rem;
+	color: #d63638;
+}
+
+/* ── Success / error notices ──────────────────────────────────────────────── */
+.mc-form-notice {
+	padding: 0.75rem 1rem;
+	margin-bottom: 1.25rem;
+	border-radius: 4px;
+	font-size: 0.95rem;
+}
+
+.mc-form-notice--success {
+	background-color: #edfaef;
+	border: 1px solid #1e8a2e;
+	color: #1e4620;
+}
+
+.mc-form-notice--error {
+	background-color: #fcf0f1;
+	border: 1px solid #d63638;
+	color: #8a1c1e;
+}
+
+/* ── Confirmation message ─────────────────────────────────────────────────── */
+.mc-form-confirmation {
+	padding: 1rem 1.25rem;
+	background-color: #edfaef;
+	border: 1px solid #1e8a2e;
+	border-radius: 4px;
+	color: #1e4620;
+	font-size: 1rem;
+}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS HTTP Helpers
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /*
  * -------------------------------------------------------------------------
@@ -24,14 +25,15 @@ defined( 'MC_ABSPATH' ) || exit;
  * @param string $action The action name the nonce protects.
  * @return string The nonce token (hex string).
  */
-function mc_create_nonce( string $action = '-1' ): string {
+function mc_create_nonce(string $action = '-1'): string
+{
 
 	$tick = mc_nonce_tick();
 	$uid  = mc_get_current_user_id();
 	$key  = MC_SECRET_KEY;
 
 	return substr(
-		hash_hmac( 'sha256', $tick . '|' . $action . '|' . $uid, $key ),
+		hash_hmac('sha256', $tick . '|' . $action . '|' . $uid, $key),
 		0,
 		20
 	);
@@ -46,9 +48,10 @@ function mc_create_nonce( string $action = '-1' ): string {
  * @param string $action The expected action name.
  * @return bool True if the nonce is valid.
  */
-function mc_verify_nonce( string $nonce, string $action = '-1' ): bool {
+function mc_verify_nonce(string $nonce, string $action = '-1'): bool
+{
 
-	if ( '' === $nonce ) {
+	if ('' === $nonce) {
 		return false;
 	}
 
@@ -58,23 +61,23 @@ function mc_verify_nonce( string $nonce, string $action = '-1' ): bool {
 	// Check current tick.
 	$tick     = mc_nonce_tick();
 	$expected = substr(
-		hash_hmac( 'sha256', $tick . '|' . $action . '|' . $uid, $key ),
+		hash_hmac('sha256', $tick . '|' . $action . '|' . $uid, $key),
 		0,
 		20
 	);
 
-	if ( hash_equals( $expected, $nonce ) ) {
+	if (hash_equals($expected, $nonce)) {
 		return true;
 	}
 
 	// Check previous tick (allows a 1-tick grace period).
 	$expected_prev = substr(
-		hash_hmac( 'sha256', ( $tick - 1 ) . '|' . $action . '|' . $uid, $key ),
+		hash_hmac('sha256', ( $tick - 1 ) . '|' . $action . '|' . $uid, $key),
 		0,
 		20
 	);
 
-	return hash_equals( $expected_prev, $nonce );
+	return hash_equals($expected_prev, $nonce);
 }
 
 /**
@@ -84,10 +87,11 @@ function mc_verify_nonce( string $nonce, string $action = '-1' ): bool {
  *
  * @return int Current tick.
  */
-function mc_nonce_tick(): int {
+function mc_nonce_tick(): int
+{
 
 	$nonce_life = 86400; // 24 hours total (two 12-hour ticks).
-	return (int) ceil( time() / ( $nonce_life / 2 ) );
+	return (int) ceil(time() / ( $nonce_life / 2 ));
 }
 
 /**
@@ -99,10 +103,11 @@ function mc_nonce_tick(): int {
  * @param string $name   The field name. Default '_mc_nonce'.
  * @return void
  */
-function mc_nonce_field( string $action = '-1', string $name = '_mc_nonce' ): void {
+function mc_nonce_field(string $action = '-1', string $name = '_mc_nonce'): void
+{
 
-	$nonce = mc_create_nonce( $action );
-	echo '<input type="hidden" name="' . mc_esc_attr( $name ) . '" value="' . mc_esc_attr( $nonce ) . '" />' . "\n";
+	$nonce = mc_create_nonce($action);
+	echo '<input type="hidden" name="' . mc_esc_attr($name) . '" value="' . mc_esc_attr($nonce) . '" />' . "\n";
 }
 
 /**
@@ -115,12 +120,13 @@ function mc_nonce_field( string $action = '-1', string $name = '_mc_nonce' ): vo
  * @param string $name   Query parameter name. Default '_mc_nonce'.
  * @return string URL with nonce.
  */
-function mc_nonce_url( string $url, string $action = '-1', string $name = '_mc_nonce' ): string {
+function mc_nonce_url(string $url, string $action = '-1', string $name = '_mc_nonce'): string
+{
 
-	$nonce     = mc_create_nonce( $action );
-	$separator = str_contains( $url, '?' ) ? '&' : '?';
+	$nonce     = mc_create_nonce($action);
+	$separator = str_contains($url, '?') ? '&' : '?';
 
-	return $url . $separator . rawurlencode( $name ) . '=' . rawurlencode( $nonce );
+	return $url . $separator . rawurlencode($name) . '=' . rawurlencode($nonce);
 }
 
 /*
@@ -138,9 +144,10 @@ function mc_nonce_url( string $url, string $action = '-1', string $name = '_mc_n
  * @param int    $status HTTP status code. Default 302.
  * @return never
  */
-function mc_redirect( string $url, int $status = 302 ): never {
+function mc_redirect(string $url, int $status = 302): never
+{
 
-	header( 'Location: ' . $url, true, $status );
+	header('Location: ' . $url, true, $status);
 	exit;
 }
 
@@ -152,9 +159,10 @@ function mc_redirect( string $url, int $status = 302 ): never {
  * @param string $url Destination URL.
  * @return never
  */
-function mc_safe_redirect( string $url ): never {
+function mc_safe_redirect(string $url): never
+{
 
-	mc_redirect( $url, 303 );
+	mc_redirect($url, 303);
 }
 
 /*
@@ -170,9 +178,10 @@ function mc_safe_redirect( string $url ): never {
  *
  * @return string Uppercase method name (GET, POST, etc.).
  */
-function mc_request_method(): string {
+function mc_request_method(): string
+{
 
-	return strtoupper( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
+	return strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 }
 
 /**
@@ -182,7 +191,8 @@ function mc_request_method(): string {
  *
  * @return bool
  */
-function mc_is_post_request(): bool {
+function mc_is_post_request(): bool
+{
 
 	return 'POST' === mc_request_method();
 }
@@ -194,13 +204,14 @@ function mc_is_post_request(): bool {
  *
  * @return bool
  */
-function mc_is_ajax_request(): bool {
+function mc_is_ajax_request(): bool
+{
 
-	if ( defined( 'MC_DOING_AJAX' ) && MC_DOING_AJAX ) {
+	if (defined('MC_DOING_AJAX') && MC_DOING_AJAX) {
 		return true;
 	}
 
-	return 'xmlhttprequest' === strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '' );
+	return 'xmlhttprequest' === strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '');
 }
 
 /**
@@ -212,11 +223,12 @@ function mc_is_ajax_request(): bool {
  * @param int   $status HTTP status code. Default 200.
  * @return never
  */
-function mc_send_json( mixed $data, int $status = 200 ): never {
+function mc_send_json(mixed $data, int $status = 200): never
+{
 
-	http_response_code( $status );
-	header( 'Content-Type: application/json; charset=utf-8' );
-	echo json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	http_response_code($status);
+	header('Content-Type: application/json; charset=utf-8');
+	echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit;
 }
 
@@ -228,7 +240,8 @@ function mc_send_json( mixed $data, int $status = 200 ): never {
  * @param mixed $data Optional data.
  * @return never
  */
-function mc_send_json_success( mixed $data = null ): never {
+function mc_send_json_success(mixed $data = null): never
+{
 
 	mc_send_json(
 		array(
@@ -248,7 +261,8 @@ function mc_send_json_success( mixed $data = null ): never {
  * @param int   $status HTTP status. Default 400.
  * @return never
  */
-function mc_send_json_error( mixed $data = null, int $status = 400 ): never {
+function mc_send_json_error(mixed $data = null, int $status = 400): never
+{
 
 	mc_send_json(
 		array(
@@ -272,9 +286,10 @@ function mc_send_json_error( mixed $data = null, int $status = 400 ): never {
  *
  * @return void
  */
-function mc_send_404(): void {
+function mc_send_404(): void
+{
 
-	http_response_code( 404 );
+	http_response_code(404);
 }
 
 /**
@@ -284,9 +299,10 @@ function mc_send_404(): void {
  *
  * @return void
  */
-function mc_no_cache_headers(): void {
+function mc_no_cache_headers(): void
+{
 
-	header( 'Cache-Control: no-cache, no-store, must-revalidate' );
-	header( 'Pragma: no-cache' );
-	header( 'Expires: 0' );
+	header('Cache-Control: no-cache, no-store, must-revalidate');
+	header('Pragma: no-cache');
+	header('Expires: 0');
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS File Cache
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * In-memory runtime cache to avoid hitting disk repeatedly within a request.
@@ -29,32 +30,33 @@ $mc_runtime_cache = array();
  * @param string $group Cache group. Default 'default'.
  * @return mixed Cached value or false if not found / expired.
  */
-function mc_cache_get( string $key, string $group = 'default' ): mixed {
+function mc_cache_get(string $key, string $group = 'default'): mixed
+{
 
 	global $mc_runtime_cache;
 
 	$runtime_key = $group . ':' . $key;
 
-	if ( isset( $mc_runtime_cache[ $runtime_key ] ) ) {
+	if (isset($mc_runtime_cache[ $runtime_key ])) {
 		return $mc_runtime_cache[ $runtime_key ];
 	}
 
-	$file = mc_cache_file_path( $key, $group );
+	$file = mc_cache_file_path($key, $group);
 
-	if ( ! is_file( $file ) ) {
+	if (! is_file($file)) {
 		return false;
 	}
 
 	$data = @include $file;
 
-	if ( ! is_array( $data ) || ! isset( $data['expires'], $data['value'] ) ) {
-		@unlink( $file );
+	if (! is_array($data) || ! isset($data['expires'], $data['value'])) {
+		@unlink($file);
 		return false;
 	}
 
 	// Check expiration (0 means no expiry).
-	if ( 0 !== $data['expires'] && time() > $data['expires'] ) {
-		@unlink( $file );
+	if (0 !== $data['expires'] && time() > $data['expires']) {
+		@unlink($file);
 		return false;
 	}
 
@@ -73,18 +75,19 @@ function mc_cache_get( string $key, string $group = 'default' ): mixed {
  * @param int    $ttl   Time-to-live in seconds. 0 = no expiry. Default 3600.
  * @return bool True on success.
  */
-function mc_cache_set( string $key, mixed $value, string $group = 'default', int $ttl = 3600 ): bool {
+function mc_cache_set(string $key, mixed $value, string $group = 'default', int $ttl = 3600): bool
+{
 
 	global $mc_runtime_cache;
 
 	$runtime_key                      = $group . ':' . $key;
 	$mc_runtime_cache[ $runtime_key ] = $value;
 
-	$file = mc_cache_file_path( $key, $group );
-	$dir  = dirname( $file );
+	$file = mc_cache_file_path($key, $group);
+	$dir  = dirname($file);
 
-	if ( ! is_dir( $dir ) ) {
-		mkdir( $dir, 0755, true );
+	if (! is_dir($dir)) {
+		mkdir($dir, 0755, true);
 	}
 
 	$expires = ( 0 === $ttl ) ? 0 : time() + $ttl;
@@ -97,7 +100,7 @@ function mc_cache_set( string $key, mixed $value, string $group = 'default', int
 		true
 	) . ';' . "\n";
 
-	return false !== file_put_contents( $file, $content, LOCK_EX );
+	return false !== file_put_contents($file, $content, LOCK_EX);
 }
 
 /**
@@ -109,17 +112,18 @@ function mc_cache_set( string $key, mixed $value, string $group = 'default', int
  * @param string $group Cache group. Default 'default'.
  * @return bool True if deleted.
  */
-function mc_cache_delete( string $key, string $group = 'default' ): bool {
+function mc_cache_delete(string $key, string $group = 'default'): bool
+{
 
 	global $mc_runtime_cache;
 
 	$runtime_key = $group . ':' . $key;
-	unset( $mc_runtime_cache[ $runtime_key ] );
+	unset($mc_runtime_cache[ $runtime_key ]);
 
-	$file = mc_cache_file_path( $key, $group );
+	$file = mc_cache_file_path($key, $group);
 
-	if ( is_file( $file ) ) {
-		return @unlink( $file );
+	if (is_file($file)) {
+		return @unlink($file);
 	}
 
 	return false;
@@ -133,20 +137,21 @@ function mc_cache_delete( string $key, string $group = 'default' ): bool {
  * @param string $group Optional. Specific group to flush. Empty flushes all.
  * @return void
  */
-function mc_cache_flush( string $group = '' ): void {
+function mc_cache_flush(string $group = ''): void
+{
 
 	global $mc_runtime_cache;
 	$mc_runtime_cache = array();
 
-	if ( '' !== $group ) {
-		$dir = MC_CACHE_DIR . mc_sanitize_filename( $group );
+	if ('' !== $group) {
+		$dir = MC_CACHE_DIR . mc_sanitize_filename($group);
 	} else {
 		$dir = MC_CACHE_DIR;
 	}
 
-	if ( is_dir( $dir ) ) {
-		mc_rmdir_recursive( $dir );
-		mkdir( $dir, 0755, true );
+	if (is_dir($dir)) {
+		mc_rmdir_recursive($dir);
+		mkdir($dir, 0755, true);
 	}
 }
 
@@ -159,10 +164,11 @@ function mc_cache_flush( string $group = '' ): void {
  * @param string $group Cache group.
  * @return string Absolute file path.
  */
-function mc_cache_file_path( string $key, string $group ): string {
+function mc_cache_file_path(string $key, string $group): string
+{
 
-	$safe_group = mc_sanitize_filename( $group );
-	$hash       = md5( $key );
+	$safe_group = mc_sanitize_filename($group);
+	$hash       = md5($key);
 
 	return MC_CACHE_DIR . $safe_group . '/' . $hash . '.php';
 }
@@ -175,24 +181,25 @@ function mc_cache_file_path( string $key, string $group ): string {
  * @param string $dir Directory path.
  * @return void
  */
-function mc_rmdir_recursive( string $dir ): void {
+function mc_rmdir_recursive(string $dir): void
+{
 
-	if ( ! is_dir( $dir ) ) {
+	if (! is_dir($dir)) {
 		return;
 	}
 
 	$items = new \RecursiveIteratorIterator(
-		new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+		new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
 		\RecursiveIteratorIterator::CHILD_FIRST
 	);
 
-	foreach ( $items as $item ) {
-		if ( $item->isDir() ) {
-			rmdir( $item->getPathname() );
+	foreach ($items as $item) {
+		if ($item->isDir()) {
+			rmdir($item->getPathname());
 		} else {
-			unlink( $item->getPathname() );
+			unlink($item->getPathname());
 		}
 	}
 
-	rmdir( $dir );
+	rmdir($dir);
 }

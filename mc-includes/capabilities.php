@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Roles and Capabilities
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * All registered roles.
@@ -32,7 +33,8 @@ $mc_roles = array();
  *
  * @return void
  */
-function mc_initialise_roles(): void {
+function mc_initialise_roles(): void
+{
 
 	global $mc_roles;
 
@@ -98,7 +100,7 @@ function mc_initialise_roles(): void {
 	 *
 	 * @param array $roles Default roles.
 	 */
-	$mc_roles = mc_apply_filters( 'mc_user_roles', $roles );
+	$mc_roles = mc_apply_filters('mc_user_roles', $roles);
 }
 
 /**
@@ -111,7 +113,8 @@ function mc_initialise_roles(): void {
  * @param array  $capabilities Associative array of capability => bool.
  * @return void
  */
-function mc_add_role( string $slug, string $label, array $capabilities = array() ): void {
+function mc_add_role(string $slug, string $label, array $capabilities = array()): void
+{
 
 	global $mc_roles;
 
@@ -129,10 +132,11 @@ function mc_add_role( string $slug, string $label, array $capabilities = array()
  * @param string $slug Role identifier.
  * @return void
  */
-function mc_remove_role( string $slug ): void {
+function mc_remove_role(string $slug): void
+{
 
 	global $mc_roles;
-	unset( $mc_roles[ $slug ] );
+	unset($mc_roles[ $slug ]);
 }
 
 /**
@@ -143,7 +147,8 @@ function mc_remove_role( string $slug ): void {
  * @param string $slug Role identifier.
  * @return array|null Role array or null if not found.
  */
-function mc_get_role( string $slug ): ?array {
+function mc_get_role(string $slug): ?array
+{
 
 	global $mc_roles;
 	return $mc_roles[ $slug ] ?? null;
@@ -156,7 +161,8 @@ function mc_get_role( string $slug ): ?array {
  *
  * @return array All roles.
  */
-function mc_get_roles(): array {
+function mc_get_roles(): array
+{
 
 	global $mc_roles;
 	return $mc_roles;
@@ -172,11 +178,12 @@ function mc_get_roles(): array {
  * @param bool   $grant      Whether to grant. Default true.
  * @return void
  */
-function mc_add_cap( string $role, string $capability, bool $grant = true ): void {
+function mc_add_cap(string $role, string $capability, bool $grant = true): void
+{
 
 	global $mc_roles;
 
-	if ( isset( $mc_roles[ $role ] ) ) {
+	if (isset($mc_roles[ $role ])) {
 		$mc_roles[ $role ]['capabilities'][ $capability ] = $grant;
 	}
 }
@@ -190,11 +197,12 @@ function mc_add_cap( string $role, string $capability, bool $grant = true ): voi
  * @param string $capability Capability name.
  * @return void
  */
-function mc_remove_cap( string $role, string $capability ): void {
+function mc_remove_cap(string $role, string $capability): void
+{
 
 	global $mc_roles;
 
-	unset( $mc_roles[ $role ]['capabilities'][ $capability ] );
+	unset($mc_roles[ $role ]['capabilities'][ $capability ]);
 }
 
 /**
@@ -206,15 +214,16 @@ function mc_remove_cap( string $role, string $capability ): void {
  * @param string $capability Capability to check.
  * @return bool True if the role grants the capability.
  */
-function mc_role_has_cap( string $role, string $capability ): bool {
+function mc_role_has_cap(string $role, string $capability): bool
+{
 
 	global $mc_roles;
 
-	if ( ! isset( $mc_roles[ $role ] ) ) {
+	if (! isset($mc_roles[ $role ])) {
 		return false;
 	}
 
-	return ! empty( $mc_roles[ $role ]['capabilities'][ $capability ] );
+	return ! empty($mc_roles[ $role ]['capabilities'][ $capability ]);
 }
 
 /**
@@ -226,7 +235,8 @@ function mc_role_has_cap( string $role, string $capability ): bool {
  * @param string $capability Capability name.
  * @return bool
  */
-function mc_user_can( array $user, string $capability ): bool {
+function mc_user_can(array $user, string $capability): bool
+{
 
 	$role = $user['role'] ?? '';
 
@@ -239,13 +249,13 @@ function mc_user_can( array $user, string $capability ): bool {
 	 * @param array     $user       User data.
 	 * @param string    $capability Capability name.
 	 */
-	$override = mc_apply_filters( 'mc_user_can', null, $user, $capability );
+	$override = mc_apply_filters('mc_user_can', null, $user, $capability);
 
-	if ( null !== $override ) {
+	if (null !== $override) {
 		return (bool) $override;
 	}
 
-	return mc_role_has_cap( $role, $capability );
+	return mc_role_has_cap($role, $capability);
 }
 
 /**
@@ -258,13 +268,14 @@ function mc_user_can( array $user, string $capability ): bool {
  * @param string $capability Capability name.
  * @return bool
  */
-function mc_current_user_can( string $capability ): bool {
+function mc_current_user_can(string $capability): bool
+{
 
 	$user = mc_get_current_user();
 
-	if ( empty( $user ) ) {
+	if (empty($user)) {
 		return false;
 	}
 
-	return mc_user_can( $user, $capability );
+	return mc_user_can($user, $capability);
 }

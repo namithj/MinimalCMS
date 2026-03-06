@@ -4,6 +4,7 @@
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-8892BF)
 ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
 ![Status](https://img.shields.io/badge/status-early%20development-orange)
+[![Live Demo](https://img.shields.io/badge/demo-live-0f766e)](https://namithj.github.io/MinimalCMS/)
 
 > A lightweight, flat-file CMS built with a WordPress-inspired architecture — no database, no bloat, just PHP and Markdown.
 
@@ -11,11 +12,11 @@
 
 ## What is MinimalCMS?
 
-MinimalCMS is a file-based content management system that borrows the familiar patterns of WordPress (hooks, template hierarchy, plugins, themes, shortcodes) without requiring a database, a framework, or complex infrastructure.
+MinimalCMS is a file-based content management system with a familiar hook, plugin, and theme architecture — without requiring a database, a framework, or complex infrastructure.
 
 Content is written in **Markdown**, metadata lives in **JSON sidecars**, user data is **sodium-encrypted at rest**, and the entire system boots from a single `index.php` front controller. If you can upload files to a PHP + Apache host, you can run MinimalCMS.
 
-It is designed as a learning reference, a lightweight CMS for small sites, and a clean base for developers who want WordPress-style extensibility without the overhead.
+It is designed as a learning reference, a lightweight CMS for small sites, and a clean base for developers who want a hook-driven, extensible CMS without the overhead.
 
 ---
 
@@ -29,7 +30,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 | **Dependencies** | Parsedown (Markdown parser) |
 | **Admin UI** | Built-in dashboard with Markdown editor |
 | **Auth** | Encrypted user file, bcrypt passwords, HMAC nonces |
-| **Extensibility** | Plugin & theme system with WordPress-style hooks |
+| **Extensibility** | Plugin & theme system with action/filter hooks |
 
 ---
 
@@ -38,7 +39,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 **Content**
 - Write pages and posts in Markdown (`.md`) with JSON sidecar metadata
 - Custom content types, archive routes, and permalink slugs
-- Shortcode parser — `[greet name="World"]` syntax, identical to WordPress
+- Shortcode parser — `[greet name="World"]` syntax
 
 **Security**
 - User data encrypted with `sodium_crypto_secretbox` (256-bit key)
@@ -47,7 +48,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 - `mc-data/` is locked behind Apache `Deny all` + PHP `die()` double guard
 
 **Extensibility**
-- WordPress-style actions & filters with `mc_add_action()` / `mc_add_filter()`
+- Action & filter hooks with `mc_add_action()` / `mc_add_filter()`
 - Plugin lifecycle (activate, deactivate) driven by `config.json`
 - Theme system with template hierarchy, child theme support, and `theme.json` manifests
 - MU-plugins directory for must-use code
@@ -56,7 +57,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 - Single front controller — no framework magic
 - File-based PHP cache with TTL
 - Full PHPUnit test suite (unit + integration)
-- PHPStan + PHPCS (WordPress Coding Standards) pre-configured
+- PHPStan + PHPCS (MinimalCMS Coding Standards) pre-configured
 - SCSS build pipeline via npm + Sass
 
 ---
@@ -93,6 +94,21 @@ The **setup wizard** runs automatically on the first visit. It will:
 - Generate a `secret_key` and `encryption_key` in `config.json`
 - Create the initial administrator account
 - Redirect you to the dashboard
+
+---
+
+## PHP-WASM Demo
+
+For fast browser-based demos (without a local PHP runtime), run:
+
+```bash
+npm run demo:wasm
+```
+
+Then open `http://127.0.0.1:9400/`.
+
+Demo-specific files are stored in `demo/php-wasm/` and are excluded from release archives.
+You can also publish a browser demo to GitHub Pages via `.github/workflows/demo-pages.yml`.
 
 ---
 
@@ -217,7 +233,7 @@ mc-content/pages/my-page/
 
 ## Plugin Development
 
-Plugins live in `mc-content/plugins/{plugin-name}/{plugin-name}.php` and use a WordPress-style file header:
+Plugins live in `mc-content/plugins/{plugin-name}/{plugin-name}.php` and use a standard file header:
 
 ```php
 <?php
@@ -264,7 +280,7 @@ Themes live in `mc-content/themes/{theme-name}/` and require a `theme.json` mani
 
 ### Template Hierarchy
 
-The template loader follows a WordPress-like cascade:
+The template loader follows a cascade:
 
 1. `front-page.php` (home page only)
 2. `page-{slug}.php` → `page.php` (pages)
@@ -362,7 +378,7 @@ composer test:integration
 # PHPStan (level configured in phpstan.neon)
 composer analyse
 
-# PHP CodeSniffer (WordPress Coding Standards)
+# PHP CodeSniffer (MinimalCMS Coding Standards)
 composer cs
 
 # Auto-fix coding standard violations

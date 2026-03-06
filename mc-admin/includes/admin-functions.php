@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Admin Functions
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * Admin menu items.
@@ -26,31 +27,31 @@ $mc_admin_menu = array(
 	),
 	array(
 		'title'      => 'Pages',
-		'url'        => mc_admin_url( 'pages.php' ),
+		'url'        => mc_admin_url('pages.php?type=page'),
 		'capability' => 'edit_content',
 		'icon'       => '&#x1F4C4;',
 	),
 	array(
 		'title'      => 'Users',
-		'url'        => mc_admin_url( 'users.php' ),
+		'url'        => mc_admin_url('users.php'),
 		'capability' => 'manage_users',
 		'icon'       => '&#x1F465;',
 	),
 	array(
 		'title'      => 'Plugins',
-		'url'        => mc_admin_url( 'plugins.php' ),
+		'url'        => mc_admin_url('plugins.php'),
 		'capability' => 'manage_plugins',
 		'icon'       => '&#x1F50C;',
 	),
 	array(
 		'title'      => 'Themes',
-		'url'        => mc_admin_url( 'themes.php' ),
+		'url'        => mc_admin_url('themes.php'),
 		'capability' => 'manage_themes',
 		'icon'       => '&#x1F3A8;',
 	),
 	array(
 		'title'      => 'Settings',
-		'url'        => mc_admin_url( 'settings.php' ),
+		'url'        => mc_admin_url('settings.php'),
 		'capability' => 'manage_settings',
 		'icon'       => '&#x2699;',
 	),
@@ -63,7 +64,7 @@ $mc_admin_menu = array(
  *
  * @since 1.0.0
  */
-mc_do_action( 'mc_admin_menu' );
+mc_do_action('mc_admin_menu');
 
 /**
  * Render the admin menu in the sidebar.
@@ -72,26 +73,27 @@ mc_do_action( 'mc_admin_menu' );
  *
  * @return void
  */
-function mc_render_admin_menu(): void {
+function mc_render_admin_menu(): void
+{
 
 	global $mc_admin_menu;
 
 	echo '<nav class="admin-menu">' . "\n";
 	echo '<ul>' . "\n";
 
-	foreach ( $mc_admin_menu as $item ) {
-		if ( ! mc_current_user_can( $item['capability'] ) ) {
+	foreach ($mc_admin_menu as $item) {
+		if (! mc_current_user_can($item['capability'])) {
 			continue;
 		}
 
-		$active = mc_is_current_admin_page( $item['url'] ) ? ' class="active"' : '';
+		$active = mc_is_current_admin_page($item['url']) ? ' class="active"' : '';
 
 		printf(
 			'<li%s><a href="%s"><span class="icon">%s</span> %s</a></li>' . "\n",
 			$active,
-			mc_esc_url( $item['url'] ),
+			mc_esc_url($item['url']),
 			$item['icon'],
-			mc_esc_html( $item['title'] )
+			mc_esc_html($item['title'])
 		);
 	}
 
@@ -107,12 +109,30 @@ function mc_render_admin_menu(): void {
  * @param string $url Menu item URL.
  * @return bool
  */
-function mc_is_current_admin_page( string $url ): bool {
+function mc_is_current_admin_page(string $url): bool
+{
 
-	$current = strtok( $_SERVER['REQUEST_URI'] ?? '', '?' );
-	$target  = strtok( parse_url( $url, PHP_URL_PATH ) ?? '', '?' );
+	$parsed       = parse_url($url);
+	$current_path = rtrim(strtok($_SERVER['REQUEST_URI'] ?? '', '?'), '/');
+	$target_path  = rtrim($parsed['path'] ?? '', '/');
 
-	return rtrim( $current, '/' ) === rtrim( $target, '/' );
+	if ($current_path !== $target_path) {
+		return false;
+	}
+
+	// When the menu URL specifies a type, the current URL must match it.
+	// Pages with no explicit type default to 'page'.
+	if (! empty($parsed['query'])) {
+		parse_str($parsed['query'], $menu_params);
+		if (isset($menu_params['type'])) {
+			$current_type = $_GET['type'] ?? 'page';
+			if ($current_type !== $menu_params['type']) {
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 /**
@@ -124,11 +144,12 @@ function mc_is_current_admin_page( string $url ): bool {
  * @param string $type    'success', 'error', 'warning', 'info'. Default 'info'.
  * @return void
  */
-function mc_admin_notice( string $message, string $type = 'info' ): void {
+function mc_admin_notice(string $message, string $type = 'info'): void
+{
 
 	printf(
 		'<div class="notice notice-%s"><p>%s</p></div>' . "\n",
-		mc_esc_attr( $type ),
-		mc_esc_html( $message )
+		mc_esc_attr($type),
+		mc_esc_html($message)
 	);
 }

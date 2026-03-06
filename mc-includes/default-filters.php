@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Default Filters
  *
@@ -9,24 +10,24 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 // Print enqueued styles in <head>.
-mc_add_action( 'mc_head', 'mc_print_styles', 8 );
+mc_add_action('mc_head', 'mc_print_styles', 8);
 
 // Print header scripts in <head>.
-mc_add_action( 'mc_head', 'mc_print_head_scripts', 9 );
+mc_add_action('mc_head', 'mc_print_head_scripts', 9);
 
 // Print footer scripts before </body>.
-mc_add_action( 'mc_footer', 'mc_print_footer_scripts', 20 );
+mc_add_action('mc_footer', 'mc_print_footer_scripts', 20);
 
 // Process shortcodes in content output.
-mc_add_filter( 'mc_the_content', 'mc_do_shortcode', 11 );
+mc_add_filter('mc_the_content', 'mc_do_shortcode', 11);
 
 // Convert line breaks in content.
 mc_add_filter(
 	'mc_the_content',
-	function ( string $html ): string {
+	function (string $html): string {
 		// Parsedown already handles this, but ensure consistent line breaks.
 		return $html;
 	},

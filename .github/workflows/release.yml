@@ -71,44 +71,22 @@ jobs:
       - name: Package release zip
         run: |
           DIST_DIR="${{ env.ARTIFACT_NAME }}"
-          mkdir -p "$DIST_DIR"
 
-          # Copy only the files needed in production
-          rsync -a --exclude-from=- . "$DIST_DIR/" <<'EOF'
-          .git
-          .github
-          .gitignore
-          .phpunit.result.cache
-          node_modules
-          tests
-          coverage
-          phpunit.xml
-          phpcs.xml.dist
-          phpstan.neon
-          phpstan.neon.dist
-          package.json
-          package-lock.json
-          composer.json
-          composer.lock
-          mc-admin/assets/src
-          mc-content/themes/default/src
-          mc-content/cache/*
-          mc-data/users.php
-          mc-data/sessions/*
-          EOF
+          # Build the base from tracked source files.
+          # export-ignore entries in .gitattributes keep dev-only files out.
+          git archive HEAD --prefix="$DIST_DIR/" | tar -x
 
-          # Remove dev-only vendor packages that composer --no-dev might leave behind
-          rm -rf "$DIST_DIR/mc-includes/vendor/phpunit" \
-                 "$DIST_DIR/mc-includes/vendor/phpstan" \
-                 "$DIST_DIR/mc-includes/vendor/squizlabs" \
-                 "$DIST_DIR/mc-includes/vendor/wp-coding-standards" \
-                 "$DIST_DIR/mc-includes/vendor/phpcsstandards" \
-                 "$DIST_DIR/mc-includes/vendor/dealerdirect"
+          # Overlay production Composer vendor (gitignored – not in archive).
+          cp -r mc-includes/vendor "$DIST_DIR/mc-includes/"
 
-          # Remove any config.json — fresh installs use config.sample.json
-          rm -f "$DIST_DIR/config.json"
+          # Overlay built front-end assets (gitignored – not in archive).
+          [ -d mc-admin/assets/css    ] && cp -r mc-admin/assets/css    "$DIST_DIR/mc-admin/assets/"
+          [ -d mc-admin/assets/vendor ] && cp -r mc-admin/assets/vendor "$DIST_DIR/mc-admin/assets/"
+          find mc-content/themes -name "*.css" -o -name "*.css.map" | while IFS= read -r f; do
+            cp "$f" "$DIST_DIR/$f"
+          done
 
-          # Ensure writable dirs exist with placeholder files
+          # Ensure writable runtime dirs exist with placeholder files.
           mkdir -p "$DIST_DIR/mc-content/cache" \
                    "$DIST_DIR/mc-content/uploads" \
                    "$DIST_DIR/mc-content/mu-plugins" \

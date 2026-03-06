@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Markdown Parser
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 // Parsedown is loaded via Composer autoloader.
 
@@ -20,16 +21,17 @@ defined( 'MC_ABSPATH' ) || exit;
  * @param string $markdown Raw Markdown text.
  * @return string Rendered HTML.
  */
-function mc_parse_markdown( string $markdown ): string {
+function mc_parse_markdown(string $markdown): string
+{
 
 	static $parser = null;
 
-	if ( null === $parser ) {
+	if (null === $parser) {
 		$parser = new Parsedown();
-		$parser->setSafeMode( false );
+		$parser->setSafeMode(false);
 	}
 
-	$html = $parser->text( $markdown );
+	$html = $parser->text($markdown);
 
 	/**
 	 * Filter the HTML produced by the Markdown parser.
@@ -41,5 +43,5 @@ function mc_parse_markdown( string $markdown ): string {
 	 * @param string $html     Rendered HTML.
 	 * @param string $markdown Original Markdown.
 	 */
-	return mc_apply_filters( 'mc_parse_markdown', $html, $markdown );
+	return mc_apply_filters('mc_parse_markdown', $html, $markdown);
 }

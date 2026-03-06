@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Template Loader
  *
@@ -9,7 +10,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * Determine and include the appropriate template for the current request.
@@ -18,7 +19,8 @@ defined( 'MC_ABSPATH' ) || exit;
  *
  * @return void
  */
-function mc_load_template(): void {
+function mc_load_template(): void
+{
 
 	global $mc_query;
 
@@ -29,7 +31,7 @@ function mc_load_template(): void {
 	 *
 	 * @since 1.0.0
 	 */
-	mc_do_action( 'mc_template_redirect' );
+	mc_do_action('mc_template_redirect');
 
 	// Build the template hierarchy (most specific → fallback).
 	$templates = mc_get_template_hierarchy();
@@ -41,10 +43,10 @@ function mc_load_template(): void {
 	 *
 	 * @param string[] $templates Candidate template filenames.
 	 */
-	$templates = mc_apply_filters( 'mc_template_hierarchy', $templates );
+	$templates = mc_apply_filters('mc_template_hierarchy', $templates);
 
 	// Locate the first matching template file.
-	$template = mc_locate_template( $templates );
+	$template = mc_locate_template($templates);
 
 	/**
 	 * Filter the resolved template file path.
@@ -54,9 +56,9 @@ function mc_load_template(): void {
 	 * @param string   $template  Absolute path to the template, or empty.
 	 * @param string[] $templates Candidate list that was searched.
 	 */
-	$template = mc_apply_filters( 'mc_template_include', $template, $templates );
+	$template = mc_apply_filters('mc_template_include', $template, $templates);
 
-	if ( '' !== $template && is_file( $template ) ) {
+	if ('' !== $template && is_file($template)) {
 		include $template;
 	} else {
 		// Last resort: output a basic error.
@@ -72,7 +74,8 @@ function mc_load_template(): void {
  *
  * @return string[] Ordered list of template filenames to search for.
  */
-function mc_get_template_hierarchy(): array {
+function mc_get_template_hierarchy(): array
+{
 
 	global $mc_query;
 
@@ -82,34 +85,31 @@ function mc_get_template_hierarchy(): array {
 	$content   = $mc_query['content'] ?? null;
 
 	// Check for a custom template set in the content's metadata.
-	if ( null !== $content && ! empty( $content['template'] ) ) {
+	if (null !== $content && ! empty($content['template'])) {
 		$templates[] = $content['template'];
 	}
 
-	if ( ! empty( $mc_query['is_404'] ) ) {
+	if (! empty($mc_query['is_404'])) {
 		$templates[] = '404.php';
-
-	} elseif ( ! empty( $mc_query['is_front_page'] ) ) {
+	} elseif (! empty($mc_query['is_front_page'])) {
 		$templates[] = 'front-page.php';
-		if ( '' !== $slug ) {
+		if ('' !== $slug) {
 			$templates[] = 'page-' . $slug . '.php';
 		}
 		$templates[] = 'page.php';
-
-	} elseif ( ! empty( $mc_query['is_archive'] ) ) {
-		if ( '' !== $type ) {
+	} elseif (! empty($mc_query['is_archive'])) {
+		if ('' !== $type) {
 			$templates[] = 'archive-' . $type . '.php';
 		}
 		$templates[] = 'archive.php';
-
-	} elseif ( ! empty( $mc_query['is_single'] ) ) {
-		if ( 'page' === $type ) {
-			if ( '' !== $slug ) {
+	} elseif (! empty($mc_query['is_single'])) {
+		if ('page' === $type) {
+			if ('' !== $slug) {
 				$templates[] = 'page-' . $slug . '.php';
 			}
 			$templates[] = 'page.php';
 		} else {
-			if ( '' !== $slug ) {
+			if ('' !== $slug) {
 				$templates[] = 'single-' . $type . '-' . $slug . '.php';
 			}
 			$templates[] = 'single-' . $type . '.php';
@@ -135,19 +135,20 @@ function mc_get_template_hierarchy(): array {
  * @param string[] $templates Candidate filenames.
  * @return string Absolute path to the first matching file, or empty string.
  */
-function mc_locate_template( array $templates ): string {
+function mc_locate_template(array $templates): string
+{
 
 	$theme_dir  = mc_get_active_theme_dir();
 	$parent_dir = mc_get_parent_theme_dir();
 
-	foreach ( $templates as $tpl ) {
+	foreach ($templates as $tpl) {
 		// Child / active theme.
-		if ( is_file( $theme_dir . $tpl ) ) {
+		if (is_file($theme_dir . $tpl)) {
 			return $theme_dir . $tpl;
 		}
 
 		// Parent theme.
-		if ( '' !== $parent_dir && is_file( $parent_dir . $tpl ) ) {
+		if ('' !== $parent_dir && is_file($parent_dir . $tpl)) {
 			return $parent_dir . $tpl;
 		}
 	}

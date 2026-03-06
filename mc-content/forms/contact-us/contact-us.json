@@ -1,0 +1,79 @@
+{
+    "title": "Contact Us",
+    "slug": "contact-us",
+    "status": "publish",
+    "author": "admin",
+    "created": "2026-03-06T17:31:12+00:00",
+    "modified": "2026-03-06T18:30:48+00:00",
+    "template": "",
+    "parent": "",
+    "order": 0,
+    "excerpt": "",
+    "featured_image": "",
+    "meta": {
+        "fields": [
+            {
+                "name": "field-1",
+                "type": "text",
+                "label": "Field 1",
+                "placeholder": "",
+                "required": true,
+                "options": []
+            },
+            {
+                "name": "field-2",
+                "type": "textarea",
+                "label": "Field 2",
+                "placeholder": "",
+                "required": false,
+                "options": []
+            },
+            {
+                "name": "field-3",
+                "type": "number",
+                "label": "Field 3",
+                "placeholder": "",
+                "required": false,
+                "options": []
+            },
+            {
+                "name": "field-4",
+                "type": "select",
+                "label": "Field 4",
+                "placeholder": "",
+                "required": false,
+                "options": [
+                    {
+                        "value": "1",
+                        "label": "1"
+                    },
+                    {
+                        "value": "2",
+                        "label": "2"
+                    },
+                    {
+                        "value": "3",
+                        "label": "3"
+                    }
+                ]
+            }
+        ],
+        "notifications": [
+            {
+                "enabled": true,
+                "to": "test@test.com",
+                "subject": "New Form Submission: {form_title}",
+                "from_name": "From Name",
+                "from_email": "fromemail@from.com",
+                "reply_to_field": ""
+            }
+        ],
+        "confirmation": {
+            "type": "message",
+            "message": "Thank you! Your submission has been received.",
+            "redirect": "",
+            "page": ""
+        }
+    },
+    "type": "form"
+}

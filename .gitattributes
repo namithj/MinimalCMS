@@ -1,0 +1,24 @@
+# =============================================================
+# export-ignore — files excluded from `git archive` / release zips
+# =============================================================
+
+# CI / tooling
+/.github/**             export-ignore
+/.gitattributes         export-ignore
+/.gitignore             export-ignore
+/phpunit.xml            export-ignore
+/phpcs.xml.dist         export-ignore
+/phpstan.neon           export-ignore
+/phpstan.neon.dist      export-ignore
+/package.json           export-ignore
+/package-lock.json      export-ignore
+/composer.json          export-ignore
+/composer.lock          export-ignore
+/tests/**               export-ignore
+
+# Demo site
+/demo/**                export-ignore
+
+# Source assets (compiled output is overlaid separately)
+/mc-admin/assets/src/** export-ignore
+/mc-content/themes/default/src/** export-ignore

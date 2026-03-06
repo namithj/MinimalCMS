@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS — Setup Wizard
  *
@@ -15,8 +16,8 @@ require_once __DIR__ . '/admin.php';
  * ── Guard: redirect away if already set up ─────────────────────────────────
  */
 $existing_users = mc_get_users();
-if ( is_array( $existing_users ) && count( $existing_users ) > 0 ) {
-	mc_redirect( mc_admin_url( 'login.php' ) );
+if (is_array($existing_users) && count($existing_users) > 0) {
+	mc_redirect(mc_admin_url('login.php'));
 	exit;
 }
 
@@ -27,36 +28,34 @@ $notice_type = 'error';
 /*
  * ── Step 2: Process form ───────────────────────────────────────────────────
  */
-if ( 2 === $step && mc_is_post_request() ) {
+if (2 === $step && mc_is_post_request()) {
+	$site_name = mc_sanitize_text(mc_input('site_name', 'post') ?? '');
+	$username  = mc_sanitize_slug(mc_input('username', 'post') ?? '');
+	$email     = mc_sanitize_email(mc_input('email', 'post') ?? '');
+	$password  = mc_input('password', 'post');
+	$password2 = mc_input('password_confirm', 'post');
 
-	$site_name = mc_sanitize_text( mc_input( 'site_name', 'post' ) ?? '' );
-	$username  = mc_sanitize_slug( mc_input( 'username', 'post' ) ?? '' );
-	$email     = mc_sanitize_email( mc_input( 'email', 'post' ) ?? '' );
-	$password  = mc_input( 'password', 'post' );
-	$password2 = mc_input( 'password_confirm', 'post' );
-
-	if ( empty( $site_name ) ) {
+	if (empty($site_name)) {
 		$notice = 'Site name is required.';
-	} elseif ( empty( $username ) ) {
+	} elseif (empty($username)) {
 		$notice = 'Username is required.';
-	} elseif ( empty( $email ) ) {
+	} elseif (empty($email)) {
 		$notice = 'Email is required.';
-	} elseif ( empty( $password ) ) {
+	} elseif (empty($password)) {
 		$notice = 'Password is required.';
-	} elseif ( $password !== $password2 ) {
+	} elseif ($password !== $password2) {
 		$notice = 'Passwords do not match.';
 	}
 
-	if ( ! $notice ) {
-
+	if (! $notice) {
 		/*
 		 * 1. Seed config.json from the sample file if it does not exist yet.
 		 */
 		$config_path = MC_ABSPATH . 'config.json';
 		$sample_path = MC_ABSPATH . 'config.sample.json';
 
-		if ( ! is_file( $config_path ) && is_file( $sample_path ) ) {
-			copy( $sample_path, $config_path );
+		if (! is_file($config_path) && is_file($sample_path)) {
+			copy($sample_path, $config_path);
 		}
 
 		$config = $GLOBALS['mc_config'];
@@ -64,12 +63,12 @@ if ( 2 === $step && mc_is_post_request() ) {
 		/*
 		 * 2. Generate cryptographic keys if they are still placeholder/empty.
 		 */
-		if ( empty( $config['encryption_key'] ) || 'CHANGE_ME_RANDOM_HEX_64' === $config['encryption_key'] ) {
-			$config['encryption_key'] = bin2hex( random_bytes( 32 ) );
+		if (empty($config['encryption_key']) || 'CHANGE_ME_RANDOM_HEX_64' === $config['encryption_key']) {
+			$config['encryption_key'] = bin2hex(random_bytes(32));
 		}
 
-		if ( empty( $config['secret_key'] ) || 'CHANGE_ME_RANDOM_STRING' === $config['secret_key'] ) {
-			$config['secret_key'] = bin2hex( random_bytes( 32 ) );
+		if (empty($config['secret_key']) || 'CHANGE_ME_RANDOM_STRING' === $config['secret_key']) {
+			$config['secret_key'] = bin2hex(random_bytes(32));
 		}
 
 		$config['site_name'] = $site_name;
@@ -77,9 +76,9 @@ if ( 2 === $step && mc_is_post_request() ) {
 		/*
 		 * 3. Save config first (encryption_key needed for user file).
 		 */
-		$saved = mc_save_config( $config );
+		$saved = mc_save_config($config);
 
-		if ( mc_is_error( $saved ) ) {
+		if (mc_is_error($saved)) {
 			$notice = 'Could not save config: ' . $saved->get_error_message();
 		} else {
 			// Reload globals so mc_derive_encryption_key() picks up new key.
@@ -98,19 +97,19 @@ if ( 2 === $step && mc_is_post_request() ) {
 				)
 			);
 
-			if ( mc_is_error( $user ) ) {
+			if (mc_is_error($user)) {
 				$notice = 'Could not create user: ' . $user->get_error_message();
 			} else {
 				// Log in immediately.
 				mc_start_session();
-				mc_set_auth_session( $username );
+				mc_set_auth_session($username);
 
 				$step = 3; // Success.
 			}
 		}
 	}
 
-	if ( $notice ) {
+	if ($notice) {
 		$step = 1; // Back to form on error.
 	}
 }
@@ -148,29 +147,27 @@ if ( 2 === $step && mc_is_post_request() ) {
 		<div class="setup-logo">MinimalCMS</div>
 		<div class="setup-box">
 
-		<?php if ( 3 === $step ) : // ── Success ─────────────────────────── ?>
-
+		<?php if (3 === $step) : // ── Success ─────────────────────────── ?>
 			<div class="success-icon">&#x2705;</div>
 			<h1 style="text-align:center;">All Set!</h1>
 			<p class="lead" style="text-align:center;">Your site is ready. You've been logged in as the admin.</p>
 			<div style="text-align:center;margin-top:20px;">
-				<a href="<?php echo mc_esc_url( mc_admin_url() ); ?>" class="btn">Go to Dashboard</a>
+				<a href="<?php echo mc_esc_url(mc_admin_url()); ?>" class="btn">Go to Dashboard</a>
 			</div>
 
 		<?php else : // ── Setup Form ────────────────────────────────────── ?>
-
 			<h1>Welcome to MinimalCMS</h1>
 			<p class="lead">Let's set up your site. This will only take a moment.</p>
 
-			<?php if ( $notice ) : ?>
-				<div class="notice notice-error"><?php echo mc_esc_html( $notice ); ?></div>
+			<?php if ($notice) : ?>
+				<div class="notice notice-error"><?php echo mc_esc_html($notice); ?></div>
 			<?php endif; ?>
 
 			<form method="post" action="?page=setup.php&step=2">
 				<div class="form-group">
 					<label for="site_name">Site Name</label>
 					<input type="text" id="site_name" name="site_name"
-							value="<?php echo mc_esc_attr( $site_name ?? ( $GLOBALS['mc_config']['site_name'] ?? 'My Site' ) ); ?>" autofocus>
+							value="<?php echo mc_esc_attr($site_name ?? ( $GLOBALS['mc_config']['site_name'] ?? 'My Site' )); ?>" autofocus>
 				</div>
 
 				<hr style="border:none;border-top:1px solid #dcdcde;margin:20px 0;">
@@ -179,13 +176,13 @@ if ( 2 === $step && mc_is_post_request() ) {
 				<div class="form-group">
 					<label for="username">Username</label>
 					<input type="text" id="username" name="username"
-							value="<?php echo mc_esc_attr( $username ?? '' ); ?>" autocomplete="username">
+							value="<?php echo mc_esc_attr($username ?? ''); ?>" autocomplete="username">
 				</div>
 
 				<div class="form-group">
 					<label for="email">Email</label>
 					<input type="email" id="email" name="email"
-							value="<?php echo mc_esc_attr( $email ?? '' ); ?>">
+							value="<?php echo mc_esc_attr($email ?? ''); ?>">
 				</div>
 
 				<div class="form-group">

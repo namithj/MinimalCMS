@@ -1,17 +1,16 @@
 <?php
+
 /**
  * MinimalCMS Hook System
  *
  * Provides the action and filter API that powers extensibility.
  * Actions are side-effect hooks; filters modify and return values.
  *
- * Inspired by the WordPress hook architecture but written from scratch.
- *
  * @package MinimalCMS
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * All registered hooks (actions and filters share the same storage).
@@ -94,13 +93,14 @@ function mc_add_filter(
  * @param mixed  ...$args Additional arguments passed to each callback.
  * @return mixed The filtered value.
  */
-function mc_apply_filters( string $hook, mixed $value, mixed ...$args ): mixed {
+function mc_apply_filters(string $hook, mixed $value, mixed ...$args): mixed
+{
 
 	global $mc_filters, $mc_filters_run, $mc_current_filter;
 
 	$mc_filters_run[ $hook ] = ( $mc_filters_run[ $hook ] ?? 0 ) + 1;
 
-	if ( empty( $mc_filters[ $hook ] ) ) {
+	if (empty($mc_filters[ $hook ])) {
 		return $value;
 	}
 
@@ -108,22 +108,22 @@ function mc_apply_filters( string $hook, mixed $value, mixed ...$args ): mixed {
 
 	// Sort callbacks by priority.
 	$hooks = $mc_filters[ $hook ];
-	ksort( $hooks, SORT_NUMERIC );
+	ksort($hooks, SORT_NUMERIC);
 
 	// Prepend $value to the argument list.
-	array_unshift( $args, $value );
+	array_unshift($args, $value);
 
-	foreach ( $hooks as $callbacks ) {
-		foreach ( $callbacks as $entry ) {
+	foreach ($hooks as $callbacks) {
+		foreach ($callbacks as $entry) {
 			$value   = call_user_func_array(
 				$entry['callback'],
-				array_slice( $args, 0, $entry['accepted_args'] )
+				array_slice($args, 0, $entry['accepted_args'])
 			);
 			$args[0] = $value;
 		}
 	}
 
-	array_pop( $mc_current_filter );
+	array_pop($mc_current_filter);
 
 	return $value;
 }
@@ -138,17 +138,18 @@ function mc_apply_filters( string $hook, mixed $value, mixed ...$args ): mixed {
  * @param int      $priority The priority it was registered with.
  * @return bool True if removed, false if not found.
  */
-function mc_remove_filter( string $hook, callable $callback, int $priority = 10 ): bool {
+function mc_remove_filter(string $hook, callable $callback, int $priority = 10): bool
+{
 
 	global $mc_filters;
 
-	if ( empty( $mc_filters[ $hook ][ $priority ] ) ) {
+	if (empty($mc_filters[ $hook ][ $priority ])) {
 		return false;
 	}
 
-	foreach ( $mc_filters[ $hook ][ $priority ] as $index => $entry ) {
-		if ( $entry['callback'] === $callback ) {
-			unset( $mc_filters[ $hook ][ $priority ][ $index ] );
+	foreach ($mc_filters[ $hook ][ $priority ] as $index => $entry) {
+		if ($entry['callback'] === $callback) {
+			unset($mc_filters[ $hook ][ $priority ][ $index ]);
 			$mc_filters[ $hook ][ $priority ] = array_values(
 				$mc_filters[ $hook ][ $priority ]
 			);
@@ -168,21 +169,22 @@ function mc_remove_filter( string $hook, callable $callback, int $priority = 10 
  * @param callable|null $callback Optional. Specific callback to look for.
  * @return bool|int False if not registered; true or the priority int if found.
  */
-function mc_has_filter( string $hook, ?callable $callback = null ): bool|int {
+function mc_has_filter(string $hook, ?callable $callback = null): bool|int
+{
 
 	global $mc_filters;
 
-	if ( ! isset( $mc_filters[ $hook ] ) ) {
+	if (! isset($mc_filters[ $hook ])) {
 		return false;
 	}
 
-	if ( null === $callback ) {
-		return ! empty( $mc_filters[ $hook ] );
+	if (null === $callback) {
+		return ! empty($mc_filters[ $hook ]);
 	}
 
-	foreach ( $mc_filters[ $hook ] as $priority => $callbacks ) {
-		foreach ( $callbacks as $entry ) {
-			if ( $entry['callback'] === $callback ) {
+	foreach ($mc_filters[ $hook ] as $priority => $callbacks) {
+		foreach ($callbacks as $entry) {
+			if ($entry['callback'] === $callback) {
 				return $priority;
 			}
 		}
@@ -215,7 +217,7 @@ function mc_add_action(
 	int $accepted_args = 1
 ): bool {
 
-	return mc_add_filter( $hook, $callback, $priority, $accepted_args );
+	return mc_add_filter($hook, $callback, $priority, $accepted_args);
 }
 
 /**
@@ -229,31 +231,32 @@ function mc_add_action(
  * @param mixed  ...$args Arguments to pass to each callback.
  * @return void
  */
-function mc_do_action( string $hook, mixed ...$args ): void {
+function mc_do_action(string $hook, mixed ...$args): void
+{
 
 	global $mc_filters, $mc_actions, $mc_current_filter;
 
 	$mc_actions[ $hook ] = ( $mc_actions[ $hook ] ?? 0 ) + 1;
 
-	if ( empty( $mc_filters[ $hook ] ) ) {
+	if (empty($mc_filters[ $hook ])) {
 		return;
 	}
 
 	$mc_current_filter[] = $hook;
 
 	$hooks = $mc_filters[ $hook ];
-	ksort( $hooks, SORT_NUMERIC );
+	ksort($hooks, SORT_NUMERIC);
 
-	foreach ( $hooks as $callbacks ) {
-		foreach ( $callbacks as $entry ) {
+	foreach ($hooks as $callbacks) {
+		foreach ($callbacks as $entry) {
 			call_user_func_array(
 				$entry['callback'],
-				array_slice( $args, 0, $entry['accepted_args'] )
+				array_slice($args, 0, $entry['accepted_args'])
 			);
 		}
 	}
 
-	array_pop( $mc_current_filter );
+	array_pop($mc_current_filter);
 }
 
 /**
@@ -266,9 +269,10 @@ function mc_do_action( string $hook, mixed ...$args ): void {
  * @param int      $priority The priority it was registered with.
  * @return bool True if removed, false if not found.
  */
-function mc_remove_action( string $hook, callable $callback, int $priority = 10 ): bool {
+function mc_remove_action(string $hook, callable $callback, int $priority = 10): bool
+{
 
-	return mc_remove_filter( $hook, $callback, $priority );
+	return mc_remove_filter($hook, $callback, $priority);
 }
 
 /**
@@ -280,9 +284,10 @@ function mc_remove_action( string $hook, callable $callback, int $priority = 10 
  * @param callable|null $callback Optional. Specific callback to search for.
  * @return bool|int False if not found; true or the priority int if found.
  */
-function mc_has_action( string $hook, ?callable $callback = null ): bool|int {
+function mc_has_action(string $hook, ?callable $callback = null): bool|int
+{
 
-	return mc_has_filter( $hook, $callback );
+	return mc_has_filter($hook, $callback);
 }
 
 /*
@@ -299,7 +304,8 @@ function mc_has_action( string $hook, ?callable $callback = null ): bool|int {
  * @param string $hook The action hook name.
  * @return int The execution count. Zero if never fired.
  */
-function mc_did_action( string $hook ): int {
+function mc_did_action(string $hook): int
+{
 
 	global $mc_actions;
 	return $mc_actions[ $hook ] ?? 0;
@@ -313,7 +319,8 @@ function mc_did_action( string $hook ): int {
  * @param string $hook The filter hook name.
  * @return int The application count.
  */
-function mc_did_filter( string $hook ): int {
+function mc_did_filter(string $hook): int
+{
 
 	global $mc_filters_run;
 	return $mc_filters_run[ $hook ] ?? 0;
@@ -327,10 +334,11 @@ function mc_did_filter( string $hook ): int {
  * @param string $hook The hook name.
  * @return bool True if the hook is currently executing.
  */
-function mc_doing_action( string $hook ): bool {
+function mc_doing_action(string $hook): bool
+{
 
 	global $mc_current_filter;
-	return in_array( $hook, $mc_current_filter, true );
+	return in_array($hook, $mc_current_filter, true);
 }
 
 /**
@@ -341,15 +349,16 @@ function mc_doing_action( string $hook ): bool {
  * @param string $hook Optional. Specific hook to check.
  * @return bool True if a hook is executing.
  */
-function mc_doing_filter( string $hook = '' ): bool {
+function mc_doing_filter(string $hook = ''): bool
+{
 
 	global $mc_current_filter;
 
-	if ( '' === $hook ) {
-		return ! empty( $mc_current_filter );
+	if ('' === $hook) {
+		return ! empty($mc_current_filter);
 	}
 
-	return in_array( $hook, $mc_current_filter, true );
+	return in_array($hook, $mc_current_filter, true);
 }
 
 /**
@@ -359,8 +368,9 @@ function mc_doing_filter( string $hook = '' ): bool {
  *
  * @return string Hook name or empty string.
  */
-function mc_current_filter(): string {
+function mc_current_filter(): string
+{
 
 	global $mc_current_filter;
-	return end( $mc_current_filter ) ?: '';
+	return end($mc_current_filter) ?: '';
 }

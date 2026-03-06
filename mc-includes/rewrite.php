@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Routing / Rewrite System
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * Custom routes registered by plugins.
@@ -48,7 +49,8 @@ $mc_query = array();
  * @param int      $priority Lower = matched first. Default 10.
  * @return void
  */
-function mc_add_route( string $pattern, callable $callback, int $priority = 10 ): void {
+function mc_add_route(string $pattern, callable $callback, int $priority = 10): void
+{
 
 	global $mc_routes;
 
@@ -72,20 +74,21 @@ function mc_add_route( string $pattern, callable $callback, int $priority = 10 )
  *
  * @return string Cleaned path, e.g. "about" or "docs/getting-started".
  */
-function mc_get_request_path(): string {
+function mc_get_request_path(): string
+{
 
 	$uri = $_SERVER['REQUEST_URI'] ?? '/';
 
 	// Strip query string.
-	$path = strtok( $uri, '?' );
+	$path = strtok($uri, '?');
 
 	// Remove the base path (subdirectory install support).
 	$base = mc_detect_base_path();
-	if ( '' !== $base && str_starts_with( $path, $base ) ) {
-		$path = substr( $path, strlen( $base ) );
+	if ('' !== $base && str_starts_with($path, $base)) {
+		$path = substr($path, strlen($base));
 	}
 
-	$path = trim( $path, '/' );
+	$path = trim($path, '/');
 
 	return $path;
 }
@@ -105,7 +108,8 @@ function mc_get_request_path(): string {
  *
  * @return void
  */
-function mc_parse_request(): void {
+function mc_parse_request(): void
+{
 
 	global $mc_query, $mc_routes;
 
@@ -118,7 +122,7 @@ function mc_parse_request(): void {
 	 *
 	 * @param string $path Cleaned request path.
 	 */
-	$path = mc_apply_filters( 'mc_request_path', $path );
+	$path = mc_apply_filters('mc_request_path', $path);
 
 	$mc_query = array(
 		'path'          => $path,
@@ -135,26 +139,26 @@ function mc_parse_request(): void {
 	);
 
 	// 1. Admin route — handled separately.
-	if ( str_starts_with( $path, 'mc-admin' ) ) {
+	if (str_starts_with($path, 'mc-admin')) {
 		$mc_query['is_admin'] = true;
 		return;
 	}
 
 	// 2. Custom routes (plugin-registered).
-	if ( ! empty( $mc_routes ) ) {
+	if (! empty($mc_routes)) {
 		// Sort by priority.
-		usort( $mc_routes, fn( $a, $b ) => $a['priority'] <=> $b['priority'] );
+		usort($mc_routes, fn($a, $b) => $a['priority'] <=> $b['priority']);
 
-		foreach ( $mc_routes as $route ) {
-			if ( preg_match( '#^' . $route['pattern'] . '$#', $path, $matches ) ) {
-				call_user_func( $route['callback'], $matches );
+		foreach ($mc_routes as $route) {
+			if (preg_match('#^' . $route['pattern'] . '$#', $path, $matches)) {
+				call_user_func($route['callback'], $matches);
 				return;
 			}
 		}
 	}
 
 	// 3–5. Content resolution.
-	mc_resolve_content_route( $path );
+	mc_resolve_content_route($path);
 }
 
 /**
@@ -165,27 +169,28 @@ function mc_parse_request(): void {
  * @param string $path The request path.
  * @return void
  */
-function mc_resolve_content_route( string $path ): void {
+function mc_resolve_content_route(string $path): void
+{
 
 	global $mc_query;
 
 	$content_types = mc_get_content_types();
 
 	// Handle pagination suffix: strip /page/N from the end.
-	if ( preg_match( '#^(.+)/page/(\d+)$#', $path, $page_match ) ) {
+	if (preg_match('#^(.+)/page/(\d+)$#', $path, $page_match)) {
 		$path                 = $page_match[1];
-		$mc_query['page_num'] = max( 1, (int) $page_match[2] );
-	} elseif ( preg_match( '#^page/(\d+)$#', $path, $page_match ) ) {
+		$mc_query['page_num'] = max(1, (int) $page_match[2]);
+	} elseif (preg_match('#^page/(\d+)$#', $path, $page_match)) {
 		$path                 = '';
-		$mc_query['page_num'] = max( 1, (int) $page_match[1] );
+		$mc_query['page_num'] = max(1, (int) $page_match[1]);
 	}
 
 	// Empty path → front page.
-	if ( '' === $path ) {
+	if ('' === $path) {
 		$front_slug = MC_FRONT_PAGE;
-		$item       = mc_get_content( 'page', $front_slug );
+		$item       = mc_get_content('page', $front_slug);
 
-		if ( null !== $item && 'publish' === ( $item['status'] ?? '' ) ) {
+		if (null !== $item && 'publish' === ( $item['status'] ?? '' )) {
 			$mc_query['type']          = 'page';
 			$mc_query['slug']          = $front_slug;
 			$mc_query['content']       = $item;
@@ -199,15 +204,20 @@ function mc_resolve_content_route( string $path ): void {
 	}
 
 	// Check custom content types: {type-slug}/{item-slug} or {type-slug}/ (archive).
-	foreach ( $content_types as $type_slug => $type_def ) {
-		if ( 'page' === $type_slug ) {
+	foreach ($content_types as $type_slug => $type_def) {
+		if ('page' === $type_slug) {
 			continue; // Pages are handled below (root-level URLs).
+		}
+
+		// Skip non-public types — they are not directly accessible via URL.
+		if (empty($type_def['public'])) {
+			continue;
 		}
 
 		$rewrite_slug = $type_def['rewrite']['slug'] ?? $type_slug;
 
 		// Archive: exact match on type slug.
-		if ( $path === $rewrite_slug && ! empty( $type_def['has_archive'] ) ) {
+		if ($path === $rewrite_slug && ! empty($type_def['has_archive'])) {
 			$mc_query['type']       = $type_slug;
 			$mc_query['is_archive'] = true;
 
@@ -224,11 +234,11 @@ function mc_resolve_content_route( string $path ): void {
 		}
 
 		// Single item: {type-slug}/{item-slug}.
-		if ( str_starts_with( $path, $rewrite_slug . '/' ) ) {
-			$item_slug = substr( $path, strlen( $rewrite_slug ) + 1 );
-			$item      = mc_get_content( $type_slug, $item_slug );
+		if (str_starts_with($path, $rewrite_slug . '/')) {
+			$item_slug = substr($path, strlen($rewrite_slug) + 1);
+			$item      = mc_get_content($type_slug, $item_slug);
 
-			if ( null !== $item && 'publish' === ( $item['status'] ?? '' ) ) {
+			if (null !== $item && 'publish' === ( $item['status'] ?? '' )) {
 				$mc_query['type']      = $type_slug;
 				$mc_query['slug']      = $item_slug;
 				$mc_query['content']   = $item;
@@ -240,9 +250,9 @@ function mc_resolve_content_route( string $path ): void {
 
 	// Pages: root-level URL. Support hierarchical slugs (parent/child).
 	$page_slug = $path;
-	$item      = mc_get_content( 'page', $page_slug );
+	$item      = mc_get_content('page', $page_slug);
 
-	if ( null !== $item && 'publish' === ( $item['status'] ?? '' ) ) {
+	if (null !== $item && 'publish' === ( $item['status'] ?? '' )) {
 		$mc_query['type']      = 'page';
 		$mc_query['slug']      = $page_slug;
 		$mc_query['content']   = $item;
@@ -251,11 +261,11 @@ function mc_resolve_content_route( string $path ): void {
 	}
 
 	// Try slugified version of the path.
-	$slugified = mc_sanitize_slug( $page_slug );
-	if ( $slugified !== $page_slug ) {
-		$item = mc_get_content( 'page', $slugified );
+	$slugified = mc_sanitize_slug($page_slug);
+	if ($slugified !== $page_slug) {
+		$item = mc_get_content('page', $slugified);
 
-		if ( null !== $item && 'publish' === ( $item['status'] ?? '' ) ) {
+		if (null !== $item && 'publish' === ( $item['status'] ?? '' )) {
 			$mc_query['type']      = 'page';
 			$mc_query['slug']      = $slugified;
 			$mc_query['content']   = $item;
@@ -281,10 +291,11 @@ function mc_resolve_content_route( string $path ): void {
  *
  * @return bool
  */
-function mc_is_front_page(): bool {
+function mc_is_front_page(): bool
+{
 
 	global $mc_query;
-	return ! empty( $mc_query['is_front_page'] );
+	return ! empty($mc_query['is_front_page']);
 }
 
 /**
@@ -294,10 +305,11 @@ function mc_is_front_page(): bool {
  *
  * @return bool
  */
-function mc_is_single(): bool {
+function mc_is_single(): bool
+{
 
 	global $mc_query;
-	return ! empty( $mc_query['is_single'] );
+	return ! empty($mc_query['is_single']);
 }
 
 /**
@@ -307,10 +319,11 @@ function mc_is_single(): bool {
  *
  * @return bool
  */
-function mc_is_archive(): bool {
+function mc_is_archive(): bool
+{
 
 	global $mc_query;
-	return ! empty( $mc_query['is_archive'] );
+	return ! empty($mc_query['is_archive']);
 }
 
 /**
@@ -320,10 +333,11 @@ function mc_is_archive(): bool {
  *
  * @return bool
  */
-function mc_is_404(): bool {
+function mc_is_404(): bool
+{
 
 	global $mc_query;
-	return ! empty( $mc_query['is_404'] );
+	return ! empty($mc_query['is_404']);
 }
 
 /**
@@ -333,7 +347,8 @@ function mc_is_404(): bool {
  *
  * @return bool
  */
-function mc_is_page(): bool {
+function mc_is_page(): bool
+{
 
 	global $mc_query;
 	return 'page' === ( $mc_query['type'] ?? '' ) && mc_is_single();
@@ -346,7 +361,8 @@ function mc_is_page(): bool {
  *
  * @return array
  */
-function mc_get_query(): array {
+function mc_get_query(): array
+{
 
 	global $mc_query;
 	return $mc_query;
@@ -359,7 +375,8 @@ function mc_get_query(): array {
  *
  * @return int
  */
-function mc_get_page_num(): int {
+function mc_get_page_num(): int
+{
 
 	global $mc_query;
 	return $mc_query['page_num'] ?? 1;

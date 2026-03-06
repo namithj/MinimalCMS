@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Posts
  * Description: Registers a "Posts" content type for blog-style articles with archive support.
@@ -6,7 +7,7 @@
  * Author:      MinimalCMS
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /*
  * -------------------------------------------------------------------------
@@ -22,7 +23,8 @@ defined( 'MC_ABSPATH' ) || exit;
  * @since 1.0.0
  * @return void
  */
-function posts_register_content_type(): void {
+function posts_register_content_type(): void
+{
 
 	mc_register_content_type(
 		'post',
@@ -37,7 +39,7 @@ function posts_register_content_type(): void {
 		)
 	);
 }
-mc_add_action( 'mc_init', 'posts_register_content_type' );
+mc_add_action('mc_init', 'posts_register_content_type');
 
 /*
  * -------------------------------------------------------------------------
@@ -51,30 +53,31 @@ mc_add_action( 'mc_init', 'posts_register_content_type' );
  * @since 1.0.0
  * @return void
  */
-function posts_admin_menu(): void {
+function posts_admin_menu(): void
+{
 
 	global $mc_admin_menu;
 
 	// Insert after "Pages" (index 1) so it appears right below.
 	$entry = array(
 		'title'      => 'Posts',
-		'url'        => mc_admin_url( 'pages.php?type=post' ),
+		'url'        => mc_admin_url('pages.php?type=post'),
 		'capability' => 'edit_content',
 		'icon'       => '&#x1F4DD;',
 	);
 
 	// Find the Pages item position and insert after it.
 	$insert_at = 2; // default: after Pages.
-	foreach ( $mc_admin_menu as $i => $item ) {
-		if ( str_contains( $item['url'] ?? '', 'pages.php' ) && ! str_contains( $item['url'] ?? '', 'type=' ) ) {
+	foreach ($mc_admin_menu as $i => $item) {
+		if (str_contains($item['url'] ?? '', 'type=page')) {
 			$insert_at = $i + 1;
 			break;
 		}
 	}
 
-	array_splice( $mc_admin_menu, $insert_at, 0, array( $entry ) );
+	array_splice($mc_admin_menu, $insert_at, 0, array( $entry ));
 }
-mc_add_action( 'mc_admin_menu', 'posts_admin_menu' );
+mc_add_action('mc_admin_menu', 'posts_admin_menu');
 
 /*
  * -------------------------------------------------------------------------
@@ -90,11 +93,12 @@ mc_add_action( 'mc_admin_menu', 'posts_admin_menu' );
  * @since 1.0.0
  * @return void
  */
-function posts_maybe_seed_sample(): void {
+function posts_maybe_seed_sample(): void
+{
 
 	// Only seed if there are zero posts.
-	$existing = mc_query_content( array( 'type' => 'post' ) );
-	if ( ! empty( $existing ) ) {
+	$existing = mc_query_content(array( 'type' => 'post' ));
+	if (! empty($existing)) {
 		return;
 	}
 
@@ -118,6 +122,6 @@ Welcome to **MinimalCMS**! This is your very first post. You can edit or delete 
 Happy writing! 🎉
 MD;
 
-	mc_save_content( 'post', 'hello-world', $meta, $body );
+	mc_save_content('post', 'hello-world', $meta, $body);
 }
-mc_add_action( 'mc_init', 'posts_maybe_seed_sample', 20 );
+mc_add_action('mc_init', 'posts_maybe_seed_sample', 20);

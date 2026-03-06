@@ -1,57 +1,118 @@
 <?xml version="1.0"?>
 <ruleset name="MinimalCMS">
-    <description>PHP CodeSniffer rules for MinimalCMS — WordPress-inspired coding standard.</description>
+	<description>MinimalCMS PHP CodeSniffer standard — PSR-12 base with tab indentation.</description>
 
-    <!-- What to scan -->
-    <file>mc-includes</file>
-    <file>mc-admin</file>
-    <file>mc-content/plugins</file>
-    <file>tests</file>
+	<!-- What to scan -->
+	<file>mc-includes</file>
+	<file>mc-admin</file>
+	<file>mc-content/plugins</file>
+	<file>tests</file>
 
-    <!-- Exclusions -->
-    <exclude-pattern>mc-includes/vendor/*</exclude-pattern>
-    <exclude-pattern>mc-admin/assets/vendor/*</exclude-pattern>
-    <exclude-pattern>mc-content/themes/*/assets/*</exclude-pattern>
-    <exclude-pattern>*/node_modules/*</exclude-pattern>
-    <exclude-pattern>*\.min\.php</exclude-pattern>
+	<!-- Exclusions -->
+	<exclude-pattern>mc-includes/vendor/*</exclude-pattern>
+	<exclude-pattern>mc-admin/assets/vendor/*</exclude-pattern>
+	<exclude-pattern>mc-content/themes/*/assets/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*\.min\.php</exclude-pattern>
 
-    <!-- Show progress and use colours -->
-    <arg value="sp"/>
-    <arg name="colors"/>
-    <arg name="extensions" value="php"/>
-    <arg name="parallel" value="8"/>
+	<!-- Show progress and use colours -->
+	<arg value="sp"/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+	<arg name="parallel" value="8"/>
 
-    <!-- Base standard: WordPress-Core gives us tabs, spacing rules, and doc-block requirements -->
-    <rule ref="WordPress-Core">
-        <!-- MinimalCMS uses its own prefix (mc_), not WordPress's (wp_) -->
-        <exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
-        <!-- Allow short array syntax [] alongside array() in tests -->
-        <exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
-    </rule>
+	<!-- Minimum PHP version -->
+	<config name="testVersion" value="8.0-"/>
 
-    <!-- Also apply extra WordPress best-practice rules -->
-    <rule ref="WordPress-Extra">
-        <exclude name="WordPress.Files.FileName"/>
-    </rule>
+	<!-- =================================================================
+	     BASE: PSR-12
+	     Covers: PSR-1 + PSR-2 + modern PHP additions (nullable/return types,
+	     class instantiation, traits, short-form type keywords, etc.)
+	================================================================== -->
+	<rule ref="PSR12">
+		<!-- PSR-12 mandates 4-space indentation; we use tabs. -->
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
+		<exclude name="Generic.WhiteSpace.ScopeIndent"/>
+		<!-- Continuation-indent sniffs hardcode space counts; exclude to avoid
+		     conflicts once the tab override corrects the base indentation. -->
+		<exclude name="PEAR.Functions.FunctionCallSignature.Indent"/>
+		<exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent"/>
+		<!-- MinimalCMS uses WordPress-style naming conventions (snake_case methods,
+		     MC_ClassName class names, no namespace requirement, procedural files). -->
+		<exclude name="PSR1.Methods.CamelCapsMethodName"/>
+		<exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+		<exclude name="Squiz.Classes.ValidClassName.NotPascalCase"/>
+		<exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+		<!-- No hard line-length limit enforced. -->
+		<exclude name="Generic.Files.LineLength"/>
+	</rule>
 
-    <!-- Require @since / @package doc-block tags -->
-    <rule ref="WordPress-Docs"/>
+	<!-- =================================================================
+	     INDENTATION: Tabs (overrides PSR-12 space indentation)
+	================================================================== -->
+	<rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
+	<rule ref="Generic.WhiteSpace.ScopeIndent">
+		<properties>
+			<property name="exact" value="false"/>
+			<property name="indent" value="4"/>
+			<property name="tabIndent" value="true"/>
+			<property name="ignoreIndentationTokens" type="array">
+				<element value="T_HEREDOC"/>
+				<element value="T_NOWDOC"/>
+				<element value="T_INLINE_HTML"/>
+			</property>
+		</properties>
+	</rule>
 
-    <!-- Enforce the mc_ prefix for all globals defined in mc-includes/ and mc-admin/ -->
-    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
-        <properties>
-            <property name="prefixes" type="array">
-                <element value="mc_"/>
-                <element value="MC_"/>
-                <element value="MinimalCMS"/>
-            </property>
-        </properties>
-        <include-pattern>mc-includes/*</include-pattern>
-        <include-pattern>mc-admin/*</include-pattern>
-        <include-pattern>mc-content/plugins/*</include-pattern>
-    </rule>
+	<!-- =================================================================
+	     PARSE ERRORS & MERGE CONFLICTS
+	================================================================== -->
+	<rule ref="Generic.PHP.Syntax"/>
+	<rule ref="Generic.VersionControl.GitMergeConflict"/>
 
-    <!-- Minimum supported PHP version for type-hint / deprecation checks -->
-    <config name="minimum_supported_wp_version" value="6.0"/>
-    <config name="testVersion" value="8.0-"/>
+	<!-- =================================================================
+	     CODE QUALITY
+	================================================================== -->
+	<!-- Assignment inside a condition. -->
+	<rule ref="Generic.CodeAnalysis.AssignmentInCondition"/>
+
+	<!-- Empty statements (e.g. empty catch blocks without a comment). -->
+	<rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+	<rule ref="Generic.CodeAnalysis.EmptyPHPStatement"/>
+
+	<!-- Unreachable / redundant code. -->
+	<rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+	<rule ref="Squiz.PHP.NonExecutableCode"/>
+
+	<!-- Unused function parameters (allow in extended classes / interfaces). -->
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClass"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassBeforeLastUsed"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInExtendedClassAfterLastUsed"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInImplementedInterface"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInImplementedInterfaceBeforeLastUsed"/>
+		<exclude name="Generic.CodeAnalysis.UnusedFunctionParameter.FoundInImplementedInterfaceAfterLastUsed"/>
+	</rule>
+
+	<!-- Loose comparisons (== instead of ===) — warning only. -->
+	<rule phpcs-only="true" ref="Universal.Operators.StrictComparisons">
+		<type>warning</type>
+	</rule>
+
+	<!-- =================================================================
+	     SECURITY
+	================================================================== -->
+	<rule ref="Generic.PHP.BacktickOperator"/>
+	<rule ref="Generic.PHP.DiscourageGoto">
+		<type>error</type>
+		<message>The "goto" language construct should not be used.</message>
+	</rule>
+	<rule ref="Squiz.PHP.Eval.Discouraged">
+		<type>error</type>
+		<message>eval() is a security risk and is not allowed.</message>
+	</rule>
+	<rule ref="Generic.PHP.DeprecatedFunctions"/>
+
+
 </ruleset>

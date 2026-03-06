@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Default Content Types
  *
@@ -8,7 +9,7 @@
  * @since   1.0.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * Register core content types.
@@ -20,7 +21,8 @@ defined( 'MC_ABSPATH' ) || exit;
  *
  * @return void
  */
-function mc_create_initial_content_types(): void {
+function mc_create_initial_content_types(): void
+{
 
 	mc_register_content_type(
 		'page',

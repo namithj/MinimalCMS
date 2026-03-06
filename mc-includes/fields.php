@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Fields API
  *
@@ -10,7 +11,7 @@
  * @since   1.1.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /**
  * Registered field types keyed by type slug.
@@ -53,24 +54,25 @@ $mc_field_types = array();
  * }
  * @return true|MC_Error True on success.
  */
-function mc_register_field_type( string $type, array $args ): true|MC_Error {
+function mc_register_field_type(string $type, array $args): true|MC_Error
+{
 
 	global $mc_field_types;
 
-	if ( '' === $type ) {
-		return new MC_Error( 'invalid_field_type', 'Field type slug cannot be empty.' );
+	if ('' === $type) {
+		return new MC_Error('invalid_field_type', 'Field type slug cannot be empty.');
 	}
 
-	if ( ! isset( $args['render_admin'] ) || ! is_callable( $args['render_admin'] ) ) {
-		return new MC_Error( 'missing_render', "Field type '{$type}' must provide a callable render_admin." );
+	if (! isset($args['render_admin']) || ! is_callable($args['render_admin'])) {
+		return new MC_Error('missing_render', "Field type '{$type}' must provide a callable render_admin.");
 	}
 
 	$mc_field_types[ $type ] = array(
 		'render_admin' => $args['render_admin'],
-		'sanitize'     => isset( $args['sanitize'] ) && is_callable( $args['sanitize'] )
+		'sanitize'     => isset($args['sanitize']) && is_callable($args['sanitize'])
 			? $args['sanitize']
 			: 'mc_field_default_sanitize',
-		'validate'     => isset( $args['validate'] ) && is_callable( $args['validate'] )
+		'validate'     => isset($args['validate']) && is_callable($args['validate'])
 			? $args['validate']
 			: 'mc_field_default_validate',
 		'admin_assets' => $args['admin_assets'] ?? array(),
@@ -84,7 +86,7 @@ function mc_register_field_type( string $type, array $args ): true|MC_Error {
 	 * @param string $type The field type slug.
 	 * @param array  $args The registered handler array.
 	 */
-	mc_do_action( 'mc_registered_field_type', $type, $mc_field_types[ $type ] );
+	mc_do_action('mc_registered_field_type', $type, $mc_field_types[ $type ]);
 
 	return true;
 }
@@ -97,7 +99,8 @@ function mc_register_field_type( string $type, array $args ): true|MC_Error {
  * @param string $type Type slug.
  * @return array|null Type definition or null.
  */
-function mc_get_field_type( string $type ): ?array {
+function mc_get_field_type(string $type): ?array
+{
 
 	global $mc_field_types;
 	return $mc_field_types[ $type ] ?? null;
@@ -110,7 +113,8 @@ function mc_get_field_type( string $type ): ?array {
  *
  * @return array Associative array of type_slug => definition.
  */
-function mc_get_field_types(): array {
+function mc_get_field_types(): array
+{
 
 	global $mc_field_types;
 	return $mc_field_types;
@@ -146,10 +150,11 @@ function mc_get_field_types(): array {
  * @param string|null  $error  Error message for this field, if any.
  * @return void Outputs HTML.
  */
-function mc_render_field( array $field, mixed $value = null, ?string $error = null ): void {
+function mc_render_field(array $field, mixed $value = null, ?string $error = null): void
+{
 
-	$type_def = mc_get_field_type( $field['type'] ?? 'text' );
-	if ( null === $type_def ) {
+	$type_def = mc_get_field_type($field['type'] ?? 'text');
+	if (null === $type_def) {
 		return;
 	}
 
@@ -167,33 +172,33 @@ function mc_render_field( array $field, mixed $value = null, ?string $error = nu
 		$field
 	);
 
-	if ( null === $value ) {
+	if (null === $value) {
 		$value = $field['default'];
 	}
 
-	$field_id    = mc_esc_attr( $field['id'] );
+	$field_id    = mc_esc_attr($field['id']);
 	$has_error   = null !== $error && '' !== $error;
 	$error_class = $has_error ? ' field-has-error' : '';
 
-	echo '<div class="form-group mc-field' . $error_class . '" data-field-type="' . mc_esc_attr( $field['type'] ) . '">' . "\n";
+	echo '<div class="form-group mc-field' . $error_class . '" data-field-type="' . mc_esc_attr($field['type']) . '">' . "\n";
 
-	if ( '' !== $field['label'] && 'checkbox' !== $field['type'] ) {
-		echo '<label for="field-' . $field_id . '">' . mc_esc_html( $field['label'] );
-		if ( $field['required'] ) {
+	if ('' !== $field['label'] && 'checkbox' !== $field['type']) {
+		echo '<label for="field-' . $field_id . '">' . mc_esc_html($field['label']);
+		if ($field['required']) {
 			echo ' <span class="required">*</span>';
 		}
 		echo '</label>' . "\n";
 	}
 
 	// Delegate to the type-specific renderer.
-	call_user_func( $type_def['render_admin'], $field, $value );
+	call_user_func($type_def['render_admin'], $field, $value);
 
-	if ( $has_error ) {
-		echo '<p class="field-error">' . mc_esc_html( $error ) . '</p>' . "\n";
+	if ($has_error) {
+		echo '<p class="field-error">' . mc_esc_html($error) . '</p>' . "\n";
 	}
 
-	if ( '' !== $field['description'] ) {
-		echo '<p class="description">' . mc_esc_html( $field['description'] ) . '</p>' . "\n";
+	if ('' !== $field['description']) {
+		echo '<p class="description">' . mc_esc_html($field['description']) . '</p>' . "\n";
 	}
 
 	echo '</div>' . "\n";
@@ -215,14 +220,15 @@ function mc_render_field( array $field, mixed $value = null, ?string $error = nu
  * @param array  $field Full field definition.
  * @return mixed Sanitised value.
  */
-function mc_sanitize_field( string $type, mixed $value, array $field = array() ): mixed {
+function mc_sanitize_field(string $type, mixed $value, array $field = array()): mixed
+{
 
-	$type_def = mc_get_field_type( $type );
-	if ( null === $type_def ) {
-		return mc_field_default_sanitize( $value, $field );
+	$type_def = mc_get_field_type($type);
+	if (null === $type_def) {
+		return mc_field_default_sanitize($value, $field);
 	}
 
-	return call_user_func( $type_def['sanitize'], $value, $field );
+	return call_user_func($type_def['sanitize'], $value, $field);
 }
 
 /**
@@ -235,20 +241,21 @@ function mc_sanitize_field( string $type, mixed $value, array $field = array() )
  * @param array  $field Full field definition.
  * @return true|string True if valid, or an error message string.
  */
-function mc_validate_field( string $type, mixed $value, array $field = array() ): true|string {
+function mc_validate_field(string $type, mixed $value, array $field = array()): true|string
+{
 
 	// Check required first.
-	if ( ! empty( $field['required'] ) && ( '' === $value || null === $value ) ) {
+	if (! empty($field['required']) && ( '' === $value || null === $value )) {
 		$label = $field['label'] ?? $field['id'] ?? 'This field';
 		return $label . ' is required.';
 	}
 
-	$type_def = mc_get_field_type( $type );
-	if ( null === $type_def ) {
-		return mc_field_default_validate( $value, $field );
+	$type_def = mc_get_field_type($type);
+	if (null === $type_def) {
+		return mc_field_default_validate($value, $field);
 	}
 
-	return call_user_func( $type_def['validate'], $value, $field );
+	return call_user_func($type_def['validate'], $value, $field);
 }
 
 /**
@@ -260,27 +267,28 @@ function mc_validate_field( string $type, mixed $value, array $field = array() )
  * @param array $raw    Raw input values keyed by field ID.
  * @return array{values: array, errors: array} Clean values and field-keyed errors.
  */
-function mc_process_fields( array $fields, array $raw ): array {
+function mc_process_fields(array $fields, array $raw): array
+{
 
 	$values = array();
 	$errors = array();
 
-	foreach ( $fields as $id => $field ) {
+	foreach ($fields as $id => $field) {
 		$field['id'] = $id;
 		$type        = $field['type'] ?? 'text';
 		$raw_value   = $raw[ $id ] ?? ( $field['default'] ?? '' );
 
 		// Checkboxes: absent from POST means unchecked.
-		if ( 'checkbox' === $type && ! array_key_exists( $id, $raw ) ) {
+		if ('checkbox' === $type && ! array_key_exists($id, $raw)) {
 			$raw_value = '';
 		}
 
-		$clean = mc_sanitize_field( $type, $raw_value, $field );
-		$valid = mc_validate_field( $type, $clean, $field );
+		$clean = mc_sanitize_field($type, $raw_value, $field);
+		$valid = mc_validate_field($type, $clean, $field);
 
 		$values[ $id ] = $clean;
 
-		if ( true !== $valid ) {
+		if (true !== $valid) {
 			$errors[ $id ] = $valid;
 		}
 	}
@@ -294,7 +302,7 @@ function mc_process_fields( array $fields, array $raw ): array {
 	 * @param array $errors Validation errors.
 	 * @param array $fields Field definitions.
 	 */
-	$values = mc_apply_filters( 'mc_process_fields_values', $values, $errors, $fields );
+	$values = mc_apply_filters('mc_process_fields_values', $values, $errors, $fields);
 
 	return array(
 		'values' => $values,
@@ -317,9 +325,10 @@ function mc_process_fields( array $fields, array $raw ): array {
  * @param array $field Field definition (unused by default).
  * @return string
  */
-function mc_field_default_sanitize( mixed $value, array $field = array() ): string {
+function mc_field_default_sanitize(mixed $value, array $field = array()): string
+{
 
-	return mc_sanitize_text( (string) $value );
+	return mc_sanitize_text((string) $value);
 }
 
 /**
@@ -331,7 +340,8 @@ function mc_field_default_sanitize( mixed $value, array $field = array() ): stri
  * @param array $field Field definition (unused by default).
  * @return true
  */
-function mc_field_default_validate( mixed $value, array $field = array() ): true {
+function mc_field_default_validate(mixed $value, array $field = array()): true
+{
 
 	return true;
 }
@@ -351,7 +361,8 @@ function mc_field_default_validate( mixed $value, array $field = array() ): true
  *
  * @return void
  */
-function mc_register_core_field_types(): void {
+function mc_register_core_field_types(): void
+{
 
 	/*
 	 * Text field.
@@ -429,7 +440,7 @@ function mc_register_core_field_types(): void {
 	 *
 	 * @since 1.1.0
 	 */
-	mc_do_action( 'mc_field_types_registered' );
+	mc_do_action('mc_field_types_registered');
 }
 
 /*
@@ -444,12 +455,13 @@ function mc_register_core_field_types(): void {
  * @param array  $field Field definition.
  * @param string $value Current value.
  */
-function mc_render_field_text( array $field, mixed $value ): void {
+function mc_render_field_text(array $field, mixed $value): void
+{
 
-	$attrs = mc_build_field_attributes( $field, array(
+	$attrs = mc_build_field_attributes($field, array(
 		'type'  => 'text',
 		'value' => (string) $value,
-	) );
+	));
 
 	echo '<input ' . $attrs . '>' . "\n";
 }
@@ -461,9 +473,10 @@ function mc_render_field_text( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return string
  */
-function mc_sanitize_field_text( mixed $value, array $field = array() ): string {
+function mc_sanitize_field_text(mixed $value, array $field = array()): string
+{
 
-	return mc_sanitize_text( (string) $value );
+	return mc_sanitize_text((string) $value);
 }
 
 /*
@@ -478,14 +491,15 @@ function mc_sanitize_field_text( mixed $value, array $field = array() ): string 
  * @param array  $field Field definition.
  * @param string $value Current value.
  */
-function mc_render_field_textarea( array $field, mixed $value ): void {
+function mc_render_field_textarea(array $field, mixed $value): void
+{
 
 	$rows = $field['options']['rows'] ?? 5;
-	$attrs = mc_build_field_attributes( $field, array(
+	$attrs = mc_build_field_attributes($field, array(
 		'rows' => (int) $rows,
-	), true );
+	), true);
 
-	echo '<textarea ' . $attrs . '>' . mc_esc_textarea( (string) $value ) . '</textarea>' . "\n";
+	echo '<textarea ' . $attrs . '>' . mc_esc_textarea((string) $value) . '</textarea>' . "\n";
 }
 
 /**
@@ -495,16 +509,17 @@ function mc_render_field_textarea( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return string
  */
-function mc_sanitize_field_textarea( mixed $value, array $field = array() ): string {
+function mc_sanitize_field_textarea(mixed $value, array $field = array()): string
+{
 
 	$value = (string) $value;
 	// Strip tags but preserve newlines.
-	$value = strip_tags( $value );
+	$value = strip_tags($value);
 	// Normalise line endings.
-	$value = str_replace( "\r\n", "\n", $value );
-	$value = str_replace( "\r", "\n", $value );
+	$value = str_replace("\r\n", "\n", $value);
+	$value = str_replace("\r", "\n", $value);
 
-	return trim( $value );
+	return trim($value);
 }
 
 /*
@@ -519,21 +534,22 @@ function mc_sanitize_field_textarea( mixed $value, array $field = array() ): str
  * @param array $field Field definition.
  * @param mixed $value Current value.
  */
-function mc_render_field_number( array $field, mixed $value ): void {
+function mc_render_field_number(array $field, mixed $value): void
+{
 
 	$extra = array( 'type' => 'number', 'value' => (string) $value );
 
-	if ( isset( $field['options']['min'] ) ) {
+	if (isset($field['options']['min'])) {
 		$extra['min'] = (string) $field['options']['min'];
 	}
-	if ( isset( $field['options']['max'] ) ) {
+	if (isset($field['options']['max'])) {
 		$extra['max'] = (string) $field['options']['max'];
 	}
-	if ( isset( $field['options']['step'] ) ) {
+	if (isset($field['options']['step'])) {
 		$extra['step'] = (string) $field['options']['step'];
 	}
 
-	$attrs = mc_build_field_attributes( $field, $extra );
+	$attrs = mc_build_field_attributes($field, $extra);
 
 	echo '<input ' . $attrs . '>' . "\n";
 }
@@ -545,16 +561,18 @@ function mc_render_field_number( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return int|float
  */
-function mc_sanitize_field_number( mixed $value, array $field = array() ): int|float {
+function mc_sanitize_field_number(mixed $value, array $field = array()): int|float
+{
 
-	if ( '' === $value || null === $value ) {
-		return $field['default'] ?? 0;
+	if ('' === $value || null === $value) {
+		$default = $field['default'] ?? 0;
+		return is_numeric($default) ? ( str_contains((string) $default, '.') ? (float) $default : (int) $default ) : 0;
 	}
 
 	$step = $field['options']['step'] ?? 1;
 
 	// If step implies integers, cast to int.
-	if ( is_int( $step ) || '1' === (string) $step ) {
+	if (is_int($step) || '1' === (string) $step) {
 		return (int) $value;
 	}
 
@@ -568,21 +586,22 @@ function mc_sanitize_field_number( mixed $value, array $field = array() ): int|f
  * @param array $field Field definition.
  * @return true|string
  */
-function mc_validate_field_number( mixed $value, array $field = array() ): true|string {
+function mc_validate_field_number(mixed $value, array $field = array()): true|string
+{
 
-	if ( '' === $value || null === $value ) {
+	if ('' === $value || null === $value) {
 		return true;
 	}
 
-	if ( ! is_numeric( $value ) ) {
+	if (! is_numeric($value)) {
 		return ( $field['label'] ?? 'Value' ) . ' must be a number.';
 	}
 
-	if ( isset( $field['options']['min'] ) && $value < $field['options']['min'] ) {
+	if (isset($field['options']['min']) && $value < $field['options']['min']) {
 		return ( $field['label'] ?? 'Value' ) . ' must be at least ' . $field['options']['min'] . '.';
 	}
 
-	if ( isset( $field['options']['max'] ) && $value > $field['options']['max'] ) {
+	if (isset($field['options']['max']) && $value > $field['options']['max']) {
 		return ( $field['label'] ?? 'Value' ) . ' must be at most ' . $field['options']['max'] . '.';
 	}
 
@@ -601,12 +620,13 @@ function mc_validate_field_number( mixed $value, array $field = array() ): true|
  * @param array  $field Field definition.
  * @param string $value Current value.
  */
-function mc_render_field_url( array $field, mixed $value ): void {
+function mc_render_field_url(array $field, mixed $value): void
+{
 
-	$attrs = mc_build_field_attributes( $field, array(
+	$attrs = mc_build_field_attributes($field, array(
 		'type'  => 'url',
 		'value' => (string) $value,
-	) );
+	));
 
 	echo '<input ' . $attrs . '>' . "\n";
 }
@@ -618,14 +638,15 @@ function mc_render_field_url( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return string
  */
-function mc_sanitize_field_url( mixed $value, array $field = array() ): string {
+function mc_sanitize_field_url(mixed $value, array $field = array()): string
+{
 
-	$value = trim( (string) $value );
-	if ( '' === $value ) {
+	$value = trim((string) $value);
+	if ('' === $value) {
 		return '';
 	}
 
-	return filter_var( $value, FILTER_SANITIZE_URL ) ?: '';
+	return filter_var($value, FILTER_SANITIZE_URL) ?: '';
 }
 
 /**
@@ -635,13 +656,14 @@ function mc_sanitize_field_url( mixed $value, array $field = array() ): string {
  * @param array $field Field definition.
  * @return true|string
  */
-function mc_validate_field_url( mixed $value, array $field = array() ): true|string {
+function mc_validate_field_url(mixed $value, array $field = array()): true|string
+{
 
-	if ( '' === $value || null === $value ) {
+	if ('' === $value || null === $value) {
 		return true;
 	}
 
-	if ( false === filter_var( $value, FILTER_VALIDATE_URL ) ) {
+	if (false === filter_var($value, FILTER_VALIDATE_URL)) {
 		return ( $field['label'] ?? 'URL' ) . ' must be a valid URL.';
 	}
 
@@ -660,17 +682,18 @@ function mc_validate_field_url( mixed $value, array $field = array() ): true|str
  * @param array $field Field definition.
  * @param mixed $value Current value (truthy = checked).
  */
-function mc_render_field_checkbox( array $field, mixed $value ): void {
+function mc_render_field_checkbox(array $field, mixed $value): void
+{
 
-	$checked = ! empty( $value ) && '0' !== $value ? ' checked' : '';
-	$id      = mc_esc_attr( $field['id'] ?? '' );
-	$name    = mc_esc_attr( $field['id'] ?? '' );
+	$checked = ! empty($value) && '0' !== $value ? ' checked' : '';
+	$id      = mc_esc_attr($field['id'] ?? '');
+	$name    = mc_esc_attr($field['id'] ?? '');
 
 	echo '<label>' . "\n";
 	echo '  <input type="hidden" name="' . $name . '" value="0">' . "\n";
 	echo '  <input type="checkbox" id="field-' . $id . '" name="' . $name . '" value="1"' . $checked . '>' . "\n";
-	if ( ! empty( $field['label'] ) ) {
-		echo '  ' . mc_esc_html( $field['label'] ) . "\n";
+	if (! empty($field['label'])) {
+		echo '  ' . mc_esc_html($field['label']) . "\n";
 	}
 	echo '</label>' . "\n";
 }
@@ -682,9 +705,10 @@ function mc_render_field_checkbox( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return bool
  */
-function mc_sanitize_field_checkbox( mixed $value, array $field = array() ): bool {
+function mc_sanitize_field_checkbox(mixed $value, array $field = array()): bool
+{
 
-	return ! empty( $value ) && '0' !== $value;
+	return ! empty($value) && '0' !== $value;
 }
 
 /*
@@ -700,25 +724,26 @@ function mc_sanitize_field_checkbox( mixed $value, array $field = array() ): boo
  *                      key => label array of option values.
  * @param string $value Current value.
  */
-function mc_render_field_select( array $field, mixed $value ): void {
+function mc_render_field_select(array $field, mixed $value): void
+{
 
-	$id      = mc_esc_attr( $field['id'] ?? '' );
-	$name    = mc_esc_attr( $field['id'] ?? '' );
+	$id      = mc_esc_attr($field['id'] ?? '');
+	$name    = mc_esc_attr($field['id'] ?? '');
 	$choices = $field['options']['choices'] ?? array();
 	$style   = '';
-	if ( ! empty( $field['attributes']['style'] ) ) {
-		$style = ' style="' . mc_esc_attr( $field['attributes']['style'] ) . '"';
+	if (! empty($field['attributes']['style'])) {
+		$style = ' style="' . mc_esc_attr($field['attributes']['style']) . '"';
 	}
 
 	echo '<select id="field-' . $id . '" name="' . $name . '" class="form-control"' . $style . '>' . "\n";
 
-	if ( ! empty( $field['options']['placeholder'] ) ) {
-		echo '<option value="">' . mc_esc_html( $field['options']['placeholder'] ) . '</option>' . "\n";
+	if (! empty($field['options']['placeholder'])) {
+		echo '<option value="">' . mc_esc_html($field['options']['placeholder']) . '</option>' . "\n";
 	}
 
-	foreach ( $choices as $opt_value => $opt_label ) {
+	foreach ($choices as $opt_value => $opt_label) {
 		$selected = ( (string) $opt_value === (string) $value ) ? ' selected' : '';
-		echo '<option value="' . mc_esc_attr( (string) $opt_value ) . '"' . $selected . '>' . mc_esc_html( $opt_label ) . '</option>' . "\n";
+		echo '<option value="' . mc_esc_attr((string) $opt_value) . '"' . $selected . '>' . mc_esc_html($opt_label) . '</option>' . "\n";
 	}
 
 	echo '</select>' . "\n";
@@ -731,12 +756,13 @@ function mc_render_field_select( array $field, mixed $value ): void {
  * @param array $field Field definition.
  * @return string
  */
-function mc_sanitize_field_select( mixed $value, array $field = array() ): string {
+function mc_sanitize_field_select(mixed $value, array $field = array()): string
+{
 
 	$value   = (string) $value;
 	$choices = $field['options']['choices'] ?? array();
 
-	if ( ! array_key_exists( $value, $choices ) && '' !== $value ) {
+	if (! array_key_exists($value, $choices) && '' !== $value) {
 		return (string) ( $field['default'] ?? '' );
 	}
 
@@ -750,15 +776,16 @@ function mc_sanitize_field_select( mixed $value, array $field = array() ): strin
  * @param array $field Field definition.
  * @return true|string
  */
-function mc_validate_field_select( mixed $value, array $field = array() ): true|string {
+function mc_validate_field_select(mixed $value, array $field = array()): true|string
+{
 
-	if ( '' === $value ) {
+	if ('' === $value) {
 		return true;
 	}
 
 	$choices = $field['options']['choices'] ?? array();
 
-	if ( ! array_key_exists( (string) $value, $choices ) ) {
+	if (! array_key_exists((string) $value, $choices)) {
 		return ( $field['label'] ?? 'Selection' ) . ' is not a valid choice.';
 	}
 
@@ -781,7 +808,8 @@ function mc_validate_field_select( mixed $value, array $field = array() ): true|
  * @param bool  $skip_value If true, omit the 'value' attribute (used for textarea).
  * @return string The HTML attributes string.
  */
-function mc_build_field_attributes( array $field, array $extra = array(), bool $skip_value = false ): string {
+function mc_build_field_attributes(array $field, array $extra = array(), bool $skip_value = false): string
+{
 
 	$id   = $field['id'] ?? '';
 	$base = array(
@@ -790,18 +818,18 @@ function mc_build_field_attributes( array $field, array $extra = array(), bool $
 		'class' => 'form-control',
 	);
 
-	$attrs = array_merge( $base, $extra, $field['attributes'] ?? array() );
+	$attrs = array_merge($base, $extra, $field['attributes'] ?? array());
 
-	if ( $skip_value ) {
-		unset( $attrs['value'] );
+	if ($skip_value) {
+		unset($attrs['value']);
 	}
 
 	$parts = array();
-	foreach ( $attrs as $key => $val ) {
-		$parts[] = mc_esc_attr( $key ) . '="' . mc_esc_attr( (string) $val ) . '"';
+	foreach ($attrs as $key => $val) {
+		$parts[] = mc_esc_attr($key) . '="' . mc_esc_attr((string) $val) . '"';
 	}
 
-	return implode( ' ', $parts );
+	return implode(' ', $parts);
 }
 
 /*
@@ -818,27 +846,28 @@ function mc_build_field_attributes( array $field, array $extra = array(), bool $
  * @param array $field_types Array of field type slugs used on the page.
  * @return array{ css: string[], js: string[] }
  */
-function mc_get_field_type_assets( array $field_types ): array {
+function mc_get_field_type_assets(array $field_types): array
+{
 
 	$css = array();
 	$js  = array();
 
-	foreach ( array_unique( $field_types ) as $type ) {
-		$type_def = mc_get_field_type( $type );
-		if ( null === $type_def || empty( $type_def['admin_assets'] ) ) {
+	foreach (array_unique($field_types) as $type) {
+		$type_def = mc_get_field_type($type);
+		if (null === $type_def || empty($type_def['admin_assets'])) {
 			continue;
 		}
 
-		if ( ! empty( $type_def['admin_assets']['css'] ) ) {
-			$css = array_merge( $css, (array) $type_def['admin_assets']['css'] );
+		if (! empty($type_def['admin_assets']['css'])) {
+			$css = array_merge($css, (array) $type_def['admin_assets']['css']);
 		}
-		if ( ! empty( $type_def['admin_assets']['js'] ) ) {
-			$js = array_merge( $js, (array) $type_def['admin_assets']['js'] );
+		if (! empty($type_def['admin_assets']['js'])) {
+			$js = array_merge($js, (array) $type_def['admin_assets']['js']);
 		}
 	}
 
 	return array(
-		'css' => array_unique( $css ),
-		'js'  => array_unique( $js ),
+		'css' => array_unique($css),
+		'js'  => array_unique($js),
 	);
 }

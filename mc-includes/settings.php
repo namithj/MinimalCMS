@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Settings API
  *
@@ -10,7 +11,7 @@
  * @since   1.1.0
  */
 
-defined( 'MC_ABSPATH' ) || exit;
+defined('MC_ABSPATH') || exit;
 
 /*
  * =========================================================================
@@ -36,10 +37,11 @@ $mc_settings_cache = array();
  * @param string $namespace Dot-separated namespace, e.g. 'core.general'.
  * @return string Absolute path.
  */
-function mc_settings_path( string $namespace ): string {
+function mc_settings_path(string $namespace): string
+{
 
 	// Sanitise the namespace into a safe filename.
-	$safe = preg_replace( '/[^a-z0-9._-]/', '-', strtolower( $namespace ) );
+	$safe = preg_replace('/[^a-z0-9._-]/', '-', strtolower($namespace));
 
 	return MC_DATA_DIR . 'settings/' . $safe . '.json';
 }
@@ -51,11 +53,12 @@ function mc_settings_path( string $namespace ): string {
  *
  * @return void
  */
-function mc_ensure_settings_dir(): void {
+function mc_ensure_settings_dir(): void
+{
 
 	$dir = MC_DATA_DIR . 'settings/';
-	if ( ! is_dir( $dir ) ) {
-		mkdir( $dir, 0755, true );
+	if (! is_dir($dir)) {
+		mkdir($dir, 0755, true);
 	}
 }
 
@@ -67,25 +70,26 @@ function mc_ensure_settings_dir(): void {
  * @param string $namespace Settings namespace.
  * @return array Key-value pairs.
  */
-function mc_get_settings( string $namespace ): array {
+function mc_get_settings(string $namespace): array
+{
 
 	global $mc_settings_cache;
 
-	if ( isset( $mc_settings_cache[ $namespace ] ) ) {
+	if (isset($mc_settings_cache[ $namespace ])) {
 		return $mc_settings_cache[ $namespace ];
 	}
 
-	$path = mc_settings_path( $namespace );
+	$path = mc_settings_path($namespace);
 
-	if ( ! is_file( $path ) ) {
+	if (! is_file($path)) {
 		$mc_settings_cache[ $namespace ] = array();
 		return array();
 	}
 
-	$raw  = file_get_contents( $path );
-	$data = json_decode( $raw, true );
+	$raw  = file_get_contents($path);
+	$data = json_decode($raw, true);
 
-	if ( ! is_array( $data ) ) {
+	if (! is_array($data)) {
 		$data = array();
 	}
 
@@ -97,7 +101,7 @@ function mc_get_settings( string $namespace ): array {
 	 * @param array  $data      Settings data.
 	 * @param string $namespace Namespace.
 	 */
-	$data = mc_apply_filters( 'mc_get_settings', $data, $namespace );
+	$data = mc_apply_filters('mc_get_settings', $data, $namespace);
 
 	$mc_settings_cache[ $namespace ] = $data;
 
@@ -114,9 +118,10 @@ function mc_get_settings( string $namespace ): array {
  * @param mixed  $default   Default value if not set.
  * @return mixed
  */
-function mc_get_setting( string $namespace, string $key, mixed $default = null ): mixed {
+function mc_get_setting(string $namespace, string $key, mixed $default = null): mixed
+{
 
-	$data = mc_get_settings( $namespace );
+	$data = mc_get_settings($namespace);
 	return $data[ $key ] ?? $default;
 }
 
@@ -129,13 +134,14 @@ function mc_get_setting( string $namespace, string $key, mixed $default = null )
  * @param array  $values    Key-value pairs to merge.
  * @return true|MC_Error True on success.
  */
-function mc_update_settings( string $namespace, array $values ): true|MC_Error {
+function mc_update_settings(string $namespace, array $values): true|MC_Error
+{
 
 	global $mc_settings_cache;
 
 	mc_ensure_settings_dir();
 
-	$existing = mc_get_settings( $namespace );
+	$existing = mc_get_settings($namespace);
 
 	/**
 	 * Filter settings values before saving.
@@ -146,14 +152,14 @@ function mc_update_settings( string $namespace, array $values ): true|MC_Error {
 	 * @param array  $existing  Current stored values.
 	 * @param string $namespace Namespace.
 	 */
-	$values = mc_apply_filters( 'mc_pre_update_settings', $values, $existing, $namespace );
+	$values = mc_apply_filters('mc_pre_update_settings', $values, $existing, $namespace);
 
-	$merged = array_merge( $existing, $values );
-	$path   = mc_settings_path( $namespace );
-	$json   = json_encode( $merged, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+	$merged = array_merge($existing, $values);
+	$path   = mc_settings_path($namespace);
+	$json   = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-	if ( false === file_put_contents( $path, $json . "\n", LOCK_EX ) ) {
-		return new MC_Error( 'settings_write_failed', "Failed to write settings for namespace '{$namespace}'." );
+	if (false === file_put_contents($path, $json . "\n", LOCK_EX)) {
+		return new MC_Error('settings_write_failed', "Failed to write settings for namespace '{$namespace}'.");
 	}
 
 	$mc_settings_cache[ $namespace ] = $merged;
@@ -166,7 +172,7 @@ function mc_update_settings( string $namespace, array $values ): true|MC_Error {
 	 * @param string $namespace Namespace.
 	 * @param array  $merged    Final merged settings.
 	 */
-	mc_do_action( 'mc_settings_updated', $namespace, $merged );
+	mc_do_action('mc_settings_updated', $namespace, $merged);
 
 	return true;
 }
@@ -180,20 +186,21 @@ function mc_update_settings( string $namespace, array $values ): true|MC_Error {
  * @param string $key       Key to remove.
  * @return true|MC_Error True on success.
  */
-function mc_delete_setting( string $namespace, string $key ): true|MC_Error {
+function mc_delete_setting(string $namespace, string $key): true|MC_Error
+{
 
 	global $mc_settings_cache;
 
-	$data = mc_get_settings( $namespace );
-	unset( $data[ $key ] );
+	$data = mc_get_settings($namespace);
+	unset($data[ $key ]);
 
 	mc_ensure_settings_dir();
 
-	$path = mc_settings_path( $namespace );
-	$json = json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+	$path = mc_settings_path($namespace);
+	$json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-	if ( false === file_put_contents( $path, $json . "\n", LOCK_EX ) ) {
-		return new MC_Error( 'settings_write_failed', "Failed to write settings for namespace '{$namespace}'." );
+	if (false === file_put_contents($path, $json . "\n", LOCK_EX)) {
+		return new MC_Error('settings_write_failed', "Failed to write settings for namespace '{$namespace}'.");
 	}
 
 	$mc_settings_cache[ $namespace ] = $data;
@@ -209,17 +216,18 @@ function mc_delete_setting( string $namespace, string $key ): true|MC_Error {
  * @param string $namespace Settings namespace.
  * @return true|MC_Error
  */
-function mc_delete_settings( string $namespace ): true|MC_Error {
+function mc_delete_settings(string $namespace): true|MC_Error
+{
 
 	global $mc_settings_cache;
 
-	$path = mc_settings_path( $namespace );
+	$path = mc_settings_path($namespace);
 
-	if ( is_file( $path ) && ! unlink( $path ) ) {
-		return new MC_Error( 'settings_delete_failed', "Failed to delete settings for namespace '{$namespace}'." );
+	if (is_file($path) && ! unlink($path)) {
+		return new MC_Error('settings_delete_failed', "Failed to delete settings for namespace '{$namespace}'.");
 	}
 
-	unset( $mc_settings_cache[ $namespace ] );
+	unset($mc_settings_cache[ $namespace ]);
 
 	return true;
 }
@@ -273,13 +281,14 @@ $mc_settings_fields = array();
  * }
  * @return void
  */
-function mc_register_settings_page( string $page_slug, array $args = array() ): void {
+function mc_register_settings_page(string $page_slug, array $args = array()): void
+{
 
 	global $mc_settings_pages;
 
 	$mc_settings_pages[ $page_slug ] = array_merge(
 		array(
-			'title'         => ucfirst( str_replace( '-', ' ', $page_slug ) ),
+			'title'         => ucfirst(str_replace('-', ' ', $page_slug)),
 			'capability'    => 'manage_settings',
 			'namespace'     => 'core.' . $page_slug,
 			'nonce_action'  => 'save_' . $page_slug,
@@ -291,7 +300,7 @@ function mc_register_settings_page( string $page_slug, array $args = array() ): 
 		$args
 	);
 
-	if ( '' === $mc_settings_pages[ $page_slug ]['menu_title'] ) {
+	if ('' === $mc_settings_pages[ $page_slug ]['menu_title']) {
 		$mc_settings_pages[ $page_slug ]['menu_title'] = $mc_settings_pages[ $page_slug ]['title'];
 	}
 }
@@ -304,7 +313,8 @@ function mc_register_settings_page( string $page_slug, array $args = array() ): 
  * @param string $page_slug Page slug.
  * @return array|null
  */
-function mc_get_settings_page( string $page_slug ): ?array {
+function mc_get_settings_page(string $page_slug): ?array
+{
 
 	global $mc_settings_pages;
 	return $mc_settings_pages[ $page_slug ] ?? null;
@@ -317,7 +327,8 @@ function mc_get_settings_page( string $page_slug ): ?array {
  *
  * @return array
  */
-function mc_get_settings_pages(): array {
+function mc_get_settings_pages(): array
+{
 
 	global $mc_settings_pages;
 	return $mc_settings_pages;
@@ -337,7 +348,8 @@ function mc_get_settings_pages(): array {
  * }
  * @return void
  */
-function mc_register_settings_section( string $page_slug, string $section_id, array $args = array() ): void {
+function mc_register_settings_section(string $page_slug, string $section_id, array $args = array()): void
+{
 
 	global $mc_settings_sections, $mc_settings_pages;
 
@@ -356,7 +368,7 @@ function mc_register_settings_section( string $page_slug, string $section_id, ar
 	);
 
 	// Track section order on the page.
-	if ( isset( $mc_settings_pages[ $page_slug ] ) ) {
+	if (isset($mc_settings_pages[ $page_slug ])) {
 		$mc_settings_pages[ $page_slug ]['sections'][ $section_id ] = $mc_settings_sections[ $key ]['priority'];
 	}
 }
@@ -373,7 +385,8 @@ function mc_register_settings_section( string $page_slug, string $section_id, ar
  *                            'type', 'label', 'description', 'default', 'options', etc.
  * @return void
  */
-function mc_register_setting_field( string $page_slug, string $section_id, string $field_id, array $args = array() ): void {
+function mc_register_setting_field(string $page_slug, string $section_id, string $field_id, array $args = array()): void
+{
 
 	global $mc_settings_fields, $mc_settings_sections;
 
@@ -397,7 +410,7 @@ function mc_register_setting_field( string $page_slug, string $section_id, strin
 	$mc_settings_fields[ $full_key ] = $args;
 
 	// Track field on its section.
-	if ( isset( $mc_settings_sections[ $section_key ] ) ) {
+	if (isset($mc_settings_sections[ $section_key ])) {
 		$mc_settings_sections[ $section_key ]['fields'][] = $field_id;
 	}
 }
@@ -410,18 +423,19 @@ function mc_register_setting_field( string $page_slug, string $section_id, strin
  * @param string $page_slug Page slug.
  * @return array Array of section definitions.
  */
-function mc_get_settings_page_sections( string $page_slug ): array {
+function mc_get_settings_page_sections(string $page_slug): array
+{
 
 	global $mc_settings_sections;
 
 	$sections = array();
-	foreach ( $mc_settings_sections as $key => $section ) {
-		if ( $section['page'] === $page_slug ) {
+	foreach ($mc_settings_sections as $key => $section) {
+		if ($section['page'] === $page_slug) {
 			$sections[ $key ] = $section;
 		}
 	}
 
-	uasort( $sections, fn( $a, $b ) => $a['priority'] <=> $b['priority'] );
+	uasort($sections, fn($a, $b) => $a['priority'] <=> $b['priority']);
 
 	return $sections;
 }
@@ -435,16 +449,17 @@ function mc_get_settings_page_sections( string $page_slug ): array {
  * @param string $section_id Section ID.
  * @return array Associative array of field_id => field definition.
  */
-function mc_get_settings_section_fields( string $page_slug, string $section_id ): array {
+function mc_get_settings_section_fields(string $page_slug, string $section_id): array
+{
 
 	global $mc_settings_fields;
 
 	$prefix = $page_slug . ':' . $section_id . ':';
 	$fields = array();
 
-	foreach ( $mc_settings_fields as $key => $field ) {
-		if ( str_starts_with( $key, $prefix ) ) {
-			$field_id           = substr( $key, strlen( $prefix ) );
+	foreach ($mc_settings_fields as $key => $field) {
+		if (str_starts_with($key, $prefix)) {
+			$field_id           = substr($key, strlen($prefix));
 			$fields[ $field_id ] = $field;
 		}
 	}
@@ -460,14 +475,15 @@ function mc_get_settings_section_fields( string $page_slug, string $section_id )
  * @param string $page_slug Page slug.
  * @return array field_id => field definition.
  */
-function mc_get_settings_page_fields( string $page_slug ): array {
+function mc_get_settings_page_fields(string $page_slug): array
+{
 
-	$sections = mc_get_settings_page_sections( $page_slug );
+	$sections = mc_get_settings_page_sections($page_slug);
 	$all      = array();
 
-	foreach ( $sections as $section ) {
-		$fields = mc_get_settings_section_fields( $page_slug, $section['id'] );
-		$all    = array_merge( $all, $fields );
+	foreach ($sections as $section) {
+		$fields = mc_get_settings_section_fields($page_slug, $section['id']);
+		$all    = array_merge($all, $fields);
 	}
 
 	return $all;
@@ -494,45 +510,46 @@ function mc_get_settings_page_fields( string $page_slug ): array {
  * @param string $notice_type 'success', 'error', etc.
  * @return void
  */
-function mc_render_settings_page( string $page_slug, array $values = array(), array $errors = array(), string $notice = '', string $notice_type = 'success' ): void {
+function mc_render_settings_page(string $page_slug, array $values = array(), array $errors = array(), string $notice = '', string $notice_type = 'success'): void
+{
 
-	$page = mc_get_settings_page( $page_slug );
-	if ( null === $page ) {
+	$page = mc_get_settings_page($page_slug);
+	if (null === $page) {
 		return;
 	}
 
-	if ( '' !== $notice ) {
-		echo '<div class="notice notice-' . mc_esc_attr( $notice_type ) . '" data-dismiss>' . "\n";
-		echo '<p>' . mc_esc_html( $notice ) . '</p>' . "\n";
+	if ('' !== $notice) {
+		echo '<div class="notice notice-' . mc_esc_attr($notice_type) . '" data-dismiss>' . "\n";
+		echo '<p>' . mc_esc_html($notice) . '</p>' . "\n";
 		echo '</div>' . "\n";
 	}
 
 	echo '<div style="max-width:720px;">' . "\n";
 	echo '<form method="post" action="">' . "\n";
 
-	mc_nonce_field( $page['nonce_action'] );
+	mc_nonce_field($page['nonce_action']);
 
-	$sections = mc_get_settings_page_sections( $page_slug );
+	$sections = mc_get_settings_page_sections($page_slug);
 
-	foreach ( $sections as $section ) {
+	foreach ($sections as $section) {
 		echo '<div class="card">' . "\n";
 
-		if ( '' !== $section['title'] ) {
-			echo '<div class="card-header">' . mc_esc_html( $section['title'] ) . '</div>' . "\n";
+		if ('' !== $section['title']) {
+			echo '<div class="card-header">' . mc_esc_html($section['title']) . '</div>' . "\n";
 		}
 
-		if ( '' !== $section['description'] ) {
-			echo '<p class="section-description">' . mc_esc_html( $section['description'] ) . '</p>' . "\n";
+		if ('' !== $section['description']) {
+			echo '<p class="section-description">' . mc_esc_html($section['description']) . '</p>' . "\n";
 		}
 
-		$fields = mc_get_settings_section_fields( $page_slug, $section['id'] );
+		$fields = mc_get_settings_section_fields($page_slug, $section['id']);
 
-		foreach ( $fields as $field_id => $field ) {
+		foreach ($fields as $field_id => $field) {
 			$field['id'] = $field_id;
 			$value       = $values[ $field_id ] ?? ( $field['default'] ?? '' );
 			$error       = $errors[ $field_id ] ?? null;
 
-			mc_render_field( $field, $value, $error );
+			mc_render_field($field, $value, $error);
 		}
 
 		echo '</div>' . "\n";
@@ -563,9 +580,10 @@ function mc_render_settings_page( string $page_slug, array $values = array(), ar
  *     notice_type: string,
  * }
  */
-function mc_handle_settings_post( string $page_slug ): array {
+function mc_handle_settings_post(string $page_slug): array
+{
 
-	$page   = mc_get_settings_page( $page_slug );
+	$page   = mc_get_settings_page($page_slug);
 	$result = array(
 		'saved'       => false,
 		'values'      => array(),
@@ -574,44 +592,44 @@ function mc_handle_settings_post( string $page_slug ): array {
 		'notice_type' => 'success',
 	);
 
-	if ( null === $page ) {
+	if (null === $page) {
 		$result['notice']      = 'Settings page not found.';
 		$result['notice_type'] = 'error';
 		return $result;
 	}
 
 	// Nonce check.
-	if ( ! mc_verify_nonce( mc_input( '_mc_nonce', 'post' ), $page['nonce_action'] ) ) {
+	if (! mc_verify_nonce(mc_input('_mc_nonce', 'post'), $page['nonce_action'])) {
 		$result['notice']      = 'Invalid security token.';
 		$result['notice_type'] = 'error';
 		return $result;
 	}
 
 	// Gather registered fields.
-	$fields = mc_get_settings_page_fields( $page_slug );
+	$fields = mc_get_settings_page_fields($page_slug);
 
 	// Build raw input from POST.
 	$raw = array();
-	foreach ( $fields as $field_id => $field ) {
-		$raw[ $field_id ] = mc_input( $field_id, 'post' );
+	foreach ($fields as $field_id => $field) {
+		$raw[ $field_id ] = mc_input($field_id, 'post');
 	}
 
 	// Sanitise and validate.
-	$processed = mc_process_fields( $fields, $raw );
+	$processed = mc_process_fields($fields, $raw);
 
 	$result['values'] = $processed['values'];
 	$result['errors'] = $processed['errors'];
 
-	if ( ! empty( $processed['errors'] ) ) {
+	if (! empty($processed['errors'])) {
 		$result['notice']      = 'Please correct the errors below.';
 		$result['notice_type'] = 'error';
 		return $result;
 	}
 
 	// Persist.
-	$saved = mc_update_settings( $page['namespace'], $processed['values'] );
+	$saved = mc_update_settings($page['namespace'], $processed['values']);
 
-	if ( mc_is_error( $saved ) ) {
+	if (mc_is_error($saved)) {
 		$result['notice']      = $saved->get_error_message();
 		$result['notice_type'] = 'error';
 		return $result;
@@ -628,7 +646,7 @@ function mc_handle_settings_post( string $page_slug ): array {
 	 * @param string $page_slug Page slug.
 	 * @param array  $values    Saved values.
 	 */
-	mc_do_action( 'mc_settings_page_saved', $page_slug, $processed['values'] );
+	mc_do_action('mc_settings_page_saved', $page_slug, $processed['values']);
 
 	return $result;
 }
@@ -641,18 +659,19 @@ function mc_handle_settings_post( string $page_slug ): array {
  * @param string $page_slug Page slug.
  * @return array Values keyed by field ID, with defaults applied.
  */
-function mc_get_settings_page_values( string $page_slug ): array {
+function mc_get_settings_page_values(string $page_slug): array
+{
 
-	$page = mc_get_settings_page( $page_slug );
-	if ( null === $page ) {
+	$page = mc_get_settings_page($page_slug);
+	if (null === $page) {
 		return array();
 	}
 
-	$stored = mc_get_settings( $page['namespace'] );
-	$fields = mc_get_settings_page_fields( $page_slug );
+	$stored = mc_get_settings($page['namespace']);
+	$fields = mc_get_settings_page_fields($page_slug);
 	$values = array();
 
-	foreach ( $fields as $field_id => $field ) {
+	foreach ($fields as $field_id => $field) {
 		$values[ $field_id ] = $stored[ $field_id ] ?? ( $field['default'] ?? '' );
 	}
 
@@ -695,13 +714,14 @@ $mc_registered_admin_pages = array();
  * }
  * @return void
  */
-function mc_register_admin_page( string $slug, array $args = array() ): void {
+function mc_register_admin_page(string $slug, array $args = array()): void
+{
 
 	global $mc_registered_admin_pages, $mc_admin_menu;
 
 	$args = array_merge(
 		array(
-			'title'         => ucfirst( str_replace( '-', ' ', $slug ) ),
+			'title'         => ucfirst(str_replace('-', ' ', $slug)),
 			'capability'    => 'manage_settings',
 			'menu_title'    => '',
 			'menu_icon'     => '&#x1F4CB;',
@@ -712,17 +732,17 @@ function mc_register_admin_page( string $slug, array $args = array() ): void {
 		$args
 	);
 
-	if ( '' === $args['menu_title'] ) {
+	if ('' === $args['menu_title']) {
 		$args['menu_title'] = $args['title'];
 	}
 
 	$mc_registered_admin_pages[ $slug ] = $args;
 
 	// Add to admin menu if requested.
-	if ( $args['add_menu'] && isset( $mc_admin_menu ) ) {
+	if ($args['add_menu'] && isset($mc_admin_menu)) {
 		$mc_admin_menu[] = array(
 			'title'      => $args['menu_title'],
-			'url'        => mc_admin_url( 'settings.php?page=' . urlencode( $slug ) ),
+			'url'        => mc_admin_url('settings.php?page=' . urlencode($slug)),
 			'capability' => $args['capability'],
 			'icon'       => $args['menu_icon'],
 		);
@@ -737,7 +757,8 @@ function mc_register_admin_page( string $slug, array $args = array() ): void {
  * @param string $slug Page slug.
  * @return array|null
  */
-function mc_get_registered_admin_page( string $slug ): ?array {
+function mc_get_registered_admin_page(string $slug): ?array
+{
 
 	global $mc_registered_admin_pages;
 	return $mc_registered_admin_pages[ $slug ] ?? null;
@@ -760,7 +781,8 @@ function mc_get_registered_admin_page( string $slug ): ?array {
  *
  * @return void
  */
-function mc_register_core_settings_pages(): void {
+function mc_register_core_settings_pages(): void
+{
 
 	/*
 	 * ── Core "Site Settings" page ──────────────────────────────────────────
@@ -780,49 +802,49 @@ function mc_register_core_settings_pages(): void {
 	/*
 	 * Section: General
 	 */
-	mc_register_settings_section( 'general', 'general', array(
+	mc_register_settings_section('general', 'general', array(
 		'title'    => 'General',
 		'priority' => 10,
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'general', 'site_name', array(
+	mc_register_setting_field('general', 'general', 'site_name', array(
 		'type'    => 'text',
 		'label'   => 'Site Name',
 		'default' => '',
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'general', 'site_description', array(
+	mc_register_setting_field('general', 'general', 'site_description', array(
 		'type'    => 'text',
 		'label'   => 'Site Description',
 		'default' => '',
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'general', 'site_url', array(
+	mc_register_setting_field('general', 'general', 'site_url', array(
 		'type'        => 'url',
 		'label'       => 'Site URL',
 		'description' => 'Leave blank for auto-detection.',
 		'default'     => '',
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'general', 'timezone', array(
+	mc_register_setting_field('general', 'general', 'timezone', array(
 		'type'        => 'text',
 		'label'       => 'Timezone',
 		'description' => 'PHP timezone string, e.g. America/New_York',
 		'default'     => 'UTC',
 		'attributes'  => array( 'placeholder' => 'UTC' ),
-	) );
+	));
 
 	/*
 	 * Section: Reading
 	 */
-	mc_register_settings_section( 'general', 'reading', array(
+	mc_register_settings_section('general', 'reading', array(
 		'title'    => 'Reading',
 		'priority' => 20,
-	) );
+	));
 
 	// The "Home Page" select gets its choices dynamically at render time
 	// via a filter, so we register it as a normal select with empty choices.
-	mc_register_setting_field( 'general', 'reading', 'front_page', array(
+	mc_register_setting_field('general', 'reading', 'front_page', array(
 		'type'        => 'select',
 		'label'       => 'Home Page',
 		'description' => 'The page displayed when visitors access your site root.',
@@ -831,37 +853,37 @@ function mc_register_core_settings_pages(): void {
 			'choices' => array(), // Populated dynamically — see mc_populate_front_page_choices().
 		),
 		'attributes'  => array( 'style' => 'max-width:320px' ),
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'reading', 'posts_per_page', array(
+	mc_register_setting_field('general', 'reading', 'posts_per_page', array(
 		'type'    => 'number',
 		'label'   => 'Items Per Page',
 		'default' => 10,
 		'options' => array( 'min' => 1 ),
 		'attributes' => array( 'style' => 'width:120px' ),
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'reading', 'permalink_structure', array(
+	mc_register_setting_field('general', 'reading', 'permalink_structure', array(
 		'type'        => 'text',
 		'label'       => 'Permalink Structure',
 		'description' => 'Tokens: {type}, {slug}, {year}, {month}',
 		'default'     => '/{type}/{slug}/',
-	) );
+	));
 
 	/*
 	 * Section: Advanced
 	 */
-	mc_register_settings_section( 'general', 'advanced', array(
+	mc_register_settings_section('general', 'advanced', array(
 		'title'    => 'Advanced',
 		'priority' => 30,
-	) );
+	));
 
-	mc_register_setting_field( 'general', 'advanced', 'debug', array(
+	mc_register_setting_field('general', 'advanced', 'debug', array(
 		'type'        => 'checkbox',
 		'label'       => 'Enable Debug Mode',
 		'description' => 'Shows PHP errors and extra logging.',
 		'default'     => false,
-	) );
+	));
 
 	/**
 	 * Fires after core settings pages are registered.
@@ -870,7 +892,7 @@ function mc_register_core_settings_pages(): void {
 	 *
 	 * @since 1.1.0
 	 */
-	mc_do_action( 'mc_register_settings' );
+	mc_do_action('mc_register_settings');
 }
 
 /**
@@ -883,26 +905,27 @@ function mc_register_core_settings_pages(): void {
  *
  * @return void
  */
-function mc_populate_front_page_choices(): void {
+function mc_populate_front_page_choices(): void
+{
 
 	global $mc_settings_fields;
 
 	$key = 'general:reading:front_page';
 
-	if ( ! isset( $mc_settings_fields[ $key ] ) ) {
+	if (! isset($mc_settings_fields[ $key ])) {
 		return;
 	}
 
-	$all_pages = mc_query_content( array(
+	$all_pages = mc_query_content(array(
 		'type'     => 'page',
 		'status'   => '',
 		'limit'    => 200,
 		'order_by' => 'title',
 		'order'    => 'ASC',
-	) );
+	));
 
 	$choices = array();
-	foreach ( $all_pages as $fp_item ) {
+	foreach ($all_pages as $fp_item) {
 		$choices[ $fp_item['slug'] ] = $fp_item['title'] . ' (/' . $fp_item['slug'] . ')';
 	}
 
@@ -922,9 +945,10 @@ function mc_populate_front_page_choices(): void {
  * @param array  $values    Saved values.
  * @return void
  */
-function mc_sync_core_settings_to_config( string $page_slug, array $values ): void {
+function mc_sync_core_settings_to_config(string $page_slug, array $values): void
+{
 
-	if ( 'general' !== $page_slug ) {
+	if ('general' !== $page_slug) {
 		return;
 	}
 
@@ -935,17 +959,17 @@ function mc_sync_core_settings_to_config( string $page_slug, array $values ): vo
 		'front_page', 'posts_per_page', 'permalink_structure', 'debug',
 	);
 
-	foreach ( $config_keys as $key ) {
-		if ( array_key_exists( $key, $values ) ) {
+	foreach ($config_keys as $key) {
+		if (array_key_exists($key, $values)) {
 			$mc_config[ $key ] = $values[ $key ];
 		}
 	}
 
-	mc_save_config( $mc_config );
+	mc_save_config($mc_config);
 }
 
 // Wire the config sync hook.
-mc_add_action( 'mc_settings_page_saved', 'mc_sync_core_settings_to_config', 10, 2 );
+mc_add_action('mc_settings_page_saved', 'mc_sync_core_settings_to_config', 10, 2);
 
 /**
  * Seed core settings from config.json if the settings file doesn't exist yet.
@@ -957,11 +981,12 @@ mc_add_action( 'mc_settings_page_saved', 'mc_sync_core_settings_to_config', 10, 
  *
  * @return void
  */
-function mc_maybe_seed_core_settings(): void {
+function mc_maybe_seed_core_settings(): void
+{
 
-	$path = mc_settings_path( 'core.general' );
+	$path = mc_settings_path('core.general');
 
-	if ( is_file( $path ) ) {
+	if (is_file($path)) {
 		return;
 	}
 
@@ -973,13 +998,13 @@ function mc_maybe_seed_core_settings(): void {
 	);
 
 	$seed = array();
-	foreach ( $seed_keys as $key ) {
-		if ( isset( $mc_config[ $key ] ) ) {
+	foreach ($seed_keys as $key) {
+		if (isset($mc_config[ $key ])) {
 			$seed[ $key ] = $mc_config[ $key ];
 		}
 	}
 
-	if ( ! empty( $seed ) ) {
-		mc_update_settings( 'core.general', $seed );
+	if (! empty($seed)) {
+		mc_update_settings('core.general', $seed);
 	}
 }

@@ -6,7 +6,9 @@
     "content_dir": "mc-content",
     "data_dir": "mc-data",
     "active_theme": "default",
-    "active_plugins": [],
+    "active_plugins": [
+        "forms/forms.php"
+    ],
     "permalink_structure": "/{type}/{slug}",
     "front_page": "home",
     "posts_per_page": 10,
