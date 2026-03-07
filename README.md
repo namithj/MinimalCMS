@@ -1,6 +1,6 @@
 # MinimalCMS
 
-![Version](https://img.shields.io/badge/version-0.0.2-blue)
+![Version](https://img.shields.io/badge/version-0.0.3-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
 ![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
 ![Status](https://img.shields.io/badge/status-early%20development-orange)

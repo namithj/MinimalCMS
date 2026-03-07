@@ -16,7 +16,7 @@ defined('MC_ABSPATH') || exit;
  *
  * @var string
  */
-define('MC_VERSION', '0.0.2');
+define('MC_VERSION', '0.0.3');
 
 /**
  * The minimum required PHP version.

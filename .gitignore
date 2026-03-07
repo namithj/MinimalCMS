@@ -22,6 +22,7 @@ Thumbs.db
 # Data (sensitive)
 /mc-data/users.php
 /mc-data/sessions/
+/mc-data/settings/
 
 # Cache
 /mc-content/cache/
