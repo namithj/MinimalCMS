@@ -26,11 +26,27 @@ require_once MC_ABSPATH . 'mc-includes/load.php';
 require_once MC_ABSPATH . 'mc-includes/version.php';
 
 // Read configuration. Fall back to the sample on a fresh install.
-$config_path = MC_ABSPATH . 'config.json';
-if ( ! is_file( $config_path ) ) {
+$config_path   = MC_ABSPATH . 'config.json';
+$config_exists = is_file( $config_path );
+if ( ! $config_exists ) {
 	$config_path = MC_ABSPATH . 'config.sample.json';
 }
 $mc_config = mc_load_config( $config_path );
+
+// On a fresh install (no config.json yet), redirect all front-end requests to /home.
+if ( ! $config_exists ) {
+	$base         = mc_detect_base_path();
+	$home_url     = rtrim( $base, '/' ) . '/home';
+	$request_uri  = $_SERVER['REQUEST_URI'] ?? '/';
+	$request_path = strtok( $request_uri, '?' );
+
+	if ( ! str_starts_with( $request_path, $home_url )
+		&& false === strpos( $request_path, 'mc-admin' )
+	) {
+		header( 'Location: ' . $home_url, true, 302 );
+		exit;
+	}
+}
 
 // Auto-detect site URL if not set.
 if ( empty( $mc_config['site_url'] ) ) {
