@@ -24,6 +24,10 @@ Thumbs.db
 /mc-data/sessions/
 /mc-data/settings/
 
+# Pages (keep only home)
+/mc-content/pages/*
+!/mc-content/pages/home/
+
 # Cache
 /mc-content/cache/
 
@@ -42,3 +46,4 @@ config.json
 
 docs/architecture
 docs/architecture/*
+
