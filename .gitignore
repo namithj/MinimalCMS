@@ -36,3 +36,9 @@ composer.phar
 wp-config.php
 config.json
 .phpunit.cache/*
+
+.github/instructions
+.github/instructions/*
+
+docs/architecture
+docs/architecture/*

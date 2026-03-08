@@ -67,7 +67,7 @@ $values      = mc_get_settings_page_values($page_slug);
 $errors      = array();
 
 if (mc_is_post_request()) {
-	$result = mc_handle_settings_post($page_slug);
+	$result = mc_handle_settings_post($page_slug, $_POST);
 
 	$values      = $result['values'] ?: $values;
 	$errors      = $result['errors'];

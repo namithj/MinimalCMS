@@ -11,7 +11,7 @@
 
 defined('MC_ABSPATH') || exit;
 
-require_once MC_ABSPATH . 'mc-admin/includes/admin-functions.php';
+// admin-functions.php is loaded by admin.php during bootstrap.
 
 $admin_page_title = $admin_page_title ?? 'Dashboard';
 
@@ -23,6 +23,7 @@ $admin_page_title = $admin_page_title ?? 'Dashboard';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?php echo mc_esc_html($admin_page_title); ?> &mdash; <?php echo mc_esc_html(MC_SITE_NAME); ?></title>
 <link rel="stylesheet" href="<?php echo mc_esc_url(mc_admin_url('assets/css/admin.css')); ?>">
+<link rel="icon" href="<?php echo mc_esc_url(mc_admin_url('assets/favicon.svg')); ?>" type="image/svg+xml">
 <?php mc_do_action('mc_admin_head'); ?>
 <?php if (defined('MC_LOAD_EDITOR') && MC_LOAD_EDITOR) : ?>
 <link rel="stylesheet" href="<?php echo mc_esc_url(mc_admin_url('assets/vendor/easymde/easymde.min.css')); ?>">

@@ -15,35 +15,17 @@ defined( 'MC_ABSPATH' ) || exit;
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title><?php mc_document_title(); ?></title>
 	<meta name="description" content="<?php mc_the_excerpt(); ?>" />
+	<link rel="icon" href="<?php echo mc_esc_url( mc_favicon_url() ); ?>" type="image/svg+xml" />
 	<?php mc_head(); ?>
 </head>
 <body <?php mc_body_class(); ?>>
-
-<?php if ( mc_is_logged_in() ) : ?>
-<div class="mc-admin-bar">
-	<span>MinimalCMS</span>
-	<nav>
-		<a href="<?php echo mc_esc_url( mc_admin_url() ); ?>">Dashboard</a>
-		<a href="<?php echo mc_esc_url( mc_admin_url( 'pages.php' ) ); ?>">Pages</a>
-		<?php if ( mc_is_single() ) : ?>
-			<?php
-			global $mc_query;
-			$edit_url = mc_admin_url( 'edit-page.php?type=' . rawurlencode( $mc_query['type'] ?? 'page' ) . '&slug=' . rawurlencode( $mc_query['slug'] ?? '' ) );
-			?>
-			<a href="<?php echo mc_esc_url( $edit_url ); ?>">Edit Page</a>
-		<?php endif; ?>
-		<a href="<?php echo mc_esc_url( mc_admin_url( 'login.php?action=logout' ) ); ?>">Log Out</a>
-	</nav>
-</div>
-<?php endif; ?>
+<?php mc_body_open(); ?>
 
 <div class="site">
 	<header class="site-header">
 		<div class="container">
 			<div class="site-branding">
-				<a href="<?php echo mc_esc_url( mc_site_url() ); ?>">
-					<?php echo mc_esc_html( MC_SITE_NAME ); ?>
-				</a>
+				<a href="<?php echo mc_esc_url( mc_site_url() ); ?>" class="brand">Minimal<span>CMS</span></a>
 				<?php if ( MC_SITE_DESCRIPTION ) : ?>
 					<span class="site-description"> — <?php echo mc_esc_html( MC_SITE_DESCRIPTION ); ?></span>
 				<?php endif; ?>

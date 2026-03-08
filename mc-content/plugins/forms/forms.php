@@ -65,6 +65,7 @@ function forms_register_content_type(): void
 			'has_archive'  => false,
 			'rewrite'      => array( 'slug' => 'form' ),
 			'supports'     => array( 'title' ),
+			'menu_icon'    => '&#x1F4CB;',
 		)
 	);
 }
@@ -87,32 +88,14 @@ function forms_admin_menu(): void
 
 	global $mc_admin_menu;
 
-	// Main "Forms" list link.
-	$entry = array(
-		'title'      => 'Forms',
-		'url'        => mc_admin_url('pages.php?type=form'),
-		'capability' => 'edit_content',
-		'icon'       => '&#x1F4CB;',
-	);
-
-	// "Submissions" link (child entry).
-	$submissions_entry = array(
+	// Submissions is a submenu item under the auto-registered Forms content type (slug 'content-form').
+	$mc_admin_menu[] = array(
+		'slug'       => 'content-form-submissions',
 		'title'      => 'Submissions',
 		'url'        => mc_admin_url('form-submissions.php'),
 		'capability' => 'edit_content',
-		'icon'       => '&#x1F4EC;',
+		'parent'     => 'content-form',
 	);
-
-	// Insert after Posts if present, otherwise after Pages.
-	$insert_at = 2;
-	foreach ($mc_admin_menu as $i => $item) {
-		if (str_contains($item['url'] ?? '', 'type=post')) {
-			$insert_at = $i + 1;
-			break;
-		}
-	}
-
-	array_splice($mc_admin_menu, $insert_at, 0, array( $entry, $submissions_entry ));
 }
 mc_add_action('mc_admin_menu', 'forms_admin_menu');
 

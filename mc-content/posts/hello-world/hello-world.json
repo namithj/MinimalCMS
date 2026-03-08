@@ -1,0 +1,14 @@
+{
+    "title": "Hello World",
+    "slug": "hello-world",
+    "status": "publish",
+    "author": "admin",
+    "created": "2026-03-08T16:02:09+00:00",
+    "modified": "2026-03-08T16:02:09+00:00",
+    "template": "",
+    "parent": "",
+    "order": 0,
+    "excerpt": "Welcome to MinimalCMS. This is your first post — edit or delete it, then start writing!",
+    "featured_image": "",
+    "meta": []
+}

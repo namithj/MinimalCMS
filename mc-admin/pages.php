@@ -11,10 +11,7 @@
 
 require_once __DIR__ . '/admin.php';
 
-if (! mc_current_user_can('edit_content')) {
-	mc_redirect(mc_admin_url());
-	exit;
-}
+mc_admin_require_capability('edit_content');
 
 $content_type = mc_sanitize_slug(mc_input('type', 'get') ?: 'page');
 $type_obj     = mc_get_content_type($content_type);
@@ -33,19 +30,16 @@ $type_single = $type_obj['singular'] ?? ucfirst($content_type);
 $notice      = '';
 $notice_type = 'success';
 
-if (isset($_GET['action'], $_GET['slug'], $_GET['_nonce']) && 'delete' === $_GET['action']) {
-	if (mc_current_user_can('delete_content') && mc_verify_nonce($_GET['_nonce'], 'delete_' . $_GET['slug'])) {
-		$deleted = mc_delete_content($content_type, $_GET['slug']);
-		if (mc_is_error($deleted)) {
-			$notice      = $deleted->get_error_message();
-			$notice_type = 'error';
-		} else {
-			$notice = $type_single . ' deleted.';
-		}
-	} else {
-		$notice      = 'Permission denied or invalid nonce.';
-		$notice_type = 'error';
-	}
+$_delete_result = mc_handle_admin_delete_action(
+	'slug',
+	'delete_',
+	'delete_content',
+	fn($slug) => mc_delete_content($content_type, $slug),
+	$type_single . ' deleted.'
+);
+if (null !== $_delete_result) {
+	$notice      = $_delete_result['notice'];
+	$notice_type = $_delete_result['notice_type'];
 }
 
 /*
@@ -72,27 +66,24 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ($notice) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>" data-dismiss>
-		<p><?php echo mc_esc_html($notice); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
-<div class="page-header-bar">
-	<h2><?php echo mc_esc_html($type_label); ?> (<?php echo count($items); ?>)</h2>
-	<?php if (mc_current_user_can('create_content')) : ?>
-		<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=' . urlencode($content_type))); ?>" class="btn btn-primary">+ Add New</a>
-	<?php endif; ?>
-</div>
+<?php
+mc_render_page_header_bar(
+	$type_label,
+	count($items),
+	mc_current_user_can('create_content') ? mc_admin_url('edit-page.php?type=' . urlencode($content_type)) : ''
+);
+?>
 
 <!-- Filters -->
-<div style="margin-bottom:12px;font-size:.85rem;">
+<div class="filter-bar">
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type))); ?>"
-		style="<?php echo ! $status_filter ? 'font-weight:700;' : ''; ?>">All</a> |
+		class="<?php echo ! $status_filter ? 'filter-link-active' : ''; ?>">All</a> |
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type) . '&status=publish')); ?>"
-		style="<?php echo 'publish' === $status_filter ? 'font-weight:700;' : ''; ?>">Published</a> |
+		class="<?php echo 'publish' === $status_filter ? 'filter-link-active' : ''; ?>">Published</a> |
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type) . '&status=draft')); ?>"
-		style="<?php echo 'draft' === $status_filter ? 'font-weight:700;' : ''; ?>">Drafts</a>
+		class="<?php echo 'draft' === $status_filter ? 'filter-link-active' : ''; ?>">Drafts</a>
 </div>
 
 <?php if ($items) : ?>
@@ -122,10 +113,10 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 							<?php echo mc_esc_html(ucfirst($item['status'])); ?>
 						</span>
 					</td>
-					<td style="font-size:.85rem;color:#646970;">
-						<?php echo mc_esc_html(date('M j, Y', strtotime($item['modified'] ?? $item['created'] ?? ''))); ?>
-					</td>
-					<td class="row-actions" style="text-align:right;">
+				<td class="text-muted-sm">
+					<?php echo mc_esc_html(date('M j, Y', strtotime($item['modified'] ?? $item['created'] ?? ''))); ?>
+				</td>
+				<td class="row-actions text-right">
 						<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=' . urlencode($content_type) . '&slug=' . urlencode($item['slug']))); ?>">Edit</a>
 						<?php if ('form' === $content_type) : ?>
 							<a href="<?php echo mc_esc_url(mc_admin_url('form-submissions.php?form=' . urlencode($item['slug']))); ?>">Submissions</a>
@@ -142,13 +133,14 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 		</tbody>
 	</table>
 <?php else : ?>
-	<div class="empty-state">
-		<div class="icon">&#x1F4C4;</div>
-		<p>No <?php echo mc_esc_html(strtolower($type_label)); ?> found.</p>
-		<?php if (mc_current_user_can('create_content')) : ?>
-			<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=' . urlencode($content_type))); ?>" class="btn btn-primary">Create your first <?php echo mc_esc_html(strtolower($type_single)); ?></a>
-		<?php endif; ?>
-	</div>
+	<?php
+	mc_render_empty_state(
+		'&#x1F4C4;',
+		'No ' . strtolower($type_label) . ' found.',
+		mc_current_user_can('create_content') ? mc_admin_url('edit-page.php?type=' . urlencode($content_type)) : '',
+		'Create your first ' . strtolower($type_single)
+	);
+	?>
 <?php endif; ?>
 
 <?php require MC_ABSPATH . 'mc-admin/admin-footer.php'; ?>

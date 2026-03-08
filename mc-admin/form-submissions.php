@@ -12,14 +12,20 @@
 
 require_once __DIR__ . '/admin.php';
 
-if ( ! mc_current_user_can( 'edit_content' ) ) {
-	mc_redirect( mc_admin_url() );
-	exit;
-}
+mc_admin_require_capability('edit_content');
 
 /*
- * ── Helpers ────────────────────────────────────────────────────────────────
+ * ── Helpers ───────────────────────────────────────────────────
  */
+
+/**
+ * Return the base submissions directory (with trailing slash).
+ *
+ * @return string
+ */
+function fsub_get_submissions_dir(): string {
+	return defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+}
 
 /**
  * Return an array of all form slugs that have a submissions directory.
@@ -27,7 +33,7 @@ if ( ! mc_current_user_can( 'edit_content' ) ) {
  * @return string[]
  */
 function fsub_get_form_slugs(): array {
-	$base = defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+	$base = fsub_get_submissions_dir();
 	if ( ! is_dir( $base ) ) {
 		return array();
 	}
@@ -52,7 +58,7 @@ function fsub_get_form_slugs(): array {
  * @return array[]
  */
 function fsub_get_submissions( string $form_slug ): array {
-	$base = defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+	$base = fsub_get_submissions_dir();
 	$dir  = $base . $form_slug . '/';
 
 	if ( ! is_dir( $dir ) ) {
@@ -99,7 +105,7 @@ function fsub_get_submission( string $form_slug, string $submission_id ): ?array
 		return null;
 	}
 
-	$base = defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+	$base = fsub_get_submissions_dir();
 	$path = $base . $form_slug . '/' . $submission_id . '.json';
 
 	if ( ! file_exists( $path ) ) {
@@ -131,7 +137,7 @@ function fsub_delete_submission( string $form_slug, string $submission_id ): boo
 		return false;
 	}
 
-	$base = defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+	$base = fsub_get_submissions_dir();
 	$path = $base . $form_slug . '/' . $submission_id . '.json';
 
 	if ( ! file_exists( $path ) ) {
@@ -237,11 +243,7 @@ $admin_page_title = 'Form Submissions';
 require MC_ABSPATH . 'mc-admin/admin-header.php';
 ?>
 
-<?php if ( $notice ) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr( $notice_type ); ?>" data-dismiss>
-		<p><?php echo mc_esc_html( $notice ); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice( $notice, $notice_type ); ?>
 
 <?php
 /* ── Detail view ─────────────────────────────────────────────────────────── */
@@ -264,11 +266,11 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 	<a href="<?php echo $back_url; ?>" class="btn">&larr; Back to list</a>
 </div>
 
-<div style="max-width:720px;">
-	<table class="mc-table" style="margin-bottom:24px;">
+<div class="content-max-width-lg">
+	<table class="mc-table mb-lg">
 		<tbody>
 			<tr>
-				<th style="width:160px;text-align:left;">ID</th>
+				<th class="th-fixed-sm">ID</th>
 				<td><code><?php echo mc_esc_html( $submission['id'] ); ?></code></td>
 			</tr>
 			<tr>
@@ -281,16 +283,16 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 			</tr>
 			<tr>
 				<th>User Agent</th>
-				<td style="font-size:.8rem;word-break:break-all;"><?php echo mc_esc_html( $submission['user_agent'] ?? '—' ); ?></td>
+				<td class="text-tiny-breakable"><?php echo mc_esc_html( $submission['user_agent'] ?? '—' ); ?></td>
 			</tr>
 		</tbody>
 	</table>
 
-	<h3 style="margin-bottom:12px;">Field Values</h3>
-	<table class="mc-table" style="margin-bottom:24px;">
+	<h3 class="mb-sm">Field Values</h3>
+	<table class="mc-table mb-lg">
 		<thead>
 			<tr>
-				<th style="width:200px;">Field</th>
+				<th class="th-fixed-md">Field</th>
 				<th>Value</th>
 			</tr>
 		</thead>
@@ -314,8 +316,7 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 
 	<?php if ( mc_current_user_can( 'delete_content' ) ) : ?>
 		<a href="<?php echo $delete_url; ?>"
-			class="btn btn-danger confirm-delete"
-			style="background:#d63638;color:#fff;border-color:#d63638;">
+			class="btn btn-danger confirm-delete">
 			Delete This Submission
 		</a>
 	<?php endif; ?>
@@ -363,11 +364,11 @@ elseif ( '' !== $current_form && isset( $submissions, $form_title ) ) :
 				);
 				?>
 				<tr>
-					<td style="white-space:nowrap;font-size:.85rem;"><?php echo mc_esc_html( $sub_date ); ?></td>
-					<td><code style="font-size:.75rem;"><?php echo mc_esc_html( $sub['id'] ); ?></code></td>
-					<td style="font-size:.85rem;"><?php echo mc_esc_html( $sub['ip'] ?? '—' ); ?></td>
-					<td style="color:#646970;font-size:.85rem;"><?php echo mc_esc_html( $sub_preview ); ?></td>
-					<td class="row-actions" style="text-align:right;white-space:nowrap;">
+					<td class="text-nowrap-sm"><?php echo mc_esc_html( $sub_date ); ?></td>
+					<td><code class="text-code-tiny"><?php echo mc_esc_html( $sub['id'] ); ?></code></td>
+					<td class="text-muted-sm"><?php echo mc_esc_html( $sub['ip'] ?? '—' ); ?></td>
+					<td class="text-muted-sm"><?php echo mc_esc_html( $sub_preview ); ?></td>
+					<td class="row-actions text-right-nowrap">
 						<a href="<?php echo $view_url; ?>">View</a>
 						<?php if ( mc_current_user_can( 'delete_content' ) ) : ?>
 							<a href="<?php echo $delete_url; ?>" class="delete confirm-delete">Delete</a>
@@ -378,10 +379,7 @@ elseif ( '' !== $current_form && isset( $submissions, $form_title ) ) :
 		</tbody>
 	</table>
 <?php else : ?>
-	<div class="empty-state">
-		<div class="icon">&#x1F4EC;</div>
-		<p>No submissions yet for this form.</p>
-	</div>
+	<?php mc_render_empty_state( '&#x1F4EC;', 'No submissions yet for this form.' ); ?>
 <?php endif; ?>
 
 <?php
@@ -415,10 +413,10 @@ else :
 				<tr>
 					<td>
 						<strong><a href="<?php echo $list_url; ?>"><?php echo mc_esc_html( $title ); ?></a></strong>
-						<div style="font-size:.8rem;color:#646970;"><code><?php echo mc_esc_html( $slug ); ?></code></div>
+						<div class="text-tiny-breakable text-muted-sm"><code><?php echo mc_esc_html( $slug ); ?></code></div>
 					</td>
 					<td><?php echo (int) $count; ?></td>
-					<td class="row-actions" style="text-align:right;">
+					<td class="row-actions text-right">
 						<a href="<?php echo $list_url; ?>">View</a>
 					</td>
 				</tr>
@@ -426,10 +424,7 @@ else :
 		</tbody>
 	</table>
 <?php else : ?>
-	<div class="empty-state">
-		<div class="icon">&#x1F4EC;</div>
-		<p>No form submissions yet.</p>
-	</div>
+	<?php mc_render_empty_state( '&#x1F4EC;', 'No form submissions yet.' ); ?>
 <?php endif; ?>
 
 <?php endif; ?>

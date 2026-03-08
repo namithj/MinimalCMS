@@ -50,13 +50,20 @@ body {
   }
 }
 
+.brand {
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: $color-white;
+
+  span { color: $color-brand-accent; }
+
+  &:hover { color: $color-white; }
+}
+
 .site-branding {
-  a {
-    color: $color-white;
-    text-decoration: none;
+  .brand {
     font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
   }
 
   .site-description {
@@ -86,6 +93,39 @@ body {
     &:hover,
     &.active {
       background: rgba($color-white, 0.15);
+      color: $color-white;
+    }
+  }
+}
+
+/* ── User Navigation ──────────────────────────────────────────────────────── */
+
+.user-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-nav {
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: $color-link;
+  color: $color-white;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover { background: $color-link-hover; color: $color-white; }
+
+  &--outline {
+    background: transparent;
+    border: 1px solid rgba($color-white, 0.45);
+    color: rgba($color-white, 0.85);
+
+    &:hover {
+      background: rgba($color-white, 0.1);
       color: $color-white;
     }
   }
@@ -288,13 +328,59 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 
   a {
     color: rgba($color-white, 0.8);
     text-decoration: none;
-    margin-left: 1rem;
+    border-radius: 3px;
+    transition: background 0.15s, color 0.15s;
 
-    &:hover { color: $color-white; }
+    &:hover, &.active { color: $color-white; }
+  }
+
+  &__start {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+  }
+
+  &__pages {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex-wrap: wrap;
+
+    a {
+      padding: 0.2rem 0.5rem;
+
+      &:hover, &.active {
+        background: rgba($color-white, 0.12);
+        color: $color-white;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    flex-shrink: 0;
+
+    a {
+      padding: 0.2rem 0.5rem;
+
+      &:hover { background: rgba($color-white, 0.12); color: $color-white; }
+    }
   }
 }
 
@@ -306,6 +392,7 @@ body {
     align-items: flex-start;
   }
 
-  .main-navigation ul { flex-wrap: wrap; }
-  .entry-title        { font-size: 1.5rem; }
+  .main-navigation ul      { flex-wrap: wrap; }
+  .mc-admin-bar__pages     { display: none; }
+  .entry-title             { font-size: 1.5rem; }
 }

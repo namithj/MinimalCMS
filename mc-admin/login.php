@@ -34,6 +34,10 @@ $error = '';
  * ── Handle POST ────────────────────────────────────────────────────────────
  */
 if (mc_is_post_request()) {
+	// CSRF guard — verify nonce before processing credentials.
+	if (! mc_verify_nonce(mc_input('_mc_nonce', 'post'), 'login')) {
+		$error = 'Invalid security token. Please try again.';
+	} else {
 	$username = mc_sanitize_text(mc_input('username', 'post') ?? '');
 	$password = mc_input('password', 'post');
 
@@ -52,6 +56,7 @@ if (mc_is_post_request()) {
 			exit;
 		}
 	}
+	} // end nonce check
 }
 
 $logged_out = isset($_GET['logged_out']);
@@ -64,32 +69,14 @@ $redirect   = mc_esc_attr(mc_input('redirect_to', 'get') ?? '');
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Log In &mdash; <?php echo mc_esc_html(MC_SITE_NAME); ?></title>
-	<style>
-		*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-		body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#1d2327}
-		.login-wrap{width:100%;max-width:360px;padding:20px}
-		.login-logo{text-align:center;margin-bottom:24px;font-size:1.5rem;font-weight:700;letter-spacing:-.5px}
-		.login-box{background:#fff;border:1px solid #c3c4c7;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-		.login-box h1{font-size:1.1rem;margin-bottom:20px;text-align:center}
-		.form-group{margin-bottom:16px}
-		.form-group label{display:block;font-size:.875rem;font-weight:600;margin-bottom:6px}
-		.form-group input{width:100%;padding:8px 12px;font-size:.95rem;border:1px solid #8c8f94;border-radius:4px;outline:none;transition:border-color .15s}
-		.form-group input:focus{border-color:#2271b1;box-shadow:0 0 0 1px #2271b1}
-		.btn{display:block;width:100%;padding:10px;font-size:.95rem;font-weight:600;color:#fff;background:#2271b1;border:none;border-radius:4px;cursor:pointer;transition:background .15s}
-		.btn:hover{background:#135e96}
-		.notice{padding:10px 14px;border-radius:4px;font-size:.875rem;margin-bottom:16px}
-		.notice-error{background:#fcf0f1;border-left:4px solid #d63638;color:#d63638}
-		.notice-success{background:#edfaef;border-left:4px solid #00a32a;color:#00a32a}
-		.back-link{text-align:center;margin-top:16px;font-size:.85rem}
-		.back-link a{color:#2271b1;text-decoration:none}
-		.back-link a:hover{text-decoration:underline}
-	</style>
+	<link rel="stylesheet" href="<?php echo mc_esc_url(mc_admin_url('assets/css/auth.css')); ?>">
+	<link rel="icon" href="<?php echo mc_esc_url(mc_admin_url('assets/favicon.svg')); ?>" type="image/svg+xml">
 </head>
 <body>
-	<div class="login-wrap">
-		<div class="login-logo">MinimalCMS</div>
-		<div class="login-box">
-			<h1>Log In</h1>
+	<div class="auth-wrap">
+		<div class="auth-logo">Minimal<span>CMS</span></div>
+		<div class="auth-box">
+			<h1 class="centered">Log In</h1>
 
 			<?php if ($logged_out) : ?>
 				<div class="notice notice-success">You have been logged out.</div>
@@ -110,8 +97,7 @@ $redirect   = mc_esc_attr(mc_input('redirect_to', 'get') ?? '');
 				</div>
 				<?php if ($redirect) : ?>
 					<input type="hidden" name="redirect_to" value="<?php echo $redirect; ?>">
-				<?php endif; ?>
-				<button type="submit" class="btn">Log In</button>
+				<?php endif; ?>			<?php mc_nonce_field('login'); ?>				<button type="submit" class="btn btn-full-width">Log In</button>
 			</form>
 		</div>
 		<div class="back-link">

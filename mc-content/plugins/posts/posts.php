@@ -36,48 +36,11 @@ function posts_register_content_type(): void
 			'has_archive'  => true,
 			'rewrite'      => array( 'slug' => 'post' ),
 			'supports'     => array( 'title', 'editor', 'excerpt', 'thumbnail' ),
+			'menu_icon'    => '&#x1F4DD;',
 		)
 	);
 }
 mc_add_action('mc_init', 'posts_register_content_type');
-
-/*
- * -------------------------------------------------------------------------
- *  Admin menu entry
- * -------------------------------------------------------------------------
- */
-
-/**
- * Add a "Posts" link to the admin sidebar.
- *
- * @since 1.0.0
- * @return void
- */
-function posts_admin_menu(): void
-{
-
-	global $mc_admin_menu;
-
-	// Insert after "Pages" (index 1) so it appears right below.
-	$entry = array(
-		'title'      => 'Posts',
-		'url'        => mc_admin_url('pages.php?type=post'),
-		'capability' => 'edit_content',
-		'icon'       => '&#x1F4DD;',
-	);
-
-	// Find the Pages item position and insert after it.
-	$insert_at = 2; // default: after Pages.
-	foreach ($mc_admin_menu as $i => $item) {
-		if (str_contains($item['url'] ?? '', 'type=page')) {
-			$insert_at = $i + 1;
-			break;
-		}
-	}
-
-	array_splice($mc_admin_menu, $insert_at, 0, array( $entry ));
-}
-mc_add_action('mc_admin_menu', 'posts_admin_menu');
 
 /*
  * -------------------------------------------------------------------------

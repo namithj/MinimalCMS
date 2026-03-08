@@ -9,10 +9,7 @@
 
 require_once __DIR__ . '/admin.php';
 
-if (! mc_current_user_can('manage_users')) {
-	mc_redirect(mc_admin_url());
-	exit;
-}
+mc_admin_require_capability('manage_users');
 
 $edit_id = mc_input('id', 'get');
 $is_new  = empty($edit_id);
@@ -114,13 +111,9 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ($notice) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>">
-		<p><?php echo mc_esc_html($notice); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
-<div style="max-width:640px;">
+<div class="content-max-width-md">
 	<form method="post" action="">
 		<?php mc_nonce_field('edit_user'); ?>
 

@@ -19,6 +19,8 @@ if (! defined('MC_ADMIN')) {
 	define('MC_ADMIN', true);
 }
 
+require_once MC_ABSPATH . 'mc-admin/includes/admin-functions.php';
+
 mc_start_session();
 
 // Determine which admin page is being requested — used for auth decisions.

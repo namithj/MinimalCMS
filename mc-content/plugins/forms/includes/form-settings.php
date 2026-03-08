@@ -116,9 +116,10 @@ function forms_register_settings_page(): void
 		'confirmation',
 		'default_confirmation_message',
 		array(
-			'type'    => 'textarea',
-			'label'   => 'Default Success Message',
-			'default' => 'Thank you! Your submission has been received.',
+			'type'        => 'html',
+			'label'       => 'Default Success Message',
+			'description' => 'Supports basic HTML (bold, italic, links). Used when a form has no per-form confirmation message set.',
+			'default'     => 'Thank you! Your submission has been received.',
 		)
 	);
 
@@ -155,21 +156,6 @@ function forms_register_settings_page(): void
 			'type'    => 'checkbox',
 			'label'   => 'Enable Honeypot Field',
 			'default' => true,
-		)
-	);
-
-	/*
-	 * Register admin page so it appears in the menu via Settings API.
-	 */
-	mc_register_admin_page(
-		'forms',
-		array(
-			'title'         => 'Forms Settings',
-			'capability'    => 'manage_settings',
-			'menu_title'    => 'Forms Settings',
-			'menu_icon'     => '&#x2699;',
-			'menu_position' => 45,
-			'add_menu'      => true,
 		)
 	);
 }

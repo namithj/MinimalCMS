@@ -14,6 +14,17 @@
 defined('MC_ABSPATH') || exit;
 
 /**
+ * Return the sanitized 'type' GET parameter (edit-form context helper).
+ *
+ * @since 1.0.0
+ * @return string
+ */
+function forms_get_edit_type(): string
+{
+	return mc_sanitize_slug(mc_input('type', 'get') ?? '');
+}
+
+/**
  * Enqueue form builder assets on admin pages when editing a form.
  *
  * @since 1.0.0
@@ -22,9 +33,7 @@ defined('MC_ABSPATH') || exit;
 function forms_admin_head(): void
 {
 
-	$type = mc_sanitize_slug(mc_input('type', 'get') ?? '');
-
-	if ('form' !== $type) {
+	if ('form' !== forms_get_edit_type()) {
 		return;
 	}
 
@@ -43,9 +52,7 @@ mc_add_action('mc_admin_head', 'forms_admin_head');
 function forms_admin_footer(): void
 {
 
-	$type = mc_sanitize_slug(mc_input('type', 'get') ?? '');
-
-	if ('form' !== $type) {
+	if ('form' !== forms_get_edit_type()) {
 		return;
 	}
 
@@ -116,8 +123,8 @@ function forms_handle_save(string $type, string $slug, array $meta): void
 		'page'     => mc_sanitize_slug(mc_input('confirm_page', 'post') ?? ''),
 	);
 
-	$confirmation['redirect'] = filter_var($confirmation['redirect'], FILTER_SANITIZE_URL);
-	if ('' === $confirmation['redirect'] || false === $confirmation['redirect']) {
+	$confirmation['redirect'] = filter_var($confirmation['redirect'], FILTER_VALIDATE_URL);
+	if (false === $confirmation['redirect']) {
 		$confirmation['redirect'] = '';
 	}
 
@@ -138,6 +145,12 @@ function forms_handle_save(string $type, string $slug, array $meta): void
 			'confirmation'  => $confirmation,
 		)
 	);
+
+	// Validate the form definition; skip re-save if invalid.
+	if (forms_validate_definition($form_meta)) {
+		$saving = false;
+		return;
+	}
 
 	// Remove runtime keys that shouldn't be persisted to JSON.
 	unset($existing['body_raw'], $existing['body_html']);

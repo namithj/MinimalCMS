@@ -9,10 +9,7 @@
 
 require_once __DIR__ . '/admin.php';
 
-if (! mc_current_user_can('manage_plugins')) {
-	mc_redirect(mc_admin_url());
-	exit;
-}
+mc_admin_require_capability('manage_plugins');
 
 /*
  * ── Handle activate / deactivate ───────────────────────────────────────────
@@ -46,7 +43,7 @@ if (isset($_GET['action'], $_GET['plugin'], $_GET['_nonce'])) {
 }
 
 $plugins        = mc_discover_plugins();
-$active_plugins = $GLOBALS['mc_config']['active_plugins'] ?? array();
+$active_plugins = mc_get_active_plugins();
 
 /*
  * ── Render ─────────────────────────────────────────────────────────────────
@@ -56,15 +53,9 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ($notice) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>" data-dismiss>
-		<p><?php echo mc_esc_html($notice); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
-<div class="page-header-bar">
-	<h2>Plugins (<?php echo count($plugins); ?>)</h2>
-</div>
+<?php mc_render_page_header_bar('Plugins', count($plugins)); ?>
 
 <?php if ($plugins) : ?>
 	<table class="mc-table">
@@ -86,7 +77,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 					<td>
 						<strong><?php echo mc_esc_html($data['Name'] ?? basename($file)); ?></strong>
 						<?php if (! empty($data['Description'])) : ?>
-							<br><span style="font-size:.85rem;color:#646970;"><?php echo mc_esc_html($data['Description']); ?></span>
+						<br><span class="text-muted-sm"><?php echo mc_esc_html($data['Description']); ?></span>
 						<?php endif; ?>
 					</td>
 					<td><?php echo mc_esc_html($data['Version'] ?? '—'); ?></td>
@@ -96,7 +87,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 							<?php echo $is_active ? 'Active' : 'Inactive'; ?>
 						</span>
 					</td>
-					<td class="row-actions" style="text-align:right;">
+					<td class="row-actions text-right">
 						<?php if ($is_active) : ?>
 							<a href="<?php echo mc_esc_url(mc_admin_url('plugins.php?action=deactivate&plugin=' . urlencode($file) . '&_nonce=' . mc_create_nonce('deactivate_plugin_' . $file))); ?>">Deactivate</a>
 						<?php else : ?>
@@ -108,10 +99,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 		</tbody>
 	</table>
 <?php else : ?>
-	<div class="empty-state">
-		<div class="icon">&#x1F50C;</div>
-		<p>No plugins installed. Drop a plugin folder into <code>mc-content/plugins/</code>.</p>
-	</div>
+	<?php mc_render_empty_state('&#x1F50C;', 'No plugins installed. Drop a plugin folder into mc-content/plugins/.'); ?>
 <?php endif; ?>
 
 <?php require MC_ABSPATH . 'mc-admin/admin-footer.php'; ?>

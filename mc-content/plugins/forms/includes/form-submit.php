@@ -13,6 +13,9 @@
 
 defined('MC_ABSPATH') || exit;
 
+// Ensure the flash-pending global is always initialized.
+$GLOBALS['mc_forms_flash_pending'] ??= array();
+
 /**
  * Process a form submission.
  *

@@ -90,7 +90,7 @@ function forms_send_notifications(array $form, array $values): void
 		$header_str = implode("\r\n", $args['headers']);
 
 		// Send via PHP mail() — non-blocking failure handling.
-		@mail($args['to'], $args['subject'], $args['body'], $header_str);
+		mail($args['to'], $args['subject'], $args['body'], $header_str);
 	}
 }
 

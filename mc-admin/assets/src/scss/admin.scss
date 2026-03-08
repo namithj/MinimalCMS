@@ -76,19 +76,24 @@ a {
 }
 
 .admin-menu {
-  ul {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+
+  > ul {
     list-style: none;
     padding: $spacing-sm 0;
   }
 
+  // ── Base item link ──────────────────────────────────────────────────────
   li a {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px $spacing-lg;
+    padding: 9px $spacing-lg;
     color: $color-sidebar-text;
     text-decoration: none;
-    font-size: .9rem;
+    font-size: .875rem;
     @include transition(background, color);
 
     &:hover {
@@ -98,15 +103,83 @@ a {
     }
   }
 
-  li.active a {
+  // ── Top-level active ────────────────────────────────────────────────────
+  > ul > li.active > a {
     background: $color-sidebar-active;
     color: $color-white;
+    font-weight: 500;
   }
 
+  // ── Chevron on parents that have a submenu ──────────────────────────────
+  > ul > li.has-submenu > a {
+    &::after {
+      content: '▾';
+      margin-left: auto;
+      font-size: .75rem;
+      opacity: .4;
+      flex-shrink: 0;
+      line-height: 1;
+      @include transition(opacity);
+    }
+
+    &:hover::after { opacity: .8; }
+  }
+
+  > ul > li.has-submenu.active > a::after { opacity: .9; }
+  > ul > li.has-submenu.open > a::after  { opacity: .9; transform: rotate(-180deg); }
+
+  // ── Submenu panel ───────────────────────────────────────────────────────
+  ul.submenu {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 2px 0 6px;
+
+    li a {
+      // Indent aligns text under the parent label (icon col = 22px + 10px gap).
+      padding: 7px $spacing-lg 7px calc(#{$spacing-lg} + 22px + 10px);
+      font-size: .8375rem;
+      color: rgba(195, 196, 199, .72);
+      position: relative;
+
+      // Vertical guide line centred under the parent's icon.
+      &::before {
+        content: '';
+        position: absolute;
+        left: calc(#{$spacing-lg} + 11px);
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: $color-sidebar-border;
+        border-radius: 1px;
+      }
+
+      &:hover {
+        background: $color-sidebar-hover;
+        color: $color-white;
+
+        &::before { background: rgba($color-sidebar-border, .5); }
+      }
+    }
+
+    li.active a {
+      background: rgba($color-primary, .18);
+      color: $color-white;
+      font-weight: 500;
+
+      &::before { background: $color-sidebar-active; }
+    }
+  }
+
+  // Show submenu when parent li has .open class.
+  > ul > li.open > ul.submenu { display: block; }
+
+  // ── Icon ────────────────────────────────────────────────────────────────
   .icon {
     font-size: 1.1rem;
     width: 22px;
     text-align: center;
+    flex-shrink: 0;
   }
 }
 
@@ -214,6 +287,14 @@ a {
   margin-bottom: $spacing-xl;
 }
 
+.dashboard-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  align-items: start;
+}
+
 .stat-card {
   @include card-base;
   padding: $spacing-lg;
@@ -229,6 +310,143 @@ a {
     font-size: .85rem;
     color: $color-text-muted;
     margin-top: $spacing-xs;
+  }
+}
+
+/* ── Link List (Quick Links widget) ──────────────────────────────────────── */
+
+.link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    border-bottom: 1px solid $color-border-light;
+
+    &:last-child { border-bottom: none; }
+
+    a {
+      display: flex;
+      align-items: center;
+      padding: $spacing-sm $spacing-md;
+      font-size: .9rem;
+      color: $color-text;
+      text-decoration: none;
+      transition: background .12s, color .12s;
+
+      &:hover {
+        background: $color-surface;
+        color: $color-primary;
+      }
+    }
+  }
+}
+
+/* ── Site Info Widget ─────────────────────────────────────────────────────── */
+
+.site-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-lg;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.site-info-panel {
+  background: $color-surface;
+  border-radius: 6px;
+  padding: $spacing-lg;
+
+  &__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: $color-text-light;
+    margin: 0 0 $spacing-md;
+  }
+}
+
+.site-info-list {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin: 0;
+
+  dt,
+  dd {
+    margin: 0;
+    padding: 10px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid $color-border-light;
+  }
+
+  dt:last-of-type,
+  dd:last-of-type {
+    border-bottom: none;
+  }
+
+  dt {
+    color: $color-text-secondary;
+    font-weight: 400;
+    padding-right: $spacing-md;
+    display: flex;
+    align-items: center;
+  }
+
+  dd {
+    color: $color-text;
+    font-weight: 500;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+.site-info-meter {
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+  }
+
+  &__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $color-text;
+    line-height: 1;
+  }
+
+  &__sub {
+    font-size: 0.85rem;
+    color: $color-text-muted;
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: $spacing-sm;
+    font-size: 0.78rem;
+    color: $color-text-muted;
+  }
+}
+
+.site-info-bar {
+  height: 8px;
+  background: $color-border-light;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    background: $color-primary;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+
+    &--warn { background: #f0b429; }
   }
 }
 
@@ -390,6 +608,72 @@ select.form-control {
   align-items: center;
 }
 
+/* ── MC Field Registry fields ─────────────────────────────────────────────── */
+// Apply form-control styling to all inputs/textareas/selects inside .mc-field
+// (rendered by MC_Field_Registry which doesn't add a form-control class).
+.mc-field {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+  textarea,
+  select {
+    width: 100%;
+    padding: $spacing-sm 12px;
+    font-size: .95rem;
+    border: 1px solid $color-text-light;
+    border-radius: $border-radius;
+    outline: none;
+    font-family: inherit;
+    @include transition(border-color);
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 1px $color-primary;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  select {
+    appearance: auto;
+  }
+
+  &.field-has-error {
+    input:not([type="checkbox"]):not([type="radio"]),
+    textarea,
+    select {
+      border-color: $color-danger;
+
+      &:focus { box-shadow: 0 0 0 1px $color-danger; }
+    }
+  }
+
+  .field-error {
+    font-size: .8rem;
+    color: $color-danger;
+    margin-top: $spacing-xs;
+  }
+
+  .required {
+    color: $color-danger;
+    margin-left: 2px;
+  }
+
+  .checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 400;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+  }
+}
+
 /* ── Page header bar ──────────────────────────────────────────────────────── */
 
 .page-header-bar {
@@ -404,12 +688,36 @@ select.form-control {
   }
 }
 
-/* ── Editor ───────────────────────────────────────────────────────────────── */
+/* ── Empty state ──────────────────────────────────────────────────────────── */
 
+.empty-state {
+  text-align: center;
+  padding: 48px $spacing-xl;
+  color: $color-text-muted;
+
+  .icon { font-size: 3rem; margin-bottom: 12px; }
+  p     { margin-bottom: $spacing-md; }
+}
+
+/* ── Editor layout (edit-page.php) ────────────────────────────────────────── */
 .editor-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: $spacing-lg;
+  align-items: start;
+}
+
+.editor-main {
+  min-width: 0;
+}
+
+.editor-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  min-width: 0;
+
+  .card { margin-bottom: 0; }
 }
 
 .editor-pane {
@@ -470,16 +778,76 @@ select.form-control {
   pre        { background: $color-body-bg; padding: 12px; border-radius: $border-radius; overflow-x: auto; margin-bottom: 1em; }
 }
 
-/* ── Empty state ──────────────────────────────────────────────────────────── */
-
-.empty-state {
-  text-align: center;
-  padding: 48px $spacing-xl;
-  color: $color-text-muted;
-
-  .icon { font-size: 3rem; margin-bottom: 12px; }
-  p     { margin-bottom: $spacing-md; }
+/* ── Card variants ────────────────────────────────────────────────────────── */
+.card-grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
 }
+
+.card-header--flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.theme-card--active {
+  border: 2px solid $color-primary;
+}
+
+/* ── Filter bar (pages list etc.) ─────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  flex-wrap: wrap;
+
+  a {
+    padding: $spacing-xs $spacing-md;
+    border-radius: $border-radius;
+    font-size: .85rem;
+    color: $color-text-muted;
+    text-decoration: none;
+    border: 1px solid transparent;
+
+    &:hover {
+      color: $color-primary;
+      text-decoration: none;
+    }
+  }
+}
+
+.filter-link-active {
+  background: $color-primary;
+  color: $color-white !important;
+  border-color: $color-primary !important;
+  font-weight: 600;
+}
+
+/* ── Template sections (template-sections.php) ────────────────────────────── */
+.template-section-wrapper {
+  .card { margin-bottom: $spacing-md; }
+}
+
+/* ── Typography utilities ─────────────────────────────────────────────────── */
+.text-right      { text-align: right; }
+.text-center     { text-align: center; }
+.text-muted-sm   { font-size: .8rem; color: $color-text-muted; margin-top: $spacing-xs; }
+.text-meta       { font-size: .85rem; color: $color-text-muted; margin-top: $spacing-xs; }
+.text-meta-lg    { font-size: .95rem; color: $color-text-secondary; margin: $spacing-sm 0; }
+.section-description { font-size: .875rem; color: $color-text-muted; margin-bottom: $spacing-md; }
+
+/* ── Button variant ───────────────────────────────────────────────────────── */
+.btn-disabled-visual {
+  opacity: .65;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── Width constraint ─────────────────────────────────────────────────────── */
+.content-max-width-md { max-width: 640px; }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
@@ -502,7 +870,8 @@ select.form-control {
 }
 
 @include breakpoint-down(480px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
+  .dashboard-grid,
+  .dashboard-grid-2col { grid-template-columns: 1fr; }
 
   .mc-table {
     font-size: .85rem;

@@ -28,6 +28,23 @@
 		} );
 	}
 
+	/* ── Submenu toggles ─────────────────────────────────────────────────── */
+	document.querySelectorAll( '.has-submenu > a' ).forEach( function ( link ) {
+		link.addEventListener( 'click', function ( e ) {
+			const li = link.closest( 'li' );
+			if ( ! li ) { return; }
+			e.preventDefault();
+			li.classList.toggle( 'open' );
+		} );
+	} );
+
+	// Auto-open the submenu that contains the active child on page load.
+	document.querySelectorAll( '.has-submenu' ).forEach( function ( li ) {
+		if ( li.querySelector( '.submenu .active' ) || li.classList.contains( 'active' ) ) {
+			li.classList.add( 'open' );
+		}
+	} );
+
 	/* ── Confirm delete actions ───────────────────────────────────────── */
 	document.querySelectorAll( '.confirm-delete' ).forEach( function ( el ) {
 		el.addEventListener( 'click', function ( e ) {

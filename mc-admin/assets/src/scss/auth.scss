@@ -1,0 +1,198 @@
+/**
+ * MinimalCMS — Auth Stylesheet (login + setup)
+ *
+ * @package MinimalCMS
+ * @since   {version}
+ */
+
+@use "variables" as *;
+
+/* ── Reset & Base ──────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: $font-family;
+  background: $color-body-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: $color-text;
+}
+
+/* ── Wrapper ───────────────────────────────────────────────────────────────── */
+
+.auth-wrap {
+  width: 100%;
+  max-width: 360px;
+  padding: $spacing-lg;
+
+  &--wide { max-width: 520px; }
+}
+
+/* ── Branding ──────────────────────────────────────────────────────────────── */
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  color: $color-text;
+  text-decoration: none;
+  display: block;
+
+  span { color: #14b8a6; }
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────── */
+
+.auth-box {
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: 8px;
+  padding: $spacing-xl;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+
+  h1 {
+    font-size: 1.1rem;
+    margin-bottom: $spacing-lg;
+
+    &.centered { text-align: center; }
+  }
+
+  p.centered { text-align: center; }
+}
+
+/* ── Form ──────────────────────────────────────────────────────────────────── */
+
+.form-group {
+  margin-bottom: $spacing-md;
+
+  label {
+    display: block;
+    font-size: .875rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: .95rem;
+    border: 1px solid $color-text-light;
+    border-radius: $border-radius;
+    outline: none;
+    transition: border-color .15s;
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 1px $color-primary;
+    }
+  }
+}
+
+.desc {
+  font-size: .8rem;
+  color: $color-text-muted;
+  margin-top: $spacing-xs;
+}
+
+/* ── Button ────────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-block;
+  padding: 10px $spacing-lg;
+  font-size: .95rem;
+  font-weight: 600;
+  color: $color-white;
+  background: $color-primary;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: background .15s;
+  text-decoration: none;
+
+  &:hover { background: $color-primary-hover; }
+}
+
+.btn-full-width {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* ── Notices ───────────────────────────────────────────────────────────────── */
+
+.notice {
+  padding: 10px 14px;
+  border-radius: $border-radius;
+  font-size: .875rem;
+  margin-bottom: $spacing-md;
+}
+
+.notice-error {
+  background: $notice-error-bg;
+  border-left: 4px solid $notice-error-border;
+  color: $notice-error-text;
+}
+
+.notice-success {
+  background: $notice-success-bg;
+  border-left: 4px solid $notice-success-border;
+  color: $notice-success-text;
+}
+
+/* ── Setup-specific ────────────────────────────────────────────────────────── */
+
+.lead {
+  font-size: .95rem;
+  color: $color-text-muted;
+  margin-bottom: $spacing-lg;
+}
+
+.hr-styled {
+  border: none;
+  border-top: 1px solid $color-border-light;
+  margin: $spacing-lg 0;
+}
+
+.section-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.success-icon {
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: $spacing-md;
+}
+
+.auth-cta {
+  text-align: center;
+  margin-top: $spacing-lg;
+}
+
+/* ── Back link ─────────────────────────────────────────────────────────────── */
+
+.back-link {
+  text-align: center;
+  margin-top: $spacing-md;
+  font-size: .85rem;
+
+  a {
+    color: $color-primary;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}

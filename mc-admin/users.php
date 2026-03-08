@@ -9,10 +9,7 @@
 
 require_once __DIR__ . '/admin.php';
 
-if (! mc_current_user_can('manage_users')) {
-	mc_redirect(mc_admin_url());
-	exit;
-}
+mc_admin_require_capability('manage_users');
 
 /*
  * ── Handle delete action ───────────────────────────────────────────────────
@@ -56,16 +53,9 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ($notice) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>" data-dismiss>
-		<p><?php echo mc_esc_html($notice); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
-<div class="page-header-bar">
-	<h2>Users (<?php echo count($users); ?>)</h2>
-	<a href="<?php echo mc_esc_url(mc_admin_url('user-edit.php')); ?>" class="btn btn-primary">+ Add New</a>
-</div>
+<?php mc_render_page_header_bar('Users', count($users), mc_admin_url('user-edit.php')); ?>
 
 <?php if ($users) : ?>
 	<table class="mc-table">
@@ -93,7 +83,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 					<td>
 						<span class="badge badge-active"><?php echo mc_esc_html(ucfirst($user['role'] ?? 'contributor')); ?></span>
 					</td>
-					<td class="row-actions" style="text-align:right;">
+					<td class="row-actions text-right">
 						<a href="<?php echo mc_esc_url(mc_admin_url('user-edit.php?id=' . urlencode($user['username']))); ?>">Edit</a>
 						<?php if ($user['username'] !== mc_get_current_user_id()) : ?>
 							<a href="<?php echo mc_esc_url(mc_admin_url('users.php?action=delete&id=' . urlencode($user['username']) . '&_nonce=' . mc_create_nonce('delete_user_' . $user['username']))); ?>"
@@ -105,10 +95,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 		</tbody>
 	</table>
 <?php else : ?>
-	<div class="empty-state">
-		<div class="icon">&#x1F465;</div>
-		<p>No users found.</p>
-	</div>
+	<?php mc_render_empty_state('&#x1F465;', 'No users found.'); ?>
 <?php endif; ?>
 
 <?php require MC_ABSPATH . 'mc-admin/admin-footer.php'; ?>

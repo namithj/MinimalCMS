@@ -22,6 +22,40 @@ function default_theme_enqueue_assets(): void {
 mc_add_action( 'mc_init', 'default_theme_enqueue_assets' );
 
 /**
+ * Add "Theme Sections" to the admin sidebar when the active theme has templates
+ * that declare global sections.
+ *
+ * @since {version}
+ *
+ * @return void
+ */
+function default_theme_admin_menu(): void {
+
+	$templates = mc_get_page_templates();
+	$has_sections = false;
+	foreach ( $templates as $tpl ) {
+		if ( ! empty( $tpl['global_sections'] ) ) {
+			$has_sections = true;
+			break;
+		}
+	}
+
+	if ( ! $has_sections ) {
+		return;
+	}
+
+	global $mc_admin_menu;
+	$mc_admin_menu[] = array(
+		'slug'       => 'themes-sections',
+		'title'      => 'Theme Sections',
+		'url'        => mc_admin_url( 'template-sections.php' ),
+		'capability' => 'manage_themes',
+		'parent'     => 'themes',
+	);
+}
+mc_add_action( 'mc_admin_menu', 'default_theme_admin_menu' );
+
+/**
  * Get published pages for navigation.
  *
  * @since 1.0.0

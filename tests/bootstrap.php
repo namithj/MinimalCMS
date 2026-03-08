@@ -3,7 +3,7 @@
 /**
  * PHPUnit Bootstrap
  *
- * Sets up the test environment: defines constants, loads Composer autoloader,
+ * Sets up the test environment: defines constants, loads autoloaders,
  * and includes MinimalCMS core files needed by test cases.
  *
  * @package MinimalCMS\Tests
@@ -17,35 +17,16 @@ if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
 // MinimalCMS root directory.
 define('MC_ABSPATH', dirname(__DIR__) . '/');
 
-// Composer autoloader (loads PHPUnit, Parsedown, MC_Error class, and PSR-4 test namespaces).
+// Composer autoloader (loads PHPUnit, Parsedown, and PSR-4 test namespaces).
 require_once MC_ABSPATH . 'mc-includes/vendor/autoload.php';
 
-// ── Load MinimalCMS core files ──────────────────────────────────────────────
-// These files are guarded by `defined( 'MC_ABSPATH' ) || exit` so MC_ABSPATH
-// must be defined before they can be loaded.
-$mc_core_files = [
-	'mc-includes/load.php',
-	'mc-includes/hooks.php',
-	'mc-includes/formatting.php',
-	'mc-includes/http.php',
-	'mc-includes/cache.php',
-	'mc-includes/capabilities.php',
-	'mc-includes/user.php',
-	'mc-includes/fields.php',
-	'mc-includes/settings.php',
-	'mc-includes/content.php',
-	'mc-includes/markdown.php',
-	'mc-includes/rewrite.php',
-	'mc-includes/plugin.php',
-	'mc-includes/theme.php',
-	'mc-includes/template-loader.php',
-	'mc-includes/template-tags.php',
-	'mc-includes/shortcodes.php',
-];
+// PSR-0-style autoloader for MC_ classes in mc-includes/classes/.
+require_once MC_ABSPATH . 'mc-includes/autoload.php';
 
-foreach ($mc_core_files as $file) {
-	require_once MC_ABSPATH . $file;
-}
+// Procedural API — provides mc_maybe_define(), mc_rmdir_recursive(), and
+// all thin wrappers needed by test helpers. The functions are only defined
+// here; no MC_App boot occurs in unit tests.
+require_once MC_ABSPATH . 'mc-includes/functions.php';
 
 // ── Temporary test data directories ─────────────────────────────────────────
 
@@ -59,7 +40,6 @@ define('MC_TEST_TMP', $test_tmp);
 
 // ── Define core constants with test-safe values ─────────────────────────────
 
-// Define constants needed by the CMS.
 mc_maybe_define('MC_INC', MC_ABSPATH . 'mc-includes/');
 mc_maybe_define('MC_CONTENT_DIR', MC_TEST_TMP . 'mc-content/');
 mc_maybe_define('MC_DATA_DIR', MC_TEST_TMP . 'mc-data/');
@@ -102,22 +82,13 @@ foreach ($dirs as $dir) {
 	}
 }
 
-// ── Load remaining core files not covered by Composer "files" autoload ──────
-
-// content-types.php and default-filters.php are not in the Composer autoload
-// because they run registration logic. We load them for integration tests.
-// For unit tests, individual test classes handle setup as needed.
-
-// Initialise the roles system so capability tests work.
-mc_initialise_roles();
-
 // ── Cleanup hook ────────────────────────────────────────────────────────────
 
 register_shutdown_function(
 	function () {
 		$tmp = MC_TEST_TMP;
 		if (is_dir($tmp)) {
-				mc_rmdir_recursive($tmp);
+			mc_rmdir_recursive($tmp);
 		}
 	}
 );

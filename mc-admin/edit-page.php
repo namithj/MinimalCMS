@@ -112,14 +112,42 @@ if ($type_obj['hierarchical'] ?? false) {
 	);
 }
 
-$attribute_fields['template'] = array(
-	'id'          => 'template',
-	'type'        => 'text',
-	'label'       => 'Template',
-	'description' => 'Custom template file name.',
-	'default'     => '',
-	'attributes'  => array( 'placeholder' => 'default' ),
-);
+$page_templates = mc_get_page_templates();
+
+// Build per-page section fields and a map of which templates define each one.
+$section_fields       = array();
+$section_template_map = array(); // [ '_section_foo' => [ 'tpl-a.php', 'tpl-b.php' ] ]
+
+foreach ( $page_templates as $tpl_file => $tpl_data ) {
+	foreach ( ( $tpl_data['sections'] ?? array() ) as $section_id => $section_label ) {
+		$key = '_section_' . $section_id;
+		if ( ! isset( $section_fields[ $key ] ) ) {
+			$section_fields[ $key ] = array(
+				'id'      => $key,
+				'type'    => 'markdown',
+				'label'   => $section_label,
+				'default' => '',
+				'options' => array( 'rows' => 6 ),
+			);
+		}
+		$section_template_map[ $key ][] = $tpl_file;
+	}
+}
+
+if ( ! empty( $page_templates ) ) {
+	$template_choices = array( '' => 'Default' );
+	foreach ( $page_templates as $tpl_file => $tpl_data ) {
+		$template_choices[ $tpl_file ] = $tpl_data['name'];
+	}
+
+	$attribute_fields['template'] = array(
+		'id'      => 'template',
+		'type'    => 'select',
+		'label'   => 'Template',
+		'default' => '',
+		'options' => array( 'choices' => $template_choices ),
+	);
+}
 
 $attribute_fields['order'] = array(
 	'id'      => 'order',
@@ -157,6 +185,12 @@ foreach ($attribute_fields as $fid => $fdef) {
 		// Custom fields: pull from meta.
 		$sidebar_values[ $fid ] = $item['meta'][ $fid ] ?? ( $fdef['default'] ?? '' );
 	}
+}
+
+// Load current values for template section fields from item meta.
+$section_values = array();
+foreach ( $section_fields as $fid => $fdef ) {
+	$section_values[ $fid ] = $item['meta'][ $fid ] ?? '';
 }
 
 /*
@@ -198,6 +232,19 @@ if (mc_is_post_request()) {
 			if (! in_array($fid, $core_keys, true)) {
 				$item['meta'][ $fid ] = $fval;
 			}
+		}
+
+		// Process template section fields and store in meta.
+		if ( ! empty( $section_fields ) ) {
+			$raw_sections = array();
+			foreach ( $section_fields as $fid => $fdef ) {
+				$raw_sections[ $fid ] = mc_input( $fid, 'post' );
+			}
+			$processed_sections = mc_process_fields( $section_fields, $raw_sections );
+			foreach ( $processed_sections['values'] as $fid => $val ) {
+				$item['meta'][ $fid ] = $val;
+			}
+			$section_values = $processed_sections['values'];
 		}
 
 		// Update sidebar_values for re-render.
@@ -257,18 +304,27 @@ $type_supports       = $type_obj['supports'] ?? array( 'title', 'editor', 'excer
 $supports_editor     = in_array('editor', $type_supports, true);
 $supports_excerpt    = in_array('excerpt', $type_supports, true);
 
-if ($supports_editor) {
+if ($supports_editor || ! empty($section_fields)) {
 	define('MC_LOAD_EDITOR', true);
 }
+
+// Body field definition — rendered via Fields API so the markdown type is used.
+$body_field = array(
+	'id'          => 'body',
+	'type'        => 'markdown',
+	'label'       => 'Content (Markdown)',
+	'default'     => '',
+	'attributes'  => array(
+		'placeholder'  => 'Write your content in Markdown…',
+		'data-autosave' => '1',
+	),
+);
+
 require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ($notice) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>" data-dismiss>
-		<p><?php echo mc_esc_html($notice); ?></p>
-	</div>
-<?php endif; ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
 <form method="post" action="" data-slug="<?php echo mc_esc_attr($edit_slug); ?>">
 	<?php mc_nonce_field('edit_content'); ?>
@@ -276,23 +332,40 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 	<div class="editor-layout">
 		<!-- Main editor column -->
 		<div class="editor-main">
-			<div class="form-group<?php echo isset($errors['title']) ? ' field-has-error' : ''; ?>">
-				<label for="field-title">Title</label>
-				<input type="text" id="field-title" name="title" class="form-control" value="<?php echo mc_esc_attr($item['title']); ?>" placeholder="Enter title…" autofocus>
-			</div>
+			<?php
+			mc_render_field(
+				array(
+					'id'         => 'title',
+					'type'       => 'text',
+					'label'      => 'Title',
+					'required'   => true,
+					'attributes' => array(
+						'placeholder' => 'Enter title…',
+						'autofocus'   => 'autofocus',
+					),
+				),
+				$item['title'],
+				$errors['title'] ?? null
+			);
+			?>
 
 			<?php if ($supports_editor) : ?>
-			<div class="form-group">
-				<label>Content (Markdown)</label>
-				<textarea id="editor-markdown" name="body" placeholder="Write your content in Markdown…"><?php echo mc_esc_textarea($body); ?></textarea>
-			</div>
+			<?php mc_render_field($body_field, $body); ?>
 			<?php endif; ?>
 
 			<?php if ($supports_excerpt) : ?>
-			<div class="form-group">
-				<label for="field-excerpt">Excerpt</label>
-				<textarea id="field-excerpt" name="excerpt" class="form-control" rows="3" placeholder="Short summary…"><?php echo mc_esc_textarea($item['excerpt']); ?></textarea>
-			</div>
+			<?php
+			mc_render_field(
+				array(
+					'id'         => 'excerpt',
+					'type'       => 'textarea',
+					'label'      => 'Excerpt',
+					'options'    => array( 'rows' => 3 ),
+					'attributes' => array( 'placeholder' => 'Short summary…' ),
+				),
+				$item['excerpt']
+			);
+			?>
 			<?php endif; ?>
 
 			<?php
@@ -351,9 +424,61 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 			 */
 			mc_do_action('mc_edit_content_sidebar', $content_type, $item);
 			?>
+
+			<?php if ( ! empty( $section_template_map ) ) : ?>
+			<div class="card" id="template-sections-card">
+				<div class="card-header">Template Sections</div>
+				<?php foreach ( $section_template_map as $fid => $tpl_files ) : ?>
+					<div class="template-section-wrapper" data-for-templates="<?php echo mc_esc_attr( implode( ' ', $tpl_files ) ); ?>">
+						<?php
+						$sfdef         = $section_fields[ $fid ];
+						$sfdef['id']   = $fid;
+						mc_render_field( $sfdef, $section_values[ $fid ] ?? '' );
+						?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 </form>
+
+<?php if ( ! empty( $section_template_map ) ) : ?>
+<script>
+( function () {
+	var select   = document.getElementById( 'field-template' );
+	if ( ! select ) return;
+	var card     = document.getElementById( 'template-sections-card' );
+	var wrappers = card ? card.querySelectorAll( '[data-for-templates]' ) : [];
+
+	function updateSections() {
+		var val        = select.value;
+		var anyVisible = false;
+		wrappers.forEach( function ( el ) {
+			var list    = el.dataset.forTemplates ? el.dataset.forTemplates.split( ' ' ) : [];
+			var visible = val !== '' && list.indexOf( val ) !== -1;
+			el.style.display = visible ? '' : 'none';
+			if ( visible ) {
+				anyVisible = true;
+				// Refresh any EasyMDE instances inside this wrapper so CodeMirror
+				// recomputes dimensions after being revealed from display:none.
+				if ( window.mcEditors ) {
+					el.querySelectorAll( 'textarea' ).forEach( function ( ta ) {
+						if ( window.mcEditors[ ta.id ] ) {
+							window.mcEditors[ ta.id ].codemirror.refresh();
+						}
+					} );
+				}
+			}
+		} );
+		if ( card ) card.style.display = anyVisible ? '' : 'none';
+	}
+
+	select.addEventListener( 'change', updateSections );
+	updateSections();
+}() );
+</script>
+<?php endif; ?>
 
 <?php if ($supports_editor) : ?>
 <script src="<?php echo mc_esc_url(mc_admin_url('assets/js/editor.js')); ?>"></script>
