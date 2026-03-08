@@ -88,6 +88,22 @@ class MC_User_Manager
 		$this->encryption_key = $encryption_key;
 	}
 
+	/**
+	 * Update the encryption key at runtime.
+	 *
+	 * Used during setup when a new key is generated after the service
+	 * was already instantiated with the old (empty) key.
+	 *
+	 * @since {version}
+	 *
+	 * @param string $key New encryption key string.
+	 * @return void
+	 */
+	public function set_encryption_key(string $key): void
+	{
+		$this->encryption_key = $key;
+	}
+
 	/*
 	 * -------------------------------------------------------------------------
 	 *  Encrypted storage

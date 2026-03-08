@@ -8,7 +8,7 @@
     "active_theme": "default",
     "active_plugins": [],
     "permalink_structure": "/{type}/{slug}",
-    "front_page": "index",
+    "front_page": "home",
     "posts_per_page": 10,
     "debug": false,
     "secret_key": "",

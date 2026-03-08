@@ -3,7 +3,7 @@
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /minimal/
+RewriteBase /
 
 # If the requested file or directory exists, serve it directly.
 RewriteCond %{REQUEST_FILENAME} !-f

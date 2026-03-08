@@ -483,6 +483,21 @@ class MC_App
 		$this->maybe_define('MC_PERMALINK_STRUCTURE', (string) $config->get('permalink_structure', '/{type}/{slug}/'));
 		$this->maybe_define('MC_ACTIVE_THEME', (string) $config->get('active_theme', 'default'));
 		$this->maybe_define('MC_VERSION', self::VERSION);
+
+		// Derive the URL base path so the router can strip subdirectory prefixes.
+		$site_url = (string) $config->get('site_url', '');
+		if ('' !== $site_url) {
+			$base_path = parse_url($site_url, PHP_URL_PATH) ?: '';
+		} else {
+			$script    = $_SERVER['SCRIPT_NAME'] ?? '';
+			// Strip the CMS-internal portion (index.php or mc-admin/*) to
+			// isolate the subdirectory prefix from SCRIPT_NAME.
+			$base_path = preg_replace('#/(?:index\.php|mc-admin/.*)$#', '', $script);
+			if ('/' === $base_path || '\\' === $base_path || '' === $base_path) {
+				$base_path = '';
+			}
+		}
+		$this->maybe_define('MC_BASE_PATH', rtrim($base_path, '/'));
 	}
 
 	/**

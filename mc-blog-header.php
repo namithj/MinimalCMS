@@ -13,6 +13,12 @@ require_once __DIR__ . '/mc-load.php';
 
 $app = MC_App::instance();
 
+// Step 1b: Redirect to setup wizard when setup is needed.
+if ($app->setup()->needs_setup()) {
+	mc_redirect(mc_admin_url('setup.php'));
+	exit;
+}
+
 // Step 2: Route — parse the request and resolve content.
 $app->router()->parse_request();
 

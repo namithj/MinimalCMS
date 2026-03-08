@@ -139,9 +139,10 @@ function mc_site_url(string $path = ''): string
 	$base = defined('MC_SITE_URL') ? MC_SITE_URL : '';
 
 	if ('' === $base) {
-		$scheme = (isset($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
-		$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-		$base   = $scheme . '://' . $host;
+		$scheme    = (isset($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
+		$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
+		$base_path = defined('MC_BASE_PATH') ? MC_BASE_PATH : '';
+		$base      = $scheme . '://' . $host . $base_path;
 	}
 
 	if ('' === $path) {

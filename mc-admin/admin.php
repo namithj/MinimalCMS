@@ -31,11 +31,8 @@ if (preg_match('#/mc-admin/([a-zA-Z0-9_-]+\.php)#', $request_uri, $_m)) {
 }
 unset($_m);
 
-// ── First-run detection: redirect to setup if no users exist ───────────
-$existing_users = mc_get_users();
-$needs_setup    = ! is_array($existing_users) || 0 === count($existing_users);
-
-if ($needs_setup && 'setup.php' !== $admin_page) {
+// ── First-run detection: redirect to setup if needed ───────────────────
+if (mc_app()->setup()->needs_setup() && 'setup.php' !== $admin_page) {
 	mc_redirect(mc_admin_url('setup.php'));
 	exit;
 }

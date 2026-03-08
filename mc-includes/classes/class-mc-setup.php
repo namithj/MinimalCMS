@@ -64,6 +64,10 @@ class MC_Setup
 	public function needs_setup(): bool
 	{
 
+		if ($this->config->is_fresh_install()) {
+			return true;
+		}
+
 		$all_users = $this->users->get_users();
 		return empty($all_users);
 	}

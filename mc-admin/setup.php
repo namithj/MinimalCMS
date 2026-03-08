@@ -15,19 +15,19 @@ require_once __DIR__ . '/admin.php';
 /*
  * ── Guard: redirect away if already set up ─────────────────────────────────
  */
-$existing_users = mc_get_users();
-if (is_array($existing_users) && count($existing_users) > 0) {
+if (!mc_app()->setup()->needs_setup()) {
 	mc_redirect(mc_admin_url('login.php'));
 	exit;
 }
 
+$step        = (int) ($_GET['step'] ?? 1);
 $notice      = '';
 $notice_type = 'error';
 
 /*
- * ── Process form submission ────────────────────────────────────────────────
+ * ── Step 2: Process form submission ────────────────────────────────────────
  */
-if (mc_is_post_request()) {
+if (2 === $step && mc_is_post_request()) {
 	$site_name = mc_sanitize_text(mc_input('site_name', 'post') ?? '');
 	$username  = mc_sanitize_slug(mc_input('username', 'post') ?? '');
 	$email     = mc_sanitize_email(mc_input('email', 'post') ?? '');
@@ -70,7 +70,19 @@ if (mc_is_post_request()) {
 			$config['secret_key'] = bin2hex(random_bytes(32));
 		}
 
-		$config['site_name'] = $site_name;
+		$config['site_name']  = $site_name;
+		$config['front_page'] = 'home';
+
+		/*
+		 * 2b. Auto-detect site_url when it is blank (fresh install).
+		 */
+		if (empty($config['site_url'])) {
+			$scheme = (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
+			$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+			$base   = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/mc-admin/setup.php'));
+			$base   = ('/' === $base || '\\' === $base) ? '' : $base;
+			$config['site_url'] = $scheme . '://' . $host . $base;
+		}
 
 		/*
 		 * 3. Save config first (encryption_key needed for user file).
@@ -81,7 +93,13 @@ if (mc_is_post_request()) {
 			$notice = 'Could not save configuration. Check file permissions.';
 		} else {
 			/*
-			 * 4. Create admin user.
+			 * 4. Update the user manager's encryption key to the newly
+			 *    generated one so the user file is encrypted correctly.
+			 */
+			mc_app()->users()->set_encryption_key($config['encryption_key']);
+
+			/*
+			 * 5. Create admin user.
 			 */
 			$user = mc_create_user(
 				array(
@@ -96,13 +114,26 @@ if (mc_is_post_request()) {
 			if (mc_is_error($user)) {
 				$notice = 'Could not create user: ' . $user->get_error_message();
 			} else {
-				// Log in and redirect immediately to dashboard.
+				/*
+				 * 6. Seed general settings from the setup form values.
+				 */
+				mc_update_settings('core.general', array(
+					'site_name'  => $site_name,
+					'site_url'   => $config['site_url'],
+					'front_page' => 'home',
+				));
+
+				// Log in and advance to success step.
 				mc_start_session();
 				mc_set_auth_session($username);
-				mc_redirect(mc_admin_url());
-				exit;
+
+				$step = 3;
 			}
 		}
+	}
+
+	if ($notice) {
+		$step = 1;
 	}
 }
 
@@ -121,7 +152,15 @@ if (mc_is_post_request()) {
 		<div class="auth-logo">Minimal<span>CMS</span></div>
 		<div class="auth-box">
 
-		<?php // ── Setup Form ─────────────────────────────────────────────── ?>
+		<?php if (3 === $step) : // ── Success ──────────────────────────── ?>
+			<div style="text-align:center;font-size:3rem;margin-bottom:16px;">&#x2705;</div>
+			<h1 style="text-align:center;">All Set!</h1>
+			<p class="lead" style="text-align:center;">Your site is ready. You've been logged in as the admin.</p>
+			<div style="text-align:center;margin-top:20px;">
+				<a href="<?php echo mc_esc_url(rtrim($config['site_url'] ?? mc_site_url(), '/') . '/mc-admin/'); ?>" class="btn btn-full-width">Go to Dashboard</a>
+			</div>
+
+		<?php else : // ── Setup Form ──────────────────────────────────────── ?>
 			<h1>Welcome to MinimalCMS</h1>
 			<p class="lead">Let's set up your site. This will only take a moment.</p>
 
@@ -129,7 +168,7 @@ if (mc_is_post_request()) {
 				<div class="notice notice-error"><?php echo mc_esc_html($notice); ?></div>
 			<?php endif; ?>
 
-			<form method="post" action="">
+			<form method="post" action="?step=2">
 				<div class="form-group">
 					<label for="site_name">Site Name</label>
 					<input type="text" id="site_name" name="site_name"
@@ -163,6 +202,8 @@ if (mc_is_post_request()) {
 
 				<button type="submit" class="btn btn-full-width">Install MinimalCMS</button>
 			</form>
+
+		<?php endif; ?>
 
 		</div>
 	</div>
