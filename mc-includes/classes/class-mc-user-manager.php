@@ -628,7 +628,6 @@ class MC_User_Manager
 	public function logout_url(): string
 	{
 
-		$site_url = defined('MC_SITE_URL') ? MC_SITE_URL : '';
-		return rtrim($site_url, '/') . '/mc-admin/login.php?action=logout';
+		return mc_admin_url('login.php?action=logout');
 	}
 }

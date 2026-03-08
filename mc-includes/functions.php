@@ -136,13 +136,17 @@ function mc_app(): MC_App
  */
 function mc_site_url(string $path = ''): string
 {
-	$base = defined('MC_SITE_URL') ? MC_SITE_URL : '';
+	// Always auto-detect from the current request so the CMS is not
+	// tied to a hardcoded URL. Fall back to the configured site_url
+	// only in CLI / non-web contexts where HTTP_HOST is unavailable.
+	$host = $_SERVER['HTTP_HOST'] ?? '';
 
-	if ('' === $base) {
+	if ('' !== $host) {
 		$scheme    = (isset($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
-		$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
 		$base_path = defined('MC_BASE_PATH') ? MC_BASE_PATH : '';
 		$base      = $scheme . '://' . $host . $base_path;
+	} else {
+		$base = defined('MC_SITE_URL') ? MC_SITE_URL : '';
 	}
 
 	if ('' === $path) {

@@ -51,3 +51,4 @@ mc-content/forms-submissions/.htaccess
 mc-content/forms-submissions/index.php
 mc-content/posts/hello-world/hello-world.json
 mc-content/posts/hello-world/hello-world.md
+.phpunit.cache/test-results
