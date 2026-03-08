@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_User_Manager — User CRUD, authentication, and encrypted storage.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_User_Manager {
-
+class MC_User_Manager
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -100,7 +101,8 @@ class MC_User_Manager {
 	 *
 	 * @return array List of user arrays, or empty array on failure.
 	 */
-	public function read_users(): array {
+	public function read_users(): array
+	{
 
 		if (!is_file($this->users_file) || !is_readable($this->users_file)) {
 			return array();
@@ -158,7 +160,8 @@ class MC_User_Manager {
 	 * @param array $users List of user arrays.
 	 * @return bool True on success.
 	 */
-	public function write_users(array $users): bool {
+	public function write_users(array $users): bool
+	{
 
 		$plaintext = json_encode($users, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 		$key       = $this->derive_encryption_key();
@@ -188,7 +191,8 @@ class MC_User_Manager {
 	 *
 	 * @return string 32-byte binary key.
 	 */
-	private function derive_encryption_key(): string {
+	private function derive_encryption_key(): string
+	{
 
 		$decoded = base64_decode($this->encryption_key, true);
 		if (false !== $decoded && SODIUM_CRYPTO_SECRETBOX_KEYBYTES === strlen($decoded)) {
@@ -212,7 +216,8 @@ class MC_User_Manager {
 	 * @param string $username The username to look up.
 	 * @return array|null User data array or null if not found.
 	 */
-	public function get_user(string $username): ?array {
+	public function get_user(string $username): ?array
+	{
 
 		$users = $this->read_users();
 
@@ -233,7 +238,8 @@ class MC_User_Manager {
 	 * @param string $email Email to search for.
 	 * @return array|null User data or null.
 	 */
-	public function get_user_by_email(string $email): ?array {
+	public function get_user_by_email(string $email): ?array
+	{
 
 		$users = $this->read_users();
 
@@ -262,7 +268,8 @@ class MC_User_Manager {
 	 * }
 	 * @return true|MC_Error True on success, MC_Error on failure.
 	 */
-	public function create_user(array $data): true|MC_Error {
+	public function create_user(array $data): true|MC_Error
+	{
 
 		if (empty($data['username']) || empty($data['email']) || empty($data['password'])) {
 			return new MC_Error('missing_fields', 'Username, email, and password are required.');
@@ -323,7 +330,8 @@ class MC_User_Manager {
 	 * @param array  $data     Fields to update (email, display_name, role, password, meta).
 	 * @return true|MC_Error True on success.
 	 */
-	public function update_user(string $username, array $data): true|MC_Error {
+	public function update_user(string $username, array $data): true|MC_Error
+	{
 
 		/**
 		 * Filter user data before update.
@@ -386,7 +394,8 @@ class MC_User_Manager {
 	 * @param string $username Username to delete.
 	 * @return true|MC_Error True on success.
 	 */
-	public function delete_user(string $username): true|MC_Error {
+	public function delete_user(string $username): true|MC_Error
+	{
 
 		$users    = $this->read_users();
 		$filtered = array();
@@ -420,7 +429,8 @@ class MC_User_Manager {
 	 *
 	 * @return array List of user arrays.
 	 */
-	public function get_users(): array {
+	public function get_users(): array
+	{
 
 		$users     = $this->read_users();
 		$sanitised = array();
@@ -448,7 +458,8 @@ class MC_User_Manager {
 	 * @param string $password The plaintext password.
 	 * @return array|MC_Error User data on success, MC_Error on failure.
 	 */
-	public function authenticate(string $username, string $password): array|MC_Error {
+	public function authenticate(string $username, string $password): array|MC_Error
+	{
 
 		/**
 		 * Pre-authentication filter.
@@ -487,7 +498,8 @@ class MC_User_Manager {
 	 * @param string $password Password.
 	 * @return array|MC_Error User data on success, MC_Error on failure.
 	 */
-	public function login(string $username, string $password): array|MC_Error {
+	public function login(string $username, string $password): array|MC_Error
+	{
 
 		$result = $this->authenticate($username, $password);
 
@@ -509,7 +521,8 @@ class MC_User_Manager {
 	 *
 	 * @return void
 	 */
-	public function logout(): void {
+	public function logout(): void
+	{
 
 		$username = $this->get_current_user_id();
 
@@ -531,7 +544,8 @@ class MC_User_Manager {
 	 *
 	 * @return array|null User data or null if not logged in.
 	 */
-	public function get_current_user(): ?array {
+	public function get_current_user(): ?array
+	{
 
 		$username = $this->session->get_current_username();
 
@@ -549,7 +563,8 @@ class MC_User_Manager {
 	 *
 	 * @return string Username or empty string.
 	 */
-	public function get_current_user_id(): string {
+	public function get_current_user_id(): string
+	{
 
 		return $this->session->get_current_username() ?? '';
 	}
@@ -561,7 +576,8 @@ class MC_User_Manager {
 	 *
 	 * @return bool
 	 */
-	public function is_logged_in(): bool {
+	public function is_logged_in(): bool
+	{
 
 		return $this->session->is_active();
 	}
@@ -574,7 +590,8 @@ class MC_User_Manager {
 	 * @param string $capability Capability name.
 	 * @return bool
 	 */
-	public function current_user_can(string $capability): bool {
+	public function current_user_can(string $capability): bool
+	{
 
 		$user = $this->get_current_user();
 
@@ -592,7 +609,8 @@ class MC_User_Manager {
 	 *
 	 * @return string Logout URL.
 	 */
-	public function logout_url(): string {
+	public function logout_url(): string
+	{
 
 		$site_url = defined('MC_SITE_URL') ? MC_SITE_URL : '';
 		return rtrim($site_url, '/') . '/mc-admin/login.php?action=logout';

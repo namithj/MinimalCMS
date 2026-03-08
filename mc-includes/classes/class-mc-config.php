@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Configuration
  *
@@ -17,8 +18,8 @@
  *
  * @since {version}
  */
-class MC_Config {
-
+class MC_Config
+{
 	/**
 	 * Parsed configuration data.
 	 *
@@ -51,7 +52,8 @@ class MC_Config {
 	 * @param string $config_path Absolute path to config.json.
 	 * @param string $sample_path Absolute path to config.sample.json.
 	 */
-	public function __construct(string $config_path, string $sample_path) {
+	public function __construct(string $config_path, string $sample_path)
+	{
 
 		$this->config_path = $config_path;
 		$this->sample_path = $sample_path;
@@ -66,7 +68,8 @@ class MC_Config {
 	 *
 	 * @return array The parsed configuration.
 	 */
-	public function load(): array {
+	public function load(): array
+	{
 
 		$path = is_file($this->config_path) ? $this->config_path : $this->sample_path;
 
@@ -101,7 +104,8 @@ class MC_Config {
 	 * @param mixed  $default Default value if key not found.
 	 * @return mixed
 	 */
-	public function get(string $key, mixed $default = null): mixed {
+	public function get(string $key, mixed $default = null): mixed
+	{
 
 		if (isset($this->data[$key])) {
 			return $this->data[$key];
@@ -130,7 +134,8 @@ class MC_Config {
 	 * @param mixed  $value Value to set.
 	 * @return void
 	 */
-	public function set(string $key, mixed $value): void {
+	public function set(string $key, mixed $value): void
+	{
 
 		$this->data[$key] = $value;
 	}
@@ -142,7 +147,8 @@ class MC_Config {
 	 *
 	 * @return bool True on success, false on failure.
 	 */
-	public function save(): bool {
+	public function save(): bool
+	{
 
 		$json = json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
@@ -160,7 +166,8 @@ class MC_Config {
 	 *
 	 * @return bool True if config.json does not exist.
 	 */
-	public function is_fresh_install(): bool {
+	public function is_fresh_install(): bool
+	{
 
 		return !is_file($this->config_path);
 	}
@@ -172,7 +179,8 @@ class MC_Config {
 	 *
 	 * @return array
 	 */
-	public function all(): array {
+	public function all(): array
+	{
 
 		return $this->data;
 	}
@@ -185,7 +193,8 @@ class MC_Config {
 	 * @param string $abspath The MC_ABSPATH value for building paths.
 	 * @return void
 	 */
-	public function define_constants(string $abspath): void {
+	public function define_constants(string $abspath): void
+	{
 
 		$this->maybe_define('MC_INC', $abspath . 'mc-includes/');
 
@@ -225,7 +234,8 @@ class MC_Config {
 	 * @param mixed  $value Constant value.
 	 * @return void
 	 */
-	private function maybe_define(string $name, mixed $value): void {
+	private function maybe_define(string $name, mixed $value): void
+	{
 
 		if (!defined($name)) {
 			define($name, $value);

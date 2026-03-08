@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Markdown — Parsedown wrapper.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Markdown {
-
+class MC_Markdown
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -39,7 +40,8 @@ class MC_Markdown {
 	 *
 	 * @param MC_Hooks $hooks Hooks engine.
 	 */
-	public function __construct(MC_Hooks $hooks) {
+	public function __construct(MC_Hooks $hooks)
+	{
 
 		$this->hooks = $hooks;
 	}
@@ -52,7 +54,8 @@ class MC_Markdown {
 	 * @param string $markdown Raw Markdown text.
 	 * @return string Rendered HTML.
 	 */
-	public function parse(string $markdown): string {
+	public function parse(string $markdown): string
+	{
 
 		/**
 		 * Filter raw markdown before parsing.

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Field_Registry — Form field type registration, rendering, sanitisation.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Field_Registry {
-
+class MC_Field_Registry
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -46,7 +47,8 @@ class MC_Field_Registry {
 	 * @param MC_Hooks     $hooks     Hooks engine.
 	 * @param MC_Formatter $formatter Formatter for escaping/sanitising.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Formatter $formatter) {
+	public function __construct(MC_Hooks $hooks, MC_Formatter $formatter)
+	{
 
 		$this->hooks     = $hooks;
 		$this->formatter = $formatter;
@@ -72,7 +74,8 @@ class MC_Field_Registry {
 	 * }
 	 * @return true|MC_Error
 	 */
-	public function register_type(string $type, array $args): true|MC_Error {
+	public function register_type(string $type, array $args): true|MC_Error
+	{
 
 		if ('' === $type) {
 			return new MC_Error('invalid_field_type', 'Field type slug cannot be empty.');
@@ -114,7 +117,8 @@ class MC_Field_Registry {
 	 * @param string $type Type slug.
 	 * @return array|null
 	 */
-	public function get_type(string $type): ?array {
+	public function get_type(string $type): ?array
+	{
 
 		return $this->types[$type] ?? null;
 	}
@@ -126,7 +130,8 @@ class MC_Field_Registry {
 	 *
 	 * @return array
 	 */
-	public function get_types(): array {
+	public function get_types(): array
+	{
 
 		return $this->types;
 	}
@@ -147,7 +152,8 @@ class MC_Field_Registry {
 	 * @param string|null $error Error message for this field.
 	 * @return void
 	 */
-	public function render(array $field, mixed $value = null, ?string $error = null): void {
+	public function render(array $field, mixed $value = null, ?string $error = null): void
+	{
 
 		$type_def = $this->get_type($field['type'] ?? 'text');
 		if (null === $type_def) {
@@ -225,7 +231,8 @@ class MC_Field_Registry {
 	 * @param array  $field Full field definition.
 	 * @return mixed Sanitised value.
 	 */
-	public function sanitize(string $type, mixed $value, array $field = array()): mixed {
+	public function sanitize(string $type, mixed $value, array $field = array()): mixed
+	{
 
 		$type_def = $this->get_type($type);
 		if (null === $type_def) {
@@ -257,7 +264,8 @@ class MC_Field_Registry {
 	 * @param array  $field Full field definition.
 	 * @return true|string True if valid or error message.
 	 */
-	public function validate(string $type, mixed $value, array $field = array()): true|string {
+	public function validate(string $type, mixed $value, array $field = array()): true|string
+	{
 
 		if (!empty($field['required']) && ('' === $value || null === $value)) {
 			$label = $field['label'] ?? $field['id'] ?? 'This field';
@@ -295,7 +303,8 @@ class MC_Field_Registry {
 	 * @param array $raw    Raw input values keyed by field ID.
 	 * @return array{values: array, errors: array}
 	 */
-	public function process(array $fields, array $raw): array {
+	public function process(array $fields, array $raw): array
+	{
 
 		$values = array();
 		$errors = array();
@@ -351,7 +360,8 @@ class MC_Field_Registry {
 	 * @param array $field Field definition.
 	 * @return string
 	 */
-	public function default_sanitize(mixed $value, array $field = array()): string {
+	public function default_sanitize(mixed $value, array $field = array()): string
+	{
 
 		return $this->formatter->sanitize_text((string) $value);
 	}
@@ -365,7 +375,8 @@ class MC_Field_Registry {
 	 * @param array $field Field definition.
 	 * @return true
 	 */
-	public function default_validate(mixed $value, array $field = array()): true {
+	public function default_validate(mixed $value, array $field = array()): true
+	{
 
 		return true;
 	}
@@ -383,7 +394,8 @@ class MC_Field_Registry {
 	 *
 	 * @return void
 	 */
-	public function register_core_types(): void {
+	public function register_core_types(): void
+	{
 
 		$fmt = $this->formatter;
 
@@ -561,7 +573,8 @@ class MC_Field_Registry {
 	 * @param bool  $is_textarea Whether the element is a textarea (skip value attr).
 	 * @return string
 	 */
-	public function build_attributes(array $field, array $extras = array(), bool $is_textarea = false): string {
+	public function build_attributes(array $field, array $extras = array(), bool $is_textarea = false): string
+	{
 
 		$id   = $this->formatter->esc_attr($field['id'] ?? '');
 		$name = $id;
@@ -580,11 +593,7 @@ class MC_Field_Registry {
 		}
 
 		foreach ($extras as $key => $val) {
-			if (!isset($attrs[$key]) && 'type' !== $key && 'value' !== $key) {
-				$attrs[$key] = $val;
-			} elseif ('type' !== $key && 'value' !== $key) {
-				// already set
-			} else {
+			if ('type' !== $key && 'value' !== $key && !isset($attrs[$key])) {
 				$attrs[$key] = $val;
 			}
 		}

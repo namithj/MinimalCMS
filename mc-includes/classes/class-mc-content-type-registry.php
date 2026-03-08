@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Content_Type_Registry — Content type definitions.
  *
@@ -15,8 +16,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Content_Type_Registry {
-
+class MC_Content_Type_Registry
+{
 	/**
 	 * Registered types keyed by slug.
 	 *
@@ -47,7 +48,8 @@ class MC_Content_Type_Registry {
 	 * @param MC_Hooks $hooks       Hooks engine.
 	 * @param string   $content_dir Base content directory.
 	 */
-	public function __construct(MC_Hooks $hooks, string $content_dir) {
+	public function __construct(MC_Hooks $hooks, string $content_dir)
+	{
 
 		$this->hooks       = $hooks;
 		$this->content_dir = rtrim($content_dir, '/') . '/';
@@ -62,7 +64,8 @@ class MC_Content_Type_Registry {
 	 * @param array  $args Type configuration.
 	 * @return void
 	 */
-	public function register(string $slug, array $args = array()): void {
+	public function register(string $slug, array $args = array()): void
+	{
 
 		$defaults = array(
 			'label'        => ucfirst($slug) . 's',
@@ -117,7 +120,8 @@ class MC_Content_Type_Registry {
 	 * @param string $slug Type slug.
 	 * @return array|null Type definition or null.
 	 */
-	public function get(string $slug): ?array {
+	public function get(string $slug): ?array
+	{
 
 		return $this->types[$slug] ?? null;
 	}
@@ -129,7 +133,8 @@ class MC_Content_Type_Registry {
 	 *
 	 * @return array Associative array of slug => definition.
 	 */
-	public function all(): array {
+	public function all(): array
+	{
 
 		/**
 		 * Filter all content types when retrieved.
@@ -149,7 +154,8 @@ class MC_Content_Type_Registry {
 	 * @param string $type Content type slug.
 	 * @return string Folder name (no slashes).
 	 */
-	public function type_folder(string $type): string {
+	public function type_folder(string $type): string
+	{
 
 		if (isset($this->types[$type]['folder'])) {
 			return $this->types[$type]['folder'];
@@ -165,7 +171,8 @@ class MC_Content_Type_Registry {
 	 *
 	 * @return void
 	 */
-	public function register_defaults(): void {
+	public function register_defaults(): void
+	{
 
 		$this->register('page', array(
 			'label'        => 'Pages',

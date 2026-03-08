@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Router class.
  *
@@ -18,15 +19,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Router
  */
-class MCRouterClassTest extends TestCase {
-
+class MCRouterClassTest extends TestCase
+{
 	private MC_Router $router;
 	private MC_Hooks $hooks;
 	private MC_Content_Manager $content;
 	private MC_Content_Type_Registry $types;
 	private string $content_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->content_dir = sys_get_temp_dir() . '/mc_router_test_' . uniqid() . '/';
 		mkdir($this->content_dir, 0755, true);
@@ -49,12 +51,14 @@ class MCRouterClassTest extends TestCase {
 		$this->router = new MC_Router($this->hooks, $this->content, $this->types);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->content_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -69,12 +73,14 @@ class MCRouterClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_instantiation(): void {
+	public function test_instantiation(): void
+	{
 
 		$this->assertInstanceOf(MC_Router::class, $this->router);
 	}
 
-	public function test_add_route(): void {
+	public function test_add_route(): void
+	{
 
 		$called = false;
 		$this->router->add_route('/test', function () use (&$called) {
@@ -85,33 +91,39 @@ class MCRouterClassTest extends TestCase {
 		$this->assertFalse($called, 'Callback should not execute on registration alone');
 	}
 
-	public function test_get_query_returns_array(): void {
+	public function test_get_query_returns_array(): void
+	{
 
 		$query = $this->router->get_query();
 		$this->assertIsArray($query);
 	}
 
-	public function test_is_404_default(): void {
+	public function test_is_404_default(): void
+	{
 
 		$this->assertFalse($this->router->is_404());
 	}
 
-	public function test_is_front_page_default(): void {
+	public function test_is_front_page_default(): void
+	{
 
 		$this->assertFalse($this->router->is_front_page());
 	}
 
-	public function test_is_single_default(): void {
+	public function test_is_single_default(): void
+	{
 
 		$this->assertFalse($this->router->is_single());
 	}
 
-	public function test_is_archive_default(): void {
+	public function test_is_archive_default(): void
+	{
 
 		$this->assertFalse($this->router->is_archive());
 	}
 
-	public function test_get_page_num_default(): void {
+	public function test_get_page_num_default(): void
+	{
 
 		$this->assertSame(1, $this->router->get_page_num());
 	}

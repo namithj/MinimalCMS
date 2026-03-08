@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Hook Engine
  *
@@ -17,8 +18,8 @@
  *
  * @since {version}
  */
-class MC_Hooks {
-
+class MC_Hooks
+{
 	/**
 	 * All registered hooks (actions and filters share the same storage).
 	 *
@@ -73,7 +74,8 @@ class MC_Hooks {
 	 * @param int      $accepted_args Number of arguments the callback accepts. Default 1.
 	 * @return bool Always returns true.
 	 */
-	public function add_filter(string $hook, callable $callback, int $priority = 10, int $accepted_args = 1): bool {
+	public function add_filter(string $hook, callable $callback, int $priority = 10, int $accepted_args = 1): bool
+	{
 
 		$this->filters[$hook][$priority][] = array(
 			'callback'      => $callback,
@@ -93,7 +95,8 @@ class MC_Hooks {
 	 * @param mixed  ...$args Additional arguments passed to each callback.
 	 * @return mixed The filtered value.
 	 */
-	public function apply_filters(string $hook, mixed $value, mixed ...$args): mixed {
+	public function apply_filters(string $hook, mixed $value, mixed ...$args): mixed
+	{
 
 		$this->filter_counts[$hook] = ($this->filter_counts[$hook] ?? 0) + 1;
 
@@ -133,7 +136,8 @@ class MC_Hooks {
 	 * @param int      $priority The priority it was registered with.
 	 * @return bool True if removed, false if not found.
 	 */
-	public function remove_filter(string $hook, callable $callback, int $priority = 10): bool {
+	public function remove_filter(string $hook, callable $callback, int $priority = 10): bool
+	{
 
 		if (empty($this->filters[$hook][$priority])) {
 			return false;
@@ -161,7 +165,8 @@ class MC_Hooks {
 	 * @param callable|null $callback Optional. Specific callback to look for.
 	 * @return bool|int False if not registered; true or the priority int if found.
 	 */
-	public function has_filter(string $hook, ?callable $callback = null): bool|int {
+	public function has_filter(string $hook, ?callable $callback = null): bool|int
+	{
 
 		if (!isset($this->filters[$hook])) {
 			return false;
@@ -191,7 +196,8 @@ class MC_Hooks {
 	 * @param int|false $priority Specific priority to clear, or false for all.
 	 * @return bool Always returns true.
 	 */
-	public function remove_all_filters(string $hook, int|false $priority = false): bool {
+	public function remove_all_filters(string $hook, int|false $priority = false): bool
+	{
 
 		if (false === $priority) {
 			unset($this->filters[$hook]);
@@ -219,7 +225,8 @@ class MC_Hooks {
 	 * @param int      $accepted_args Number of arguments the callback accepts. Default 1.
 	 * @return bool Always returns true.
 	 */
-	public function add_action(string $hook, callable $callback, int $priority = 10, int $accepted_args = 1): bool {
+	public function add_action(string $hook, callable $callback, int $priority = 10, int $accepted_args = 1): bool
+	{
 
 		return $this->add_filter($hook, $callback, $priority, $accepted_args);
 	}
@@ -233,7 +240,8 @@ class MC_Hooks {
 	 * @param mixed  ...$args Arguments to pass to each callback.
 	 * @return void
 	 */
-	public function do_action(string $hook, mixed ...$args): void {
+	public function do_action(string $hook, mixed ...$args): void
+	{
 
 		$this->action_counts[$hook] = ($this->action_counts[$hook] ?? 0) + 1;
 
@@ -268,7 +276,8 @@ class MC_Hooks {
 	 * @param int      $priority The priority it was registered with.
 	 * @return bool True if removed, false if not found.
 	 */
-	public function remove_action(string $hook, callable $callback, int $priority = 10): bool {
+	public function remove_action(string $hook, callable $callback, int $priority = 10): bool
+	{
 
 		return $this->remove_filter($hook, $callback, $priority);
 	}
@@ -282,7 +291,8 @@ class MC_Hooks {
 	 * @param callable|null $callback Optional. Specific callback to search for.
 	 * @return bool|int False if not found; true or the priority int if found.
 	 */
-	public function has_action(string $hook, ?callable $callback = null): bool|int {
+	public function has_action(string $hook, ?callable $callback = null): bool|int
+	{
 
 		return $this->has_filter($hook, $callback);
 	}
@@ -296,7 +306,8 @@ class MC_Hooks {
 	 * @param int|false $priority Specific priority to clear, or false for all.
 	 * @return bool Always returns true.
 	 */
-	public function remove_all_actions(string $hook, int|false $priority = false): bool {
+	public function remove_all_actions(string $hook, int|false $priority = false): bool
+	{
 
 		return $this->remove_all_filters($hook, $priority);
 	}
@@ -315,7 +326,8 @@ class MC_Hooks {
 	 * @param string $hook The action hook name.
 	 * @return int The execution count.
 	 */
-	public function did_action(string $hook): int {
+	public function did_action(string $hook): int
+	{
 
 		return $this->action_counts[$hook] ?? 0;
 	}
@@ -328,7 +340,8 @@ class MC_Hooks {
 	 * @param string $hook The filter hook name.
 	 * @return int The application count.
 	 */
-	public function did_filter(string $hook): int {
+	public function did_filter(string $hook): int
+	{
 
 		return $this->filter_counts[$hook] ?? 0;
 	}
@@ -341,7 +354,8 @@ class MC_Hooks {
 	 * @param string|null $hook Optional. Specific hook to check. Null checks if any hook is executing.
 	 * @return bool True if the hook (or any hook) is executing.
 	 */
-	public function doing_filter(?string $hook = null): bool {
+	public function doing_filter(?string $hook = null): bool
+	{
 
 		if (null === $hook) {
 			return !empty($this->current_filter);
@@ -358,7 +372,8 @@ class MC_Hooks {
 	 * @param string|null $hook Optional. Specific hook to check.
 	 * @return bool True if the hook is executing.
 	 */
-	public function doing_action(?string $hook = null): bool {
+	public function doing_action(?string $hook = null): bool
+	{
 
 		return $this->doing_filter($hook);
 	}
@@ -370,7 +385,8 @@ class MC_Hooks {
 	 *
 	 * @return string|false Hook name or false if none executing.
 	 */
-	public function current_filter(): string|false {
+	public function current_filter(): string|false
+	{
 
 		$current = end($this->current_filter);
 		return (false === $current) ? false : $current;

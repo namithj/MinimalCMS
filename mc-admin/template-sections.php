@@ -18,8 +18,8 @@
 
 require_once __DIR__ . '/admin.php';
 
-if ( ! mc_current_user_can( 'manage_themes' ) ) {
-	mc_redirect( mc_admin_url() );
+if (! mc_current_user_can('manage_themes')) {
+	mc_redirect(mc_admin_url());
 	exit;
 }
 
@@ -29,10 +29,10 @@ if ( ! mc_current_user_can( 'manage_themes' ) ) {
 $page_templates  = mc_get_page_templates();
 $global_sections = array(); // [ '_global_id' => [ 'label', 'template_name', 'template_file' ] ]
 
-foreach ( $page_templates as $tpl_file => $tpl_data ) {
-	foreach ( ( $tpl_data['global_sections'] ?? array() ) as $section_id => $section_label ) {
+foreach ($page_templates as $tpl_file => $tpl_data) {
+	foreach (( $tpl_data['global_sections'] ?? array() ) as $section_id => $section_label) {
 		$key = '_global_' . $section_id;
-		if ( ! isset( $global_sections[ $key ] ) ) {
+		if (! isset($global_sections[ $key ])) {
 			$global_sections[ $key ] = array(
 				'label'         => $section_label,
 				'template_name' => $tpl_data['name'],
@@ -47,26 +47,26 @@ foreach ( $page_templates as $tpl_file => $tpl_data ) {
  */
 $notice      = '';
 $notice_type = 'success';
-$values      = mc_get_settings( 'theme.sections' );
+$values      = mc_get_settings('theme.sections');
 
-if ( mc_is_post_request() ) {
-	if ( ! mc_verify_nonce( mc_input( '_mc_nonce', 'post' ), 'save_global_sections' ) ) {
+if (mc_is_post_request()) {
+	if (! mc_verify_nonce(mc_input('_mc_nonce', 'post'), 'save_global_sections')) {
 		$notice      = 'Invalid security token. Please try again.';
 		$notice_type = 'error';
 	} else {
 		$save = array();
-		foreach ( $global_sections as $key => $info ) {
-			$raw          = mc_input( $key, 'post' ) ?? '';
-			$sanitized    = mc_sanitize_field( array( 'type' => 'markdown' ), $raw );
+		foreach ($global_sections as $key => $info) {
+			$raw          = mc_input($key, 'post') ?? '';
+			$sanitized    = mc_sanitize_field(array( 'type' => 'markdown' ), $raw);
 			$save[ $key ] = $sanitized;
 		}
 
-		$result = mc_update_settings( 'theme.sections', $save );
-		if ( mc_is_error( $result ) ) {
+		$result = mc_update_settings('theme.sections', $save);
+		if (mc_is_error($result)) {
 			$notice      = $result->get_error_message();
 			$notice_type = 'error';
 		} else {
-			$values = mc_get_settings( 'theme.sections' );
+			$values = mc_get_settings('theme.sections');
 			$notice = 'Global sections saved successfully.';
 		}
 	}
@@ -75,13 +75,15 @@ if ( mc_is_post_request() ) {
 /*
  * ── Render ─────────────────────────────────────────────────────────────────
  */
-$admin_page_title = 'Template Sections';define( 'MC_LOAD_EDITOR', true );require MC_ABSPATH . 'mc-admin/admin-header.php';
+$admin_page_title = 'Template Sections';
+define('MC_LOAD_EDITOR', true);
+require MC_ABSPATH . 'mc-admin/admin-header.php';
 
 ?>
 
-<?php if ( $notice ) : ?>
-	<div class="notice notice-<?php echo mc_esc_attr( $notice_type ); ?>" data-dismiss>
-		<p><?php echo mc_esc_html( $notice ); ?></p>
+<?php if ($notice) : ?>
+	<div class="notice notice-<?php echo mc_esc_attr($notice_type); ?>" data-dismiss>
+		<p><?php echo mc_esc_html($notice); ?></p>
 	</div>
 <?php endif; ?>
 
@@ -90,29 +92,28 @@ $admin_page_title = 'Template Sections';define( 'MC_LOAD_EDITOR', true );require
 	<p style="margin-top:.4rem;font-size:.9rem;color:#646970;">These values are shared across the entire site. A page can override any section with its own local content via the page editor.</p>
 </div>
 
-<?php if ( empty( $global_sections ) ) : ?>
+<?php if (empty($global_sections)) : ?>
 	<div class="empty-state">
 		<div class="icon">&#x1F4DD;</div>
 		<p>No global sections found. Declare them in a template file with a <code>Global Sections: id:Label</code> header comment.</p>
 	</div>
 <?php else : ?>
-
 	<?php
 	// Group sections by template name for display.
 	$by_template = array();
-	foreach ( $global_sections as $key => $info ) {
+	foreach ($global_sections as $key => $info) {
 		$by_template[ $info['template_name'] ][ $key ] = $info;
 	}
 	?>
 
 	<form method="post" action="">
-		<?php mc_nonce_field( 'save_global_sections' ); ?>
+		<?php mc_nonce_field('save_global_sections'); ?>
 
-		<?php foreach ( $by_template as $tpl_name => $sections ) : ?>
+		<?php foreach ($by_template as $tpl_name => $sections) : ?>
 			<div class="card" style="margin-bottom:1.5rem;">
-				<div class="card-header"><?php echo mc_esc_html( $tpl_name ); ?></div>
+				<div class="card-header"><?php echo mc_esc_html($tpl_name); ?></div>
 
-				<?php foreach ( $sections as $key => $info ) : ?>
+				<?php foreach ($sections as $key => $info) : ?>
 					<?php
 					$gfield = array(
 						'id'          => $key,
@@ -122,7 +123,7 @@ $admin_page_title = 'Template Sections';define( 'MC_LOAD_EDITOR', true );require
 						'description' => 'Supports Markdown. This value is used site-wide by pages that do not set their own local value for this section.',
 						'options'     => array( 'rows' => 6 ),
 					);
-					mc_render_field( $gfield, $values[ $key ] ?? '' );
+					mc_render_field($gfield, $values[ $key ] ?? '');
 					?>
 				<?php endforeach; ?>
 			</div>
@@ -135,6 +136,6 @@ $admin_page_title = 'Template Sections';define( 'MC_LOAD_EDITOR', true );require
 
 <?php endif; ?>
 
-<script src="<?php echo mc_esc_url( mc_admin_url( 'assets/js/editor.js' ) ); ?>"></script>
+<script src="<?php echo mc_esc_url(mc_admin_url('assets/js/editor.js')); ?>"></script>
 
 <?php require MC_ABSPATH . 'mc-admin/admin-footer.php'; ?>

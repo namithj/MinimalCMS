@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Shortcodes — Shortcode registration and processing.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Shortcodes {
-
+class MC_Shortcodes
+{
 	/**
 	 * Registered shortcode handlers keyed by tag.
 	 *
@@ -35,7 +36,8 @@ class MC_Shortcodes {
 	 * @param callable $callback Handler receives ($attrs, $content, $tag).
 	 * @return void
 	 */
-	public function add(string $tag, callable $callback): void {
+	public function add(string $tag, callable $callback): void
+	{
 
 		$this->shortcodes[$tag] = $callback;
 	}
@@ -48,7 +50,8 @@ class MC_Shortcodes {
 	 * @param string $tag Shortcode tag.
 	 * @return void
 	 */
-	public function remove(string $tag): void {
+	public function remove(string $tag): void
+	{
 
 		unset($this->shortcodes[$tag]);
 	}
@@ -61,7 +64,8 @@ class MC_Shortcodes {
 	 * @param string $tag Shortcode tag.
 	 * @return bool
 	 */
-	public function exists(string $tag): bool {
+	public function exists(string $tag): bool
+	{
 
 		return isset($this->shortcodes[$tag]);
 	}
@@ -74,7 +78,8 @@ class MC_Shortcodes {
 	 * @param string $content The content to process.
 	 * @return string Content with shortcodes replaced.
 	 */
-	public function do_shortcode(string $content): string {
+	public function do_shortcode(string $content): string
+	{
 
 		if (empty($this->shortcodes)) {
 			return $content;
@@ -98,7 +103,8 @@ class MC_Shortcodes {
 	 * @param string[] $tags List of shortcode tag names.
 	 * @return string Regex pattern (without delimiters).
 	 */
-	public function get_regex(array $tags): string {
+	public function get_regex(array $tags): string
+	{
 
 		$tag_list = implode('|', array_map('preg_quote', $tags));
 
@@ -125,7 +131,8 @@ class MC_Shortcodes {
 	 * @param array $match Regex match groups.
 	 * @return string Replacement string.
 	 */
-	public function do_shortcode_tag(array $match): string {
+	public function do_shortcode_tag(array $match): string
+	{
 
 		$tag     = $match[1];
 		$attrs   = $this->parse_attrs($match[2]);
@@ -146,7 +153,8 @@ class MC_Shortcodes {
 	 * @param string $text Attribute string.
 	 * @return array Key-value pairs.
 	 */
-	public function parse_attrs(string $text): array {
+	public function parse_attrs(string $text): array
+	{
 
 		$attrs   = array();
 		$text    = trim($text);

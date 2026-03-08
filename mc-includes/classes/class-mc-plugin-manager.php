@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Plugin_Manager — Plugin discovery, loading, activation/deactivation.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Plugin_Manager {
-
+class MC_Plugin_Manager
+{
 	/**
 	 * Loaded plugin metadata keyed by relative path.
 	 *
@@ -80,7 +81,8 @@ class MC_Plugin_Manager {
 	 * @param string    $plugins_dir    Plugins directory.
 	 * @param string    $mu_plugins_dir MU plugins directory.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Config $config, string $plugins_dir, string $mu_plugins_dir) {
+	public function __construct(MC_Hooks $hooks, MC_Config $config, string $plugins_dir, string $mu_plugins_dir)
+	{
 
 		$this->hooks          = $hooks;
 		$this->config         = $config;
@@ -96,7 +98,8 @@ class MC_Plugin_Manager {
 	 * @param string $file Absolute path to the plugin file.
 	 * @return array Parsed header data.
 	 */
-	public function get_plugin_data(string $file): array {
+	public function get_plugin_data(string $file): array
+	{
 
 		$defaults = array(
 			'name'        => '',
@@ -142,7 +145,8 @@ class MC_Plugin_Manager {
 	 *
 	 * @return array relative_path => header data.
 	 */
-	public function discover(): array {
+	public function discover(): array
+	{
 
 		if (!is_dir($this->plugins_dir)) {
 			return array();
@@ -182,7 +186,8 @@ class MC_Plugin_Manager {
 	 *
 	 * @return string[] Array of relative plugin paths.
 	 */
-	public function get_active(): array {
+	public function get_active(): array
+	{
 
 		$active = $this->config->get('active_plugins', array());
 
@@ -204,7 +209,8 @@ class MC_Plugin_Manager {
 	 * @param string $plugin Relative plugin path.
 	 * @return bool
 	 */
-	public function is_active(string $plugin): bool {
+	public function is_active(string $plugin): bool
+	{
 
 		return in_array($plugin, $this->get_active(), true);
 	}
@@ -216,7 +222,8 @@ class MC_Plugin_Manager {
 	 *
 	 * @return void
 	 */
-	public function load_mu_plugins(): void {
+	public function load_mu_plugins(): void
+	{
 
 		if (!is_dir($this->mu_plugins_dir)) {
 			return;
@@ -242,7 +249,8 @@ class MC_Plugin_Manager {
 	 *
 	 * @return void
 	 */
-	public function load_plugins(): void {
+	public function load_plugins(): void
+	{
 
 		$active = $this->get_active();
 
@@ -270,7 +278,8 @@ class MC_Plugin_Manager {
 	 * @param callable $callback Activation callback.
 	 * @return void
 	 */
-	public function register_activation_hook(string $file, callable $callback): void {
+	public function register_activation_hook(string $file, callable $callback): void
+	{
 
 		$this->activation_hooks[$file] = $callback;
 	}
@@ -284,7 +293,8 @@ class MC_Plugin_Manager {
 	 * @param callable $callback Deactivation callback.
 	 * @return void
 	 */
-	public function register_deactivation_hook(string $file, callable $callback): void {
+	public function register_deactivation_hook(string $file, callable $callback): void
+	{
 
 		$this->deactivation_hooks[$file] = $callback;
 	}
@@ -297,7 +307,8 @@ class MC_Plugin_Manager {
 	 * @param string $relative Relative plugin path.
 	 * @return true|MC_Error
 	 */
-	public function activate(string $relative): true|MC_Error {
+	public function activate(string $relative): true|MC_Error
+	{
 
 		$file = $this->plugins_dir . $relative;
 
@@ -334,7 +345,8 @@ class MC_Plugin_Manager {
 	 * @param string $relative Relative plugin path.
 	 * @return true|MC_Error
 	 */
-	public function deactivate(string $relative): true|MC_Error {
+	public function deactivate(string $relative): true|MC_Error
+	{
 
 		$active = $this->get_active();
 

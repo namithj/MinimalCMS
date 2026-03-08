@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PSR-4-style autoloader for MC_ classes.
  *

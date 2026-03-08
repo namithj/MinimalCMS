@@ -23,8 +23,9 @@ mc_admin_require_capability('edit_content');
  *
  * @return string
  */
-function fsub_get_submissions_dir(): string {
-	return defined( 'MC_FORMS_SUBMISSIONS_DIR' ) ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
+function fsub_get_submissions_dir(): string
+{
+	return defined('MC_FORMS_SUBMISSIONS_DIR') ? MC_FORMS_SUBMISSIONS_DIR : MC_CONTENT_DIR . 'forms-submissions/';
 }
 
 /**
@@ -32,18 +33,19 @@ function fsub_get_submissions_dir(): string {
  *
  * @return string[]
  */
-function fsub_get_form_slugs(): array {
+function fsub_get_form_slugs(): array
+{
 	$base = fsub_get_submissions_dir();
-	if ( ! is_dir( $base ) ) {
+	if (! is_dir($base)) {
 		return array();
 	}
-	$entries = scandir( $base );
+	$entries = scandir($base);
 	$slugs   = array();
-	foreach ( $entries as $entry ) {
-		if ( '.' === $entry || '..' === $entry ) {
+	foreach ($entries as $entry) {
+		if ('.' === $entry || '..' === $entry) {
 			continue;
 		}
-		if ( is_dir( $base . $entry ) ) {
+		if (is_dir($base . $entry)) {
 			$slugs[] = $entry;
 		}
 	}
@@ -57,34 +59,35 @@ function fsub_get_form_slugs(): array {
  * @param string $form_slug Form slug.
  * @return array[]
  */
-function fsub_get_submissions( string $form_slug ): array {
+function fsub_get_submissions(string $form_slug): array
+{
 	$base = fsub_get_submissions_dir();
 	$dir  = $base . $form_slug . '/';
 
-	if ( ! is_dir( $dir ) ) {
+	if (! is_dir($dir)) {
 		return array();
 	}
 
-	$files = glob( $dir . '*.json' );
-	if ( ! $files ) {
+	$files = glob($dir . '*.json');
+	if (! $files) {
 		return array();
 	}
 
 	// Sort newest first (filenames are date-prefixed).
-	rsort( $files );
+	rsort($files);
 
 	$submissions = array();
-	foreach ( $files as $file ) {
-		$raw = file_get_contents( $file );
-		if ( false === $raw ) {
+	foreach ($files as $file) {
+		$raw = file_get_contents($file);
+		if (false === $raw) {
 			continue;
 		}
-		$plain = forms_decrypt_submission( trim( $raw ) );
-		if ( false === $plain ) {
+		$plain = forms_decrypt_submission(trim($raw));
+		if (false === $plain) {
 			continue;
 		}
-		$data = json_decode( $plain, true );
-		if ( is_array( $data ) ) {
+		$data = json_decode($plain, true);
+		if (is_array($data)) {
 			$submissions[] = $data;
 		}
 	}
@@ -99,29 +102,30 @@ function fsub_get_submissions( string $form_slug ): array {
  * @param string $submission_id Submission ID (filename without .json).
  * @return array|null
  */
-function fsub_get_submission( string $form_slug, string $submission_id ): ?array {
+function fsub_get_submission(string $form_slug, string $submission_id): ?array
+{
 	// Validate ID format to prevent path traversal.
-	if ( ! preg_match( '/^[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$/', $submission_id ) ) {
+	if (! preg_match('/^[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$/', $submission_id)) {
 		return null;
 	}
 
 	$base = fsub_get_submissions_dir();
 	$path = $base . $form_slug . '/' . $submission_id . '.json';
 
-	if ( ! file_exists( $path ) ) {
+	if (! file_exists($path)) {
 		return null;
 	}
 
-	$raw   = file_get_contents( $path );
-	$plain = forms_decrypt_submission( trim( $raw ) );
+	$raw   = file_get_contents($path);
+	$plain = forms_decrypt_submission(trim($raw));
 
-	if ( false === $plain ) {
+	if (false === $plain) {
 		return null;
 	}
 
-	$data = json_decode( $plain, true );
+	$data = json_decode($plain, true);
 
-	return is_array( $data ) ? $data : null;
+	return is_array($data) ? $data : null;
 }
 
 /**
@@ -131,20 +135,21 @@ function fsub_get_submission( string $form_slug, string $submission_id ): ?array
  * @param string $submission_id Submission ID.
  * @return bool
  */
-function fsub_delete_submission( string $form_slug, string $submission_id ): bool {
+function fsub_delete_submission(string $form_slug, string $submission_id): bool
+{
 	// Validate ID format to prevent path traversal.
-	if ( ! preg_match( '/^[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$/', $submission_id ) ) {
+	if (! preg_match('/^[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$/', $submission_id)) {
 		return false;
 	}
 
 	$base = fsub_get_submissions_dir();
 	$path = $base . $form_slug . '/' . $submission_id . '.json';
 
-	if ( ! file_exists( $path ) ) {
+	if (! file_exists($path)) {
 		return false;
 	}
 
-	return unlink( $path );
+	return unlink($path);
 }
 
 /**
@@ -156,19 +161,20 @@ function fsub_delete_submission( string $form_slug, string $submission_id ): boo
  * @param string $form_slug Form slug.
  * @return array<string, string>
  */
-function fsub_get_field_labels( string $form_slug ): array {
-	$form = mc_get_content( 'form', $form_slug );
-	if ( ! $form || mc_is_error( $form ) ) {
+function fsub_get_field_labels(string $form_slug): array
+{
+	$form = mc_get_content('form', $form_slug);
+	if (! $form || mc_is_error($form)) {
 		return array();
 	}
 
-	$meta   = function_exists( 'forms_normalize_meta' ) ? forms_normalize_meta( $form['meta'] ?? array() ) : array();
+	$meta   = function_exists('forms_normalize_meta') ? forms_normalize_meta($form['meta'] ?? array()) : array();
 	$fields = $meta['fields'] ?? array();
 	$labels = array();
 
-	foreach ( $fields as $field ) {
+	foreach ($fields as $field) {
 		$name = $field['name'] ?? '';
-		if ( '' !== $name ) {
+		if ('' !== $name) {
 			$labels[ $name ] = '' !== ( $field['label'] ?? '' ) ? $field['label'] : $name;
 		}
 	}
@@ -180,10 +186,10 @@ function fsub_get_field_labels( string $form_slug ): array {
  * ── Input ──────────────────────────────────────────────────────────────────
  */
 
-$current_form = mc_sanitize_slug( mc_input( 'form', 'get' ) ?? '' );
-$view_id      = mc_input( 'id', 'get' ) ?? '';
+$current_form = mc_sanitize_slug(mc_input('form', 'get') ?? '');
+$view_id      = mc_input('id', 'get') ?? '';
 // Sanitise view_id: alphanumeric + hyphens only, max 40 chars.
-$view_id      = preg_replace( '/[^0-9a-f\-]/', '', mb_substr( $view_id, 0, 40 ) );
+$view_id      = preg_replace('/[^0-9a-f\-]/', '', mb_substr($view_id, 0, 40));
 $notice       = '';
 $notice_type  = 'success';
 
@@ -191,18 +197,18 @@ $notice_type  = 'success';
  * ── Delete action ──────────────────────────────────────────────────────────
  */
 if (
-	isset( $_GET['action'], $_GET['id'], $_GET['form'], $_GET['_nonce'] ) &&
+	isset($_GET['action'], $_GET['id'], $_GET['form'], $_GET['_nonce']) &&
 	'delete' === $_GET['action'] &&
-	mc_current_user_can( 'delete_content' )
+	mc_current_user_can('delete_content')
 ) {
-	$del_form = mc_sanitize_slug( $_GET['form'] );
-	$del_id   = preg_replace( '/[^0-9a-f\-]/', '', mb_substr( $_GET['id'], 0, 40 ) );
+	$del_form = mc_sanitize_slug($_GET['form']);
+	$del_id   = preg_replace('/[^0-9a-f\-]/', '', mb_substr($_GET['id'], 0, 40));
 
-	if ( mc_verify_nonce( $_GET['_nonce'], 'delete_submission_' . $del_id ) ) {
-		if ( fsub_delete_submission( $del_form, $del_id ) ) {
+	if (mc_verify_nonce($_GET['_nonce'], 'delete_submission_' . $del_id)) {
+		if (fsub_delete_submission($del_form, $del_id)) {
 			$notice = 'Submission deleted.';
 			// If we were viewing that submission, go back to the list.
-			if ( $view_id === $del_id ) {
+			if ($view_id === $del_id) {
 				$view_id = '';
 			}
 		} else {
@@ -222,9 +228,9 @@ if (
 $all_form_slugs = fsub_get_form_slugs();
 
 // Detail view.
-if ( '' !== $current_form && '' !== $view_id ) {
-	$submission = fsub_get_submission( $current_form, $view_id );
-	if ( ! $submission ) {
+if ('' !== $current_form && '' !== $view_id) {
+	$submission = fsub_get_submission($current_form, $view_id);
+	if (! $submission) {
 		$notice      = 'Submission not found.';
 		$notice_type = 'error';
 		$view_id     = '';
@@ -232,37 +238,37 @@ if ( '' !== $current_form && '' !== $view_id ) {
 }
 
 // Per-form list view.
-if ( '' !== $current_form && '' === $view_id ) {
-	$submissions  = fsub_get_submissions( $current_form );
-	$field_labels = fsub_get_field_labels( $current_form );
-	$form_obj     = mc_get_content( 'form', $current_form );
-	$form_title   = $form_obj['title'] ?? ucfirst( str_replace( '-', ' ', $current_form ) );
+if ('' !== $current_form && '' === $view_id) {
+	$submissions  = fsub_get_submissions($current_form);
+	$field_labels = fsub_get_field_labels($current_form);
+	$form_obj     = mc_get_content('form', $current_form);
+	$form_title   = $form_obj['title'] ?? ucfirst(str_replace('-', ' ', $current_form));
 }
 
 $admin_page_title = 'Form Submissions';
 require MC_ABSPATH . 'mc-admin/admin-header.php';
 ?>
 
-<?php mc_render_admin_notice( $notice, $notice_type ); ?>
+<?php mc_render_admin_notice($notice, $notice_type); ?>
 
 <?php
 /* ── Detail view ─────────────────────────────────────────────────────────── */
-if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submission ) :
-	$field_labels = fsub_get_field_labels( $current_form );
-	$form_obj     = mc_get_content( 'form', $current_form );
-	$form_title   = $form_obj['title'] ?? ucfirst( str_replace( '-', ' ', $current_form ) );
+if ('' !== $current_form && '' !== $view_id && isset($submission) && $submission) :
+	$field_labels = fsub_get_field_labels($current_form);
+	$form_obj     = mc_get_content('form', $current_form);
+	$form_title   = $form_obj['title'] ?? ucfirst(str_replace('-', ' ', $current_form));
 	$delete_url   = mc_esc_url(
 		mc_admin_url(
-			'form-submissions.php?form=' . urlencode( $current_form ) .
-			'&action=delete&id=' . urlencode( $submission['id'] ) .
-			'&_nonce=' . mc_create_nonce( 'delete_submission_' . $submission['id'] )
+			'form-submissions.php?form=' . urlencode($current_form) .
+			'&action=delete&id=' . urlencode($submission['id']) .
+			'&_nonce=' . mc_create_nonce('delete_submission_' . $submission['id'])
 		)
 	);
-	$back_url     = mc_esc_url( mc_admin_url( 'form-submissions.php?form=' . urlencode( $current_form ) ) );
+	$back_url     = mc_esc_url(mc_admin_url('form-submissions.php?form=' . urlencode($current_form)));
 ?>
 
 <div class="page-header-bar">
-	<h2><?php echo mc_esc_html( $form_title ); ?> — Submission</h2>
+	<h2><?php echo mc_esc_html($form_title); ?> — Submission</h2>
 	<a href="<?php echo $back_url; ?>" class="btn">&larr; Back to list</a>
 </div>
 
@@ -271,19 +277,19 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 		<tbody>
 			<tr>
 				<th class="th-fixed-sm">ID</th>
-				<td><code><?php echo mc_esc_html( $submission['id'] ); ?></code></td>
+				<td><code><?php echo mc_esc_html($submission['id']); ?></code></td>
 			</tr>
 			<tr>
 				<th>Submitted</th>
-				<td><?php echo mc_esc_html( date( 'M j, Y \a\t H:i:s', strtotime( $submission['submitted'] ?? '' ) ) ); ?></td>
+				<td><?php echo mc_esc_html(date('M j, Y \a\t H:i:s', strtotime($submission['submitted'] ?? ''))); ?></td>
 			</tr>
 			<tr>
 				<th>IP Address</th>
-				<td><?php echo mc_esc_html( $submission['ip'] ?? '—' ); ?></td>
+				<td><?php echo mc_esc_html($submission['ip'] ?? '—'); ?></td>
 			</tr>
 			<tr>
 				<th>User Agent</th>
-				<td class="text-tiny-breakable"><?php echo mc_esc_html( $submission['user_agent'] ?? '—' ); ?></td>
+				<td class="text-tiny-breakable"><?php echo mc_esc_html($submission['user_agent'] ?? '—'); ?></td>
 			</tr>
 		</tbody>
 	</table>
@@ -297,15 +303,15 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $submission['values'] ?? array() as $field_key => $field_value ) : ?>
+			<?php foreach ($submission['values'] ?? array() as $field_key => $field_value) : ?>
 				<tr>
-					<td><strong><?php echo mc_esc_html( $field_labels[ $field_key ] ?? $field_key ); ?></strong></td>
+					<td><strong><?php echo mc_esc_html($field_labels[ $field_key ] ?? $field_key); ?></strong></td>
 					<td>
 						<?php
-						if ( is_array( $field_value ) ) {
-							echo mc_esc_html( implode( ', ', $field_value ) );
+						if (is_array($field_value)) {
+							echo mc_esc_html(implode(', ', $field_value));
 						} else {
-							echo nl2br( mc_esc_html( (string) $field_value ) );
+							echo nl2br(mc_esc_html((string) $field_value));
 						}
 						?>
 					</td>
@@ -314,7 +320,7 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 		</tbody>
 	</table>
 
-	<?php if ( mc_current_user_can( 'delete_content' ) ) : ?>
+	<?php if (mc_current_user_can('delete_content')) : ?>
 		<a href="<?php echo $delete_url; ?>"
 			class="btn btn-danger confirm-delete">
 			Delete This Submission
@@ -324,15 +330,15 @@ if ( '' !== $current_form && '' !== $view_id && isset( $submission ) && $submiss
 
 <?php
 /* ── Per-form list view ───────────────────────────────────────────────────── */
-elseif ( '' !== $current_form && isset( $submissions, $form_title ) ) :
+elseif ('' !== $current_form && isset($submissions, $form_title)) :
 ?>
 
 <div class="page-header-bar">
-	<h2><?php echo mc_esc_html( $form_title ); ?> — <?php echo count( $submissions ); ?> Submission<?php echo 1 === count( $submissions ) ? '' : 's'; ?></h2>
-	<a href="<?php echo mc_esc_url( mc_admin_url( 'form-submissions.php' ) ); ?>" class="btn">&larr; All Forms</a>
+	<h2><?php echo mc_esc_html($form_title); ?> — <?php echo count($submissions); ?> Submission<?php echo 1 === count($submissions) ? '' : 's'; ?></h2>
+	<a href="<?php echo mc_esc_url(mc_admin_url('form-submissions.php')); ?>" class="btn">&larr; All Forms</a>
 </div>
 
-<?php if ( $submissions ) : ?>
+<?php if ($submissions) : ?>
 	<table class="mc-table">
 		<thead>
 			<tr>
@@ -344,33 +350,33 @@ elseif ( '' !== $current_form && isset( $submissions, $form_title ) ) :
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $submissions as $sub ) : ?>
+			<?php foreach ($submissions as $sub) : ?>
 				<?php
-				$sub_date    = date( 'M j, Y H:i', strtotime( $sub['submitted'] ?? '' ) );
+				$sub_date    = date('M j, Y H:i', strtotime($sub['submitted'] ?? ''));
 				$sub_preview = '';
 				$values      = $sub['values'] ?? array();
-				if ( $values ) {
-					$first_val   = reset( $values );
-					$sub_preview = is_array( $first_val ) ? implode( ', ', $first_val ) : (string) $first_val;
-					$sub_preview = mb_substr( $sub_preview, 0, 60 );
+				if ($values) {
+					$first_val   = reset($values);
+					$sub_preview = is_array($first_val) ? implode(', ', $first_val) : (string) $first_val;
+					$sub_preview = mb_substr($sub_preview, 0, 60);
 				}
-				$view_url   = mc_esc_url( mc_admin_url( 'form-submissions.php?form=' . urlencode( $current_form ) . '&id=' . urlencode( $sub['id'] ) ) );
+				$view_url   = mc_esc_url(mc_admin_url('form-submissions.php?form=' . urlencode($current_form) . '&id=' . urlencode($sub['id'])));
 				$delete_url = mc_esc_url(
 					mc_admin_url(
-						'form-submissions.php?form=' . urlencode( $current_form ) .
-						'&action=delete&id=' . urlencode( $sub['id'] ) .
-						'&_nonce=' . mc_create_nonce( 'delete_submission_' . $sub['id'] )
+						'form-submissions.php?form=' . urlencode($current_form) .
+						'&action=delete&id=' . urlencode($sub['id']) .
+						'&_nonce=' . mc_create_nonce('delete_submission_' . $sub['id'])
 					)
 				);
 				?>
 				<tr>
-					<td class="text-nowrap-sm"><?php echo mc_esc_html( $sub_date ); ?></td>
-					<td><code class="text-code-tiny"><?php echo mc_esc_html( $sub['id'] ); ?></code></td>
-					<td class="text-muted-sm"><?php echo mc_esc_html( $sub['ip'] ?? '—' ); ?></td>
-					<td class="text-muted-sm"><?php echo mc_esc_html( $sub_preview ); ?></td>
+					<td class="text-nowrap-sm"><?php echo mc_esc_html($sub_date); ?></td>
+					<td><code class="text-code-tiny"><?php echo mc_esc_html($sub['id']); ?></code></td>
+					<td class="text-muted-sm"><?php echo mc_esc_html($sub['ip'] ?? '—'); ?></td>
+					<td class="text-muted-sm"><?php echo mc_esc_html($sub_preview); ?></td>
 					<td class="row-actions text-right-nowrap">
 						<a href="<?php echo $view_url; ?>">View</a>
-						<?php if ( mc_current_user_can( 'delete_content' ) ) : ?>
+						<?php if (mc_current_user_can('delete_content')) : ?>
 							<a href="<?php echo $delete_url; ?>" class="delete confirm-delete">Delete</a>
 						<?php endif; ?>
 					</td>
@@ -379,7 +385,7 @@ elseif ( '' !== $current_form && isset( $submissions, $form_title ) ) :
 		</tbody>
 	</table>
 <?php else : ?>
-	<?php mc_render_empty_state( '&#x1F4EC;', 'No submissions yet for this form.' ); ?>
+	<?php mc_render_empty_state('&#x1F4EC;', 'No submissions yet for this form.'); ?>
 <?php endif; ?>
 
 <?php
@@ -391,7 +397,7 @@ else :
 	<h2>Form Submissions</h2>
 </div>
 
-<?php if ( $all_form_slugs ) : ?>
+<?php if ($all_form_slugs) : ?>
 	<table class="mc-table">
 		<thead>
 			<tr>
@@ -401,19 +407,19 @@ else :
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ( $all_form_slugs as $slug ) : ?>
+			<?php foreach ($all_form_slugs as $slug) : ?>
 				<?php
-				$form_obj   = mc_get_content( 'form', $slug );
-				$title      = $form_obj['title'] ?? ucfirst( str_replace( '-', ' ', $slug ) );
-				$subs       = fsub_get_submissions( $slug );
-				$count      = count( $subs );
-				$latest     = $count > 0 ? date( 'M j, Y H:i', strtotime( $subs[0]['submitted'] ?? '' ) ) : '—';
-				$list_url   = mc_esc_url( mc_admin_url( 'form-submissions.php?form=' . urlencode( $slug ) ) );
+				$form_obj   = mc_get_content('form', $slug);
+				$title      = $form_obj['title'] ?? ucfirst(str_replace('-', ' ', $slug));
+				$subs       = fsub_get_submissions($slug);
+				$count      = count($subs);
+				$latest     = $count > 0 ? date('M j, Y H:i', strtotime($subs[0]['submitted'] ?? '')) : '—';
+				$list_url   = mc_esc_url(mc_admin_url('form-submissions.php?form=' . urlencode($slug)));
 				?>
 				<tr>
 					<td>
-						<strong><a href="<?php echo $list_url; ?>"><?php echo mc_esc_html( $title ); ?></a></strong>
-						<div class="text-tiny-breakable text-muted-sm"><code><?php echo mc_esc_html( $slug ); ?></code></div>
+						<strong><a href="<?php echo $list_url; ?>"><?php echo mc_esc_html($title); ?></a></strong>
+						<div class="text-tiny-breakable text-muted-sm"><code><?php echo mc_esc_html($slug); ?></code></div>
 					</td>
 					<td><?php echo (int) $count; ?></td>
 					<td class="row-actions text-right">
@@ -424,7 +430,7 @@ else :
 		</tbody>
 	</table>
 <?php else : ?>
-	<?php mc_render_empty_state( '&#x1F4EC;', 'No form submissions yet.' ); ?>
+	<?php mc_render_empty_state('&#x1F4EC;', 'No form submissions yet.'); ?>
 <?php endif; ?>
 
 <?php endif; ?>

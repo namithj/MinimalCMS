@@ -22,5 +22,5 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 </div>
 
 <?php
-mc_do_action( 'mc_admin_dashboard' );
+mc_do_action('mc_admin_dashboard');
 require MC_ABSPATH . 'mc-admin/admin-footer.php';

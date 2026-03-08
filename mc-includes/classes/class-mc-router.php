@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Router — URL routing and query state.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Router {
-
+class MC_Router
+{
 	/**
 	 * Custom routes registered by plugins.
 	 *
@@ -61,7 +62,8 @@ class MC_Router {
 	 * @param MC_Content_Manager       $content Content manager.
 	 * @param MC_Content_Type_Registry $types   Content type registry.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Content_Manager $content, MC_Content_Type_Registry $types) {
+	public function __construct(MC_Hooks $hooks, MC_Content_Manager $content, MC_Content_Type_Registry $types)
+	{
 
 		$this->hooks   = $hooks;
 		$this->content = $content;
@@ -80,7 +82,8 @@ class MC_Router {
 	 * @param int      $priority Lower = matched first. Default 10.
 	 * @return void
 	 */
-	public function add_route(string $pattern, callable $callback, int $priority = 10): void {
+	public function add_route(string $pattern, callable $callback, int $priority = 10): void
+	{
 
 		$this->routes[] = array(
 			'pattern'  => $pattern,
@@ -96,7 +99,8 @@ class MC_Router {
 	 *
 	 * @return string Cleaned path, e.g. "about" or "docs/getting-started".
 	 */
-	public function get_request_path(): string {
+	public function get_request_path(): string
+	{
 
 		$uri = $_SERVER['REQUEST_URI'] ?? '/';
 		$path = strtok($uri, '?');
@@ -123,7 +127,8 @@ class MC_Router {
 	 *
 	 * @return void
 	 */
-	public function parse_request(): void {
+	public function parse_request(): void
+	{
 
 		$path = $this->get_request_path();
 
@@ -188,7 +193,8 @@ class MC_Router {
 	 * @param string $path The request path.
 	 * @return void
 	 */
-	public function resolve_content_route(string $path): void {
+	public function resolve_content_route(string $path): void
+	{
 
 		$content_types = $this->types->all();
 
@@ -294,7 +300,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_front_page(): bool {
+	public function is_front_page(): bool
+	{
 
 		return !empty($this->query['is_front_page']);
 	}
@@ -303,7 +310,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_single(): bool {
+	public function is_single(): bool
+	{
 
 		return !empty($this->query['is_single']);
 	}
@@ -312,7 +320,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_archive(): bool {
+	public function is_archive(): bool
+	{
 
 		return !empty($this->query['is_archive']);
 	}
@@ -321,7 +330,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_404(): bool {
+	public function is_404(): bool
+	{
 
 		return !empty($this->query['is_404']);
 	}
@@ -330,7 +340,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_page(): bool {
+	public function is_page(): bool
+	{
 
 		return 'page' === ($this->query['type'] ?? '') && $this->is_single();
 	}
@@ -339,7 +350,8 @@ class MC_Router {
 	 * @since {version}
 	 * @return bool
 	 */
-	public function is_admin(): bool {
+	public function is_admin(): bool
+	{
 
 		return !empty($this->query['is_admin']);
 	}
@@ -351,7 +363,8 @@ class MC_Router {
 	 *
 	 * @return array
 	 */
-	public function get_query(): array {
+	public function get_query(): array
+	{
 
 		return $this->query;
 	}
@@ -363,7 +376,8 @@ class MC_Router {
 	 *
 	 * @return int
 	 */
-	public function get_page_num(): int {
+	public function get_page_num(): int
+	{
 
 		return $this->query['page_num'] ?? 1;
 	}
@@ -375,7 +389,8 @@ class MC_Router {
 	 *
 	 * @return array
 	 */
-	private function default_query(): array {
+	private function default_query(): array
+	{
 
 		return array(
 			'path'          => '',

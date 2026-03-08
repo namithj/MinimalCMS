@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Admin_Bar class (DI-based version in classes/).
  *
@@ -22,12 +23,13 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Admin_Bar
  */
-class MCAdminBarClassTest extends TestCase {
-
+class MCAdminBarClassTest extends TestCase
+{
 	private MC_Admin_Bar $bar;
 	private MC_Hooks $hooks;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->hooks = new MC_Hooks();
 		$formatter   = new MC_Formatter($this->hooks);
@@ -63,12 +65,14 @@ class MCAdminBarClassTest extends TestCase {
 
 	private string $temp_dir;
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -83,12 +87,14 @@ class MCAdminBarClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_instantiation(): void {
+	public function test_instantiation(): void
+	{
 
 		$this->assertInstanceOf(MC_Admin_Bar::class, $this->bar);
 	}
 
-	public function test_add_node(): void {
+	public function test_add_node(): void
+	{
 
 		$this->bar->add_node('test', array(
 			'label' => 'Test',
@@ -105,7 +111,8 @@ class MCAdminBarClassTest extends TestCase {
 		$this->assertSame('', $html);
 	}
 
-	public function test_remove_node(): void {
+	public function test_remove_node(): void
+	{
 
 		$this->bar->add_node('removeme', array('label' => 'Remove'));
 		$this->bar->remove_node('removeme');
@@ -114,7 +121,8 @@ class MCAdminBarClassTest extends TestCase {
 		$this->assertTrue(true);
 	}
 
-	public function test_render_produces_nothing_when_not_logged_in(): void {
+	public function test_render_produces_nothing_when_not_logged_in(): void
+	{
 
 		ob_start();
 		$this->bar->render();

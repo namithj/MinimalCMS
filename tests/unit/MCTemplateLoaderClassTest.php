@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Template_Loader class.
  *
@@ -21,15 +22,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Template_Loader
  */
-class MCTemplateLoaderClassTest extends TestCase {
-
+class MCTemplateLoaderClassTest extends TestCase
+{
 	private MC_Template_Loader $loader;
 	private MC_Router $router;
 	private MC_Theme_Manager $themes;
 	private MC_Hooks $hooks;
 	private string $temp_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_tpl_test_' . uniqid() . '/';
 		$content_dir    = $this->temp_dir . 'content/';
@@ -64,12 +66,14 @@ class MCTemplateLoaderClassTest extends TestCase {
 		$this->loader = new MC_Template_Loader($this->hooks, $this->router, $this->themes);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -84,33 +88,38 @@ class MCTemplateLoaderClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_get_hierarchy_default(): void {
+	public function test_get_hierarchy_default(): void
+	{
 
 		$templates = $this->loader->get_hierarchy();
 		$this->assertIsArray($templates);
 		$this->assertContains('index.php', $templates);
 	}
 
-	public function test_locate_finds_index(): void {
+	public function test_locate_finds_index(): void
+	{
 
 		$file = $this->loader->locate(array('index.php'));
 		$this->assertStringEndsWith('index.php', $file);
 		$this->assertFileExists($file);
 	}
 
-	public function test_locate_finds_front_page(): void {
+	public function test_locate_finds_front_page(): void
+	{
 
 		$file = $this->loader->locate(array('front-page.php', 'index.php'));
 		$this->assertStringEndsWith('front-page.php', $file);
 	}
 
-	public function test_locate_returns_empty_for_missing(): void {
+	public function test_locate_returns_empty_for_missing(): void
+	{
 
 		$file = $this->loader->locate(array('nonexistent.php'));
 		$this->assertSame('', $file);
 	}
 
-	public function test_locate_falls_back(): void {
+	public function test_locate_falls_back(): void
+	{
 
 		// No archive.php exists, should return empty for just that.
 		$file = $this->loader->locate(array('archive.php'));

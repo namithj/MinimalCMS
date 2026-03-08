@@ -20,17 +20,17 @@ $recent = mc_query_content(
 ?>
 <div class="card">
 	<div class="card-header">Recent Pages</div>
-	<?php if ( $recent ) : ?>
+	<?php if ($recent) : ?>
 		<table class="mc-table widget-table">
-			<?php foreach ( $recent as $item ) : ?>
+			<?php foreach ($recent as $item) : ?>
 				<tr>
 					<td>
-						<a href="<?php echo mc_esc_url( mc_admin_url( 'edit-page.php?type=page&slug=' . urlencode( $item['slug'] ) ) ); ?>">
-							<?php echo mc_esc_html( $item['title'] ); ?>
+						<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=page&slug=' . urlencode($item['slug']))); ?>">
+							<?php echo mc_esc_html($item['title']); ?>
 						</a>
 					</td>
 					<td class="text-right">
-						<span class="badge badge-<?php echo mc_esc_attr( $item['status'] ); ?>"><?php echo mc_esc_html( $item['status'] ); ?></span>
+						<span class="badge badge-<?php echo mc_esc_attr($item['status']); ?>"><?php echo mc_esc_html($item['status']); ?></span>
 					</td>
 				</tr>
 			<?php endforeach; ?>

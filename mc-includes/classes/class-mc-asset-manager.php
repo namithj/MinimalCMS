@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Asset_Manager — Style and script enqueue system.
  *
@@ -15,8 +16,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Asset_Manager {
-
+class MC_Asset_Manager
+{
 	/**
 	 * Enqueued stylesheets keyed by handle.
 	 *
@@ -61,7 +62,8 @@ class MC_Asset_Manager {
 	 * @param MC_Hooks     $hooks     Hooks engine.
 	 * @param MC_Formatter $formatter Formatter for escaping.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Formatter $formatter) {
+	public function __construct(MC_Hooks $hooks, MC_Formatter $formatter)
+	{
 
 		$this->hooks     = $hooks;
 		$this->formatter = $formatter;
@@ -77,7 +79,8 @@ class MC_Asset_Manager {
 	 * @param string $media  Media attribute. Default 'all'.
 	 * @return void
 	 */
-	public function enqueue_style(string $handle, string $src, string $media = 'all'): void {
+	public function enqueue_style(string $handle, string $src, string $media = 'all'): void
+	{
 
 		$this->styles[$handle] = array(
 			'src'   => $src,
@@ -95,7 +98,8 @@ class MC_Asset_Manager {
 	 * @param bool   $in_footer Whether to output in footer. Default true.
 	 * @return void
 	 */
-	public function enqueue_script(string $handle, string $src, bool $in_footer = true): void {
+	public function enqueue_script(string $handle, string $src, bool $in_footer = true): void
+	{
 
 		$this->scripts[$handle] = array(
 			'src'       => $src,
@@ -111,7 +115,8 @@ class MC_Asset_Manager {
 	 * @param string $handle Handle to dequeue.
 	 * @return void
 	 */
-	public function dequeue_style(string $handle): void {
+	public function dequeue_style(string $handle): void
+	{
 
 		unset($this->styles[$handle]);
 	}
@@ -124,7 +129,8 @@ class MC_Asset_Manager {
 	 * @param string $handle Handle to dequeue.
 	 * @return void
 	 */
-	public function dequeue_script(string $handle): void {
+	public function dequeue_script(string $handle): void
+	{
 
 		unset($this->scripts[$handle]);
 	}
@@ -136,7 +142,8 @@ class MC_Asset_Manager {
 	 *
 	 * @return void
 	 */
-	public function print_styles(): void {
+	public function print_styles(): void
+	{
 
 		/**
 		 * Filter the styles array before output.
@@ -164,7 +171,8 @@ class MC_Asset_Manager {
 	 *
 	 * @return void
 	 */
-	public function print_head_scripts(): void {
+	public function print_head_scripts(): void
+	{
 
 		/**
 		 * Filter the scripts array before output.
@@ -189,7 +197,8 @@ class MC_Asset_Manager {
 	 *
 	 * @return void
 	 */
-	public function print_footer_scripts(): void {
+	public function print_footer_scripts(): void
+	{
 
 		$scripts = $this->hooks->apply_filters('mc_print_scripts', $this->scripts);
 
@@ -210,7 +219,8 @@ class MC_Asset_Manager {
 	 * @param array  $data        Key-value data.
 	 * @return void
 	 */
-	public function localize_script(string $handle, string $object_name, array $data): void {
+	public function localize_script(string $handle, string $object_name, array $data): void
+	{
 
 		$this->localisations[$handle] = array(
 			'object_name' => $object_name,
@@ -227,7 +237,8 @@ class MC_Asset_Manager {
 	 * @param array  $script Script definition.
 	 * @return void
 	 */
-	private function output_script(string $handle, array $script): void {
+	private function output_script(string $handle, array $script): void
+	{
 
 		if (isset($this->localisations[$handle])) {
 			$l10n = $this->localisations[$handle];

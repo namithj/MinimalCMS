@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Session class.
  *
@@ -18,16 +19,18 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Session
  */
-class MCSessionClassTest extends TestCase {
-
+class MCSessionClassTest extends TestCase
+{
 	private string $session_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->session_dir = sys_get_temp_dir() . '/mc_test_sessions_' . uniqid();
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		if (is_dir($this->session_dir)) {
 			array_map('unlink', glob($this->session_dir . '/*'));
@@ -35,13 +38,15 @@ class MCSessionClassTest extends TestCase {
 		}
 	}
 
-	public function test_instantiation(): void {
+	public function test_instantiation(): void
+	{
 
 		$session = new MC_Session(new MC_Hooks(), $this->session_dir);
 		$this->assertInstanceOf(MC_Session::class, $session);
 	}
 
-	public function test_custom_lifetime(): void {
+	public function test_custom_lifetime(): void
+	{
 
 		$session = new MC_Session(new MC_Hooks(), $this->session_dir, 3600);
 		$this->assertInstanceOf(MC_Session::class, $session);

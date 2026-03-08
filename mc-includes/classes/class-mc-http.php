@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS HTTP Helpers
  *
@@ -16,8 +17,8 @@
  *
  * @since {version}
  */
-class MC_Http {
-
+class MC_Http
+{
 	/**
 	 * The hooks engine.
 	 *
@@ -50,7 +51,8 @@ class MC_Http {
 	 * @param MC_Hooks $hooks      The hooks engine.
 	 * @param string   $secret_key Secret key for HMAC operations.
 	 */
-	public function __construct(MC_Hooks $hooks, string $secret_key = '') {
+	public function __construct(MC_Hooks $hooks, string $secret_key = '')
+	{
 
 		$this->hooks      = $hooks;
 		$this->secret_key = $secret_key;
@@ -66,7 +68,8 @@ class MC_Http {
 	 * @param string $user_id The current user's identifier.
 	 * @return void
 	 */
-	public function set_current_user_id(string $user_id): void {
+	public function set_current_user_id(string $user_id): void
+	{
 
 		$this->current_user_id = $user_id;
 	}
@@ -85,7 +88,8 @@ class MC_Http {
 	 * @param string $action The action name the nonce protects.
 	 * @return string The nonce token (hex string).
 	 */
-	public function create_nonce(string $action = '-1'): string {
+	public function create_nonce(string $action = '-1'): string
+	{
 
 		$tick = $this->nonce_tick();
 
@@ -105,7 +109,8 @@ class MC_Http {
 	 * @param string $action The expected action name.
 	 * @return bool True if the nonce is valid.
 	 */
-	public function verify_nonce(string $nonce, string $action = '-1'): bool {
+	public function verify_nonce(string $nonce, string $action = '-1'): bool
+	{
 
 		if ('' === $nonce) {
 			return false;
@@ -141,7 +146,8 @@ class MC_Http {
 	 *
 	 * @return int Current tick.
 	 */
-	public function nonce_tick(): int {
+	public function nonce_tick(): int
+	{
 
 		/**
 		 * Filter the nonce tick length in seconds.
@@ -164,7 +170,8 @@ class MC_Http {
 	 * @param string $name   The field name. Default '_mc_nonce'.
 	 * @return void
 	 */
-	public function nonce_field(string $action = '-1', string $name = '_mc_nonce'): void {
+	public function nonce_field(string $action = '-1', string $name = '_mc_nonce'): void
+	{
 
 		$nonce     = $this->create_nonce($action);
 		$safe_name = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -183,7 +190,8 @@ class MC_Http {
 	 * @param string $name   Query parameter name. Default '_mc_nonce'.
 	 * @return string URL with nonce.
 	 */
-	public function nonce_url(string $url, string $action = '-1', string $name = '_mc_nonce'): string {
+	public function nonce_url(string $url, string $action = '-1', string $name = '_mc_nonce'): string
+	{
 
 		$nonce     = $this->create_nonce($action);
 		$separator = str_contains($url, '?') ? '&' : '?';
@@ -206,7 +214,8 @@ class MC_Http {
 	 * @param int    $status HTTP status code. Default 302.
 	 * @return never
 	 */
-	public function redirect(string $url, int $status = 302): never {
+	public function redirect(string $url, int $status = 302): never
+	{
 
 		header('Location: ' . $url, true, $status);
 		exit;
@@ -222,7 +231,8 @@ class MC_Http {
 	 * @param string $url Destination URL.
 	 * @return never
 	 */
-	public function safe_redirect(string $url): never {
+	public function safe_redirect(string $url): never
+	{
 
 		/**
 		 * Filter the allowed hosts for safe redirects.
@@ -257,7 +267,8 @@ class MC_Http {
 	 *
 	 * @return string Uppercase method name (GET, POST, etc.).
 	 */
-	public function request_method(): string {
+	public function request_method(): string
+	{
 
 		return strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 	}
@@ -269,7 +280,8 @@ class MC_Http {
 	 *
 	 * @return bool
 	 */
-	public function is_post_request(): bool {
+	public function is_post_request(): bool
+	{
 
 		return 'POST' === $this->request_method();
 	}
@@ -281,7 +293,8 @@ class MC_Http {
 	 *
 	 * @return bool
 	 */
-	public function is_ajax_request(): bool {
+	public function is_ajax_request(): bool
+	{
 
 		if (defined('MC_DOING_AJAX') && MC_DOING_AJAX) {
 			return true;
@@ -300,7 +313,8 @@ class MC_Http {
 	 * @param callable|null $sanitize Optional sanitisation callback.
 	 * @return mixed Raw or sanitised value, or null if not present.
 	 */
-	public function input(string $key, string $method = 'REQUEST', ?callable $sanitize = null): mixed {
+	public function input(string $key, string $method = 'REQUEST', ?callable $sanitize = null): mixed
+	{
 
 		$source = match (strtoupper($method)) {
 			'GET'    => $_GET,
@@ -338,7 +352,8 @@ class MC_Http {
 	 * @param int   $status HTTP status code. Default 200.
 	 * @return never
 	 */
-	public function send_json(mixed $data, int $status = 200): never {
+	public function send_json(mixed $data, int $status = 200): never
+	{
 
 		http_response_code($status);
 		header('Content-Type: application/json; charset=utf-8');
@@ -354,7 +369,8 @@ class MC_Http {
 	 * @param mixed $data Optional data.
 	 * @return never
 	 */
-	public function send_json_success(mixed $data = null): never {
+	public function send_json_success(mixed $data = null): never
+	{
 
 		$this->send_json(
 			array(
@@ -374,7 +390,8 @@ class MC_Http {
 	 * @param int   $status HTTP status. Default 400.
 	 * @return never
 	 */
-	public function send_json_error(mixed $data = null, int $status = 400): never {
+	public function send_json_error(mixed $data = null, int $status = 400): never
+	{
 
 		$this->send_json(
 			array(
@@ -392,7 +409,8 @@ class MC_Http {
 	 *
 	 * @return void
 	 */
-	public function send_404(): void {
+	public function send_404(): void
+	{
 
 		http_response_code(404);
 	}
@@ -404,7 +422,8 @@ class MC_Http {
 	 *
 	 * @return void
 	 */
-	public function no_cache_headers(): void {
+	public function no_cache_headers(): void
+	{
 
 		header('Cache-Control: no-cache, no-store, must-revalidate');
 		header('Pragma: no-cache');

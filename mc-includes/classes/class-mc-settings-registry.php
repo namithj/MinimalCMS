@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Settings_Registry — Settings page, section and field registrations.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Settings_Registry {
-
+class MC_Settings_Registry
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -104,7 +105,8 @@ class MC_Settings_Registry {
 	 * @param array  $args      Page configuration.
 	 * @return void
 	 */
-	public function register_page(string $page_slug, array $args = array()): void {
+	public function register_page(string $page_slug, array $args = array()): void
+	{
 
 		$this->pages[$page_slug] = array_merge(
 			array(
@@ -133,7 +135,8 @@ class MC_Settings_Registry {
 	 * @param string $page_slug Page slug.
 	 * @return array|null
 	 */
-	public function get_page(string $page_slug): ?array {
+	public function get_page(string $page_slug): ?array
+	{
 
 		return $this->pages[$page_slug] ?? null;
 	}
@@ -145,7 +148,8 @@ class MC_Settings_Registry {
 	 *
 	 * @return array
 	 */
-	public function get_pages(): array {
+	public function get_pages(): array
+	{
 
 		return $this->pages;
 	}
@@ -160,7 +164,8 @@ class MC_Settings_Registry {
 	 * @param array  $args       Section configuration.
 	 * @return void
 	 */
-	public function register_section(string $page_slug, string $section_id, array $args = array()): void {
+	public function register_section(string $page_slug, string $section_id, array $args = array()): void
+	{
 
 		$key = $page_slug . ':' . $section_id;
 
@@ -192,7 +197,8 @@ class MC_Settings_Registry {
 	 * @param array  $args       Field definition.
 	 * @return void
 	 */
-	public function register_field(string $page_slug, string $section_id, string $field_id, array $args = array()): void {
+	public function register_field(string $page_slug, string $section_id, string $field_id, array $args = array()): void
+	{
 
 		$full_key    = $page_slug . ':' . $section_id . ':' . $field_id;
 		$section_key = $page_slug . ':' . $section_id;
@@ -232,7 +238,8 @@ class MC_Settings_Registry {
 	 * @param string $page_slug Page slug.
 	 * @return array Array of section definitions.
 	 */
-	public function get_sections(string $page_slug): array {
+	public function get_sections(string $page_slug): array
+	{
 
 		$result = array();
 		foreach ($this->sections as $key => $section) {
@@ -255,7 +262,8 @@ class MC_Settings_Registry {
 	 * @param string $section_id Section ID.
 	 * @return array field_id => field definition.
 	 */
-	public function get_section_fields(string $page_slug, string $section_id): array {
+	public function get_section_fields(string $page_slug, string $section_id): array
+	{
 
 		$prefix = $page_slug . ':' . $section_id . ':';
 		$result = array();
@@ -278,7 +286,8 @@ class MC_Settings_Registry {
 	 * @param string $page_slug Page slug.
 	 * @return array field_id => field definition.
 	 */
-	public function get_page_fields(string $page_slug): array {
+	public function get_page_fields(string $page_slug): array
+	{
 
 		$sections = $this->get_sections($page_slug);
 		$all      = array();
@@ -299,7 +308,8 @@ class MC_Settings_Registry {
 	 * @param string $page_slug Page slug.
 	 * @return array Values keyed by field ID.
 	 */
-	public function get_page_values(string $page_slug): array {
+	public function get_page_values(string $page_slug): array
+	{
 
 		$page = $this->get_page($page_slug);
 		if (null === $page) {
@@ -408,7 +418,8 @@ class MC_Settings_Registry {
 	 * @param array  $post_data POST data (defaults to $_POST when empty).
 	 * @return array{saved: bool, values: array, errors: array, notice: string, notice_type: string}
 	 */
-	public function handle_post(string $page_slug, array $post_data = array()): array {
+	public function handle_post(string $page_slug, array $post_data = array()): array
+	{
 
 		$page   = $this->get_page($page_slug);
 		$result = array(
@@ -502,7 +513,8 @@ class MC_Settings_Registry {
 	 * @param array  $choices    Key => label map.
 	 * @return void
 	 */
-	public function set_field_choices(string $page_slug, string $section_id, string $field_id, array $choices): void {
+	public function set_field_choices(string $page_slug, string $section_id, string $field_id, array $choices): void
+	{
 
 		$key = $page_slug . ':' . $section_id . ':' . $field_id;
 
@@ -528,7 +540,8 @@ class MC_Settings_Registry {
 	 *
 	 * @return void
 	 */
-	public function register_core_pages(): void {
+	public function register_core_pages(): void
+	{
 
 		/*
 		 * ── Core "Site Settings" page ──────────────────────────────────────
@@ -700,7 +713,8 @@ class MC_Settings_Registry {
 	 * @param MC_Content_Manager $content Content manager.
 	 * @return void
 	 */
-	public function populate_front_page_choices(MC_Content_Manager $content): void {
+	public function populate_front_page_choices(MC_Content_Manager $content): void
+	{
 
 		$all_pages = $content->query(
 			array(

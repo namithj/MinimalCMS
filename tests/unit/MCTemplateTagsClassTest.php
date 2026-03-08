@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Template_Tags class.
  *
@@ -28,8 +29,8 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Template_Tags
  */
-class MCTemplateTagsClassTest extends TestCase {
-
+class MCTemplateTagsClassTest extends TestCase
+{
 	private MC_Template_Tags $tags;
 	private MC_Hooks $hooks;
 	private MC_Router $router;
@@ -38,7 +39,8 @@ class MCTemplateTagsClassTest extends TestCase {
 	private MC_Content_Manager $content;
 	private string $temp_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_tags_test_' . uniqid() . '/';
 		$content_dir    = $this->temp_dir . 'content/';
@@ -94,12 +96,14 @@ class MCTemplateTagsClassTest extends TestCase {
 		);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -114,12 +118,14 @@ class MCTemplateTagsClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_instantiation(): void {
+	public function test_instantiation(): void
+	{
 
 		$this->assertInstanceOf(MC_Template_Tags::class, $this->tags);
 	}
 
-	public function test_head_fires_hook(): void {
+	public function test_head_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_head', function () use (&$fired) {
@@ -130,7 +136,8 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_body_open_fires_hook(): void {
+	public function test_body_open_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_body_open', function () use (&$fired) {
@@ -141,7 +148,8 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_footer_fires_hook(): void {
+	public function test_footer_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_footer', function () use (&$fired) {
@@ -152,17 +160,20 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_get_the_title_empty_when_no_content(): void {
+	public function test_get_the_title_empty_when_no_content(): void
+	{
 
 		$this->assertSame('', $this->tags->get_the_title());
 	}
 
-	public function test_get_the_content_empty_when_no_content(): void {
+	public function test_get_the_content_empty_when_no_content(): void
+	{
 
 		$this->assertSame('', $this->tags->get_the_content());
 	}
 
-	public function test_get_the_title_with_saved_content(): void {
+	public function test_get_the_title_with_saved_content(): void
+	{
 
 		$this->content->save('page', 'test-page', array(
 			'title'  => 'Hello World',
@@ -179,7 +190,8 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertSame('Hello World', $title);
 	}
 
-	public function test_get_the_content_with_markdown(): void {
+	public function test_get_the_content_with_markdown(): void
+	{
 
 		$this->content->save('page', 'test-md', array(
 			'title'  => 'MD Test',
@@ -196,7 +208,8 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertStringContainsString('<strong>bold</strong>', $html);
 	}
 
-	public function test_body_class_outputs_attribute(): void {
+	public function test_body_class_outputs_attribute(): void
+	{
 
 		ob_start();
 		$this->tags->body_class();
@@ -206,7 +219,8 @@ class MCTemplateTagsClassTest extends TestCase {
 		$this->assertStringEndsWith('"', $output);
 	}
 
-	public function test_body_class_includes_extra(): void {
+	public function test_body_class_includes_extra(): void
+	{
 
 		ob_start();
 		$this->tags->body_class('custom-class');

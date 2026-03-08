@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Session — PHP session lifecycle management.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Session {
-
+class MC_Session
+{
 	/**
 	 * Hooks instance.
 	 *
@@ -51,7 +52,8 @@ class MC_Session {
 	 * @param string   $session_dir Absolute path to session save directory.
 	 * @param int      $lifetime    Session lifetime in seconds. Default 7200 (2 hours).
 	 */
-	public function __construct(MC_Hooks $hooks, string $session_dir, int $lifetime = 7200) {
+	public function __construct(MC_Hooks $hooks, string $session_dir, int $lifetime = 7200)
+	{
 
 		$this->hooks       = $hooks;
 		$this->session_dir = $session_dir;
@@ -65,7 +67,8 @@ class MC_Session {
 	 *
 	 * @return void
 	 */
-	public function start(): void {
+	public function start(): void
+	{
 
 		if (PHP_SESSION_ACTIVE === session_status()) {
 			return;
@@ -109,7 +112,8 @@ class MC_Session {
 	 * @param string $username The authenticated username.
 	 * @return void
 	 */
-	public function set_auth(string $username): void {
+	public function set_auth(string $username): void
+	{
 
 		$this->start();
 
@@ -126,7 +130,8 @@ class MC_Session {
 	 *
 	 * @return void
 	 */
-	public function destroy(): void {
+	public function destroy(): void
+	{
 
 		$this->start();
 
@@ -157,7 +162,8 @@ class MC_Session {
 	 *
 	 * @return string|null Username or null if not authenticated.
 	 */
-	public function get_current_username(): ?string {
+	public function get_current_username(): ?string
+	{
 
 		$this->start();
 
@@ -182,7 +188,8 @@ class MC_Session {
 	 *
 	 * @return bool
 	 */
-	public function is_active(): bool {
+	public function is_active(): bool
+	{
 
 		return null !== $this->get_current_username();
 	}

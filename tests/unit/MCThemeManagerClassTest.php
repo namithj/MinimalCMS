@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Theme_Manager class.
  *
@@ -15,15 +16,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Theme_Manager
  */
-class MCThemeManagerClassTest extends TestCase {
-
+class MCThemeManagerClassTest extends TestCase
+{
 	private MC_Theme_Manager $themes;
 	private MC_Config $config;
 	private MC_Hooks $hooks;
 	private string $themes_dir;
 	private string $temp_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir   = sys_get_temp_dir() . '/mc_theme_test_' . uniqid() . '/';
 		$this->themes_dir = $this->temp_dir . 'themes/';
@@ -52,12 +54,14 @@ class MCThemeManagerClassTest extends TestCase {
 		$this->themes->load();
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -72,34 +76,39 @@ class MCThemeManagerClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_discover(): void {
+	public function test_discover(): void
+	{
 
 		$themes = $this->themes->discover();
 		$this->assertIsArray($themes);
 		$this->assertArrayHasKey('default', $themes);
 	}
 
-	public function test_get_active(): void {
+	public function test_get_active(): void
+	{
 
 		$active = $this->themes->get_active();
 		$this->assertIsArray($active);
 		$this->assertSame('Default', $active['name'] ?? '');
 	}
 
-	public function test_get_active_dir(): void {
+	public function test_get_active_dir(): void
+	{
 
 		$dir = $this->themes->get_active_dir();
 		$this->assertStringEndsWith('default/', $dir);
 	}
 
-	public function test_get_theme_data(): void {
+	public function test_get_theme_data(): void
+	{
 
 		$data = $this->themes->get_theme_data($this->themes_dir . 'default/');
 		$this->assertIsArray($data);
 		$this->assertSame('Default', $data['name']);
 	}
 
-	public function test_get_theme_data_nonexistent(): void {
+	public function test_get_theme_data_nonexistent(): void
+	{
 
 		$data = $this->themes->get_theme_data($this->themes_dir . 'nonexistent/');
 		// get_theme_data always returns an array with defaults.
@@ -107,7 +116,8 @@ class MCThemeManagerClassTest extends TestCase {
 		$this->assertSame('nonexistent', $data['name']);
 	}
 
-	public function test_switch_theme(): void {
+	public function test_switch_theme(): void
+	{
 
 		// Create another theme.
 		$alt_path = $this->themes_dir . 'alt/';
@@ -122,7 +132,8 @@ class MCThemeManagerClassTest extends TestCase {
 		$this->assertSame('alt', $this->config->get('active_theme'));
 	}
 
-	public function test_get_parent_dir_returns_empty_when_no_parent(): void {
+	public function test_get_parent_dir_returns_empty_when_no_parent(): void
+	{
 
 		$parent = $this->themes->get_parent_dir();
 		$this->assertSame('', $parent);

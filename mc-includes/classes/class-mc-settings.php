@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Settings — File-backed JSON settings storage.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Settings {
-
+class MC_Settings
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -48,7 +49,8 @@ class MC_Settings {
 	 * @param MC_Hooks $hooks        Hooks engine.
 	 * @param string   $settings_dir Directory for JSON files.
 	 */
-	public function __construct(MC_Hooks $hooks, string $settings_dir) {
+	public function __construct(MC_Hooks $hooks, string $settings_dir)
+	{
 
 		$this->hooks        = $hooks;
 		$this->settings_dir = rtrim($settings_dir, '/') . '/';
@@ -62,7 +64,8 @@ class MC_Settings {
 	 * @param string $namespace Dot-separated namespace (e.g. 'core.general').
 	 * @return string Absolute path to the JSON file.
 	 */
-	public function path(string $namespace): string {
+	public function path(string $namespace): string
+	{
 
 		$safe = preg_replace('/[^a-z0-9._-]/', '-', strtolower($namespace));
 		return $this->settings_dir . $safe . '.json';
@@ -76,7 +79,8 @@ class MC_Settings {
 	 * @param string $namespace Settings namespace.
 	 * @return array Key-value pairs.
 	 */
-	public function get_all(string $namespace): array {
+	public function get_all(string $namespace): array
+	{
 
 		if (isset($this->cache[$namespace])) {
 			return $this->cache[$namespace];
@@ -119,7 +123,8 @@ class MC_Settings {
 	 * @param mixed  $default   Default value.
 	 * @return mixed
 	 */
-	public function get(string $namespace, string $key, mixed $default = null): mixed {
+	public function get(string $namespace, string $key, mixed $default = null): mixed
+	{
 
 		$data = $this->get_all($namespace);
 		return $data[$key] ?? $default;
@@ -134,7 +139,8 @@ class MC_Settings {
 	 * @param array  $values    Key-value pairs to merge.
 	 * @return true|MC_Error
 	 */
-	public function update(string $namespace, array $values): true|MC_Error {
+	public function update(string $namespace, array $values): true|MC_Error
+	{
 
 		$this->ensure_dir();
 
@@ -183,7 +189,8 @@ class MC_Settings {
 	 * @param string $key       Key to remove.
 	 * @return true|MC_Error
 	 */
-	public function delete_key(string $namespace, string $key): true|MC_Error {
+	public function delete_key(string $namespace, string $key): true|MC_Error
+	{
 
 		$data = $this->get_all($namespace);
 		unset($data[$key]);
@@ -220,7 +227,8 @@ class MC_Settings {
 	 * @param string $namespace Settings namespace.
 	 * @return true|MC_Error
 	 */
-	public function delete(string $namespace): true|MC_Error {
+	public function delete(string $namespace): true|MC_Error
+	{
 
 		$path = $this->path($namespace);
 
@@ -249,7 +257,8 @@ class MC_Settings {
 	 *
 	 * @return void
 	 */
-	private function ensure_dir(): void {
+	private function ensure_dir(): void
+	{
 
 		if (!is_dir($this->settings_dir)) {
 			mkdir($this->settings_dir, 0755, true);

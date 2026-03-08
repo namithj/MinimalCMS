@@ -118,10 +118,10 @@ $page_templates = mc_get_page_templates();
 $section_fields       = array();
 $section_template_map = array(); // [ '_section_foo' => [ 'tpl-a.php', 'tpl-b.php' ] ]
 
-foreach ( $page_templates as $tpl_file => $tpl_data ) {
-	foreach ( ( $tpl_data['sections'] ?? array() ) as $section_id => $section_label ) {
+foreach ($page_templates as $tpl_file => $tpl_data) {
+	foreach (( $tpl_data['sections'] ?? array() ) as $section_id => $section_label) {
 		$key = '_section_' . $section_id;
-		if ( ! isset( $section_fields[ $key ] ) ) {
+		if (! isset($section_fields[ $key ])) {
 			$section_fields[ $key ] = array(
 				'id'      => $key,
 				'type'    => 'markdown',
@@ -134,9 +134,9 @@ foreach ( $page_templates as $tpl_file => $tpl_data ) {
 	}
 }
 
-if ( ! empty( $page_templates ) ) {
+if (! empty($page_templates)) {
 	$template_choices = array( '' => 'Default' );
-	foreach ( $page_templates as $tpl_file => $tpl_data ) {
+	foreach ($page_templates as $tpl_file => $tpl_data) {
 		$template_choices[ $tpl_file ] = $tpl_data['name'];
 	}
 
@@ -189,7 +189,7 @@ foreach ($attribute_fields as $fid => $fdef) {
 
 // Load current values for template section fields from item meta.
 $section_values = array();
-foreach ( $section_fields as $fid => $fdef ) {
+foreach ($section_fields as $fid => $fdef) {
 	$section_values[ $fid ] = $item['meta'][ $fid ] ?? '';
 }
 
@@ -235,13 +235,13 @@ if (mc_is_post_request()) {
 		}
 
 		// Process template section fields and store in meta.
-		if ( ! empty( $section_fields ) ) {
+		if (! empty($section_fields)) {
 			$raw_sections = array();
-			foreach ( $section_fields as $fid => $fdef ) {
-				$raw_sections[ $fid ] = mc_input( $fid, 'post' );
+			foreach ($section_fields as $fid => $fdef) {
+				$raw_sections[ $fid ] = mc_input($fid, 'post');
 			}
-			$processed_sections = mc_process_fields( $section_fields, $raw_sections );
-			foreach ( $processed_sections['values'] as $fid => $val ) {
+			$processed_sections = mc_process_fields($section_fields, $raw_sections);
+			foreach ($processed_sections['values'] as $fid => $val) {
 				$item['meta'][ $fid ] = $val;
 			}
 			$section_values = $processed_sections['values'];
@@ -425,15 +425,15 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 			mc_do_action('mc_edit_content_sidebar', $content_type, $item);
 			?>
 
-			<?php if ( ! empty( $section_template_map ) ) : ?>
+			<?php if (! empty($section_template_map)) : ?>
 			<div class="card" id="template-sections-card">
 				<div class="card-header">Template Sections</div>
-				<?php foreach ( $section_template_map as $fid => $tpl_files ) : ?>
-					<div class="template-section-wrapper" data-for-templates="<?php echo mc_esc_attr( implode( ' ', $tpl_files ) ); ?>">
+				<?php foreach ($section_template_map as $fid => $tpl_files) : ?>
+					<div class="template-section-wrapper" data-for-templates="<?php echo mc_esc_attr(implode(' ', $tpl_files)); ?>">
 						<?php
 						$sfdef         = $section_fields[ $fid ];
 						$sfdef['id']   = $fid;
-						mc_render_field( $sfdef, $section_values[ $fid ] ?? '' );
+						mc_render_field($sfdef, $section_values[ $fid ] ?? '');
 						?>
 					</div>
 				<?php endforeach; ?>
@@ -443,7 +443,7 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 	</div>
 </form>
 
-<?php if ( ! empty( $section_template_map ) ) : ?>
+<?php if (! empty($section_template_map)) : ?>
 <script>
 ( function () {
 	var select   = document.getElementById( 'field-template' );

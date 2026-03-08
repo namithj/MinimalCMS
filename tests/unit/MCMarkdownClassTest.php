@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Markdown class.
  *
@@ -14,50 +15,57 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Markdown
  */
-class MCMarkdownClassTest extends TestCase {
-
+class MCMarkdownClassTest extends TestCase
+{
 	private MC_Markdown $markdown;
 	private MC_Hooks $hooks;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->hooks    = new MC_Hooks();
 		$this->markdown = new MC_Markdown($this->hooks);
 	}
 
-	public function test_parse_heading(): void {
+	public function test_parse_heading(): void
+	{
 
 		$html = $this->markdown->parse('# Hello');
 		$this->assertStringContainsString('<h1>', $html);
 		$this->assertStringContainsString('Hello', $html);
 	}
 
-	public function test_parse_paragraph(): void {
+	public function test_parse_paragraph(): void
+	{
 
 		$html = $this->markdown->parse('Some text here');
 		$this->assertStringContainsString('<p>', $html);
 		$this->assertStringContainsString('Some text here', $html);
 	}
 
-	public function test_parse_bold(): void {
+	public function test_parse_bold(): void
+	{
 
 		$html = $this->markdown->parse('**bold text**');
 		$this->assertStringContainsString('<strong>', $html);
 	}
 
-	public function test_parse_link(): void {
+	public function test_parse_link(): void
+	{
 
 		$html = $this->markdown->parse('[example](https://example.com)');
 		$this->assertStringContainsString('href="https://example.com"', $html);
 	}
 
-	public function test_parse_empty_string(): void {
+	public function test_parse_empty_string(): void
+	{
 
 		$html = $this->markdown->parse('');
 		$this->assertSame('', $html);
 	}
 
-	public function test_pre_parse_filter(): void {
+	public function test_pre_parse_filter(): void
+	{
 
 		$this->hooks->add_filter('mc_pre_parse_markdown', function ($text) {
 			return str_replace('REPLACE', 'replaced', $text);
@@ -67,7 +75,8 @@ class MCMarkdownClassTest extends TestCase {
 		$this->assertStringContainsString('replaced', $html);
 	}
 
-	public function test_post_parse_filter(): void {
+	public function test_post_parse_filter(): void
+	{
 
 		$this->hooks->add_filter('mc_parse_markdown', function ($html) {
 			return $html . '<!-- filtered -->';

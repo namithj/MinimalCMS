@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Settings_Registry class.
  *
@@ -18,13 +19,14 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Settings_Registry
  */
-class MCSettingsRegistryClassTest extends TestCase {
-
+class MCSettingsRegistryClassTest extends TestCase
+{
 	private MC_Settings_Registry $registry;
 	private MC_Hooks $hooks;
 	private string $settings_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->settings_dir = sys_get_temp_dir() . '/mc_sr_test_' . uniqid() . '/';
 		mkdir($this->settings_dir, 0755, true);
@@ -39,12 +41,14 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->registry = new MC_Settings_Registry($this->hooks, $settings, $fields, $http);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->settings_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -59,7 +63,8 @@ class MCSettingsRegistryClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_register_page(): void {
+	public function test_register_page(): void
+	{
 
 		$this->registry->register_page('core', array(
 			'title' => 'General',
@@ -71,12 +76,14 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->assertSame('General', $page['title']);
 	}
 
-	public function test_get_page_unknown(): void {
+	public function test_get_page_unknown(): void
+	{
 
 		$this->assertNull($this->registry->get_page('nonexistent'));
 	}
 
-	public function test_get_pages(): void {
+	public function test_get_pages(): void
+	{
 
 		$this->registry->register_page('one', array('title' => 'One'));
 		$this->registry->register_page('two', array('title' => 'Two'));
@@ -86,7 +93,8 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->assertArrayHasKey('two', $pages);
 	}
 
-	public function test_register_section(): void {
+	public function test_register_section(): void
+	{
 
 		$this->registry->register_page('core', array('title' => 'Core'));
 		$this->registry->register_section('core', 'general', array(
@@ -97,7 +105,8 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->assertArrayHasKey('core:general', $sections);
 	}
 
-	public function test_register_field(): void {
+	public function test_register_field(): void
+	{
 
 		$this->registry->register_page('core', array('title' => 'Core'));
 		$this->registry->register_section('core', 'general', array('title' => 'General'));
@@ -110,7 +119,8 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->assertArrayHasKey('site_name', $fields);
 	}
 
-	public function test_get_page_fields(): void {
+	public function test_get_page_fields(): void
+	{
 
 		$this->registry->register_page('core', array('title' => 'Core'));
 		$this->registry->register_section('core', 'sec1', array('title' => 'S1'));
@@ -122,7 +132,8 @@ class MCSettingsRegistryClassTest extends TestCase {
 		$this->assertArrayHasKey('f2', $all);
 	}
 
-	public function test_get_page_values(): void {
+	public function test_get_page_values(): void
+	{
 
 		$this->registry->register_page('test', array('title' => 'Test', 'group' => 'test'));
 		$this->registry->register_section('test', 'main', array('title' => 'Main', 'section' => 'main'));

@@ -37,14 +37,14 @@ function forms_derive_key(): string
 {
 	$master = defined('MC_ENCRYPTION_KEY') ? MC_ENCRYPTION_KEY : '';
 
-	if ( '' === $master ) {
+	if ('' === $master) {
 		throw new \RuntimeException(
 			'Forms: MC_ENCRYPTION_KEY is not configured. Cannot encrypt/decrypt submissions.'
 		);
 	}
 
 	// hash_hkdf produces a binary key of the requested length.
-	return hash_hkdf( 'sha256', $master, 32, 'minimalcms-forms-v1' );
+	return hash_hkdf('sha256', $master, 32, 'minimalcms-forms-v1');
 }
 
 /**
@@ -59,11 +59,11 @@ function forms_derive_key(): string
  * @return string Base64-encoded encrypted envelope.
  * @throws \RuntimeException On encryption failure.
  */
-function forms_encrypt_submission( string $plaintext ): string
+function forms_encrypt_submission(string $plaintext): string
 {
 	$key        = forms_derive_key();
-	$iv_length  = openssl_cipher_iv_length( MC_FORMS_CIPHER );
-	$iv         = random_bytes( $iv_length );
+	$iv_length  = openssl_cipher_iv_length(MC_FORMS_CIPHER);
+	$iv         = random_bytes($iv_length);
 	$tag        = '';
 
 	$ciphertext = openssl_encrypt(
@@ -77,12 +77,12 @@ function forms_encrypt_submission( string $plaintext ): string
 		16
 	);
 
-	if ( false === $ciphertext ) {
-		throw new \RuntimeException( 'Forms: Submission encryption failed.' );
+	if (false === $ciphertext) {
+		throw new \RuntimeException('Forms: Submission encryption failed.');
 	}
 
 	// Prepend IV and tag so the envelope is self-contained.
-	return base64_encode( $iv . $tag . $ciphertext );
+	return base64_encode($iv . $tag . $ciphertext);
 }
 
 /**
@@ -94,28 +94,28 @@ function forms_encrypt_submission( string $plaintext ): string
  * @return string|false Decrypted plaintext, or false on failure (wrong key /
  *                      tampered data / invalid envelope).
  */
-function forms_decrypt_submission( string $envelope ): string|false
+function forms_decrypt_submission(string $envelope): string|false
 {
-	$raw = base64_decode( $envelope, true );
+	$raw = base64_decode($envelope, true);
 
-	if ( false === $raw ) {
+	if (false === $raw) {
 		return false;
 	}
 
-	$iv_length = openssl_cipher_iv_length( MC_FORMS_CIPHER );
+	$iv_length = openssl_cipher_iv_length(MC_FORMS_CIPHER);
 
 	// Minimum envelope: IV (12) + tag (16) + at least 1 byte ciphertext.
-	if ( strlen( $raw ) < $iv_length + 16 + 1 ) {
+	if (strlen($raw) < $iv_length + 16 + 1) {
 		return false;
 	}
 
-	$iv         = substr( $raw, 0, $iv_length );
-	$tag        = substr( $raw, $iv_length, 16 );
-	$ciphertext = substr( $raw, $iv_length + 16 );
+	$iv         = substr($raw, 0, $iv_length);
+	$tag        = substr($raw, $iv_length, 16);
+	$ciphertext = substr($raw, $iv_length + 16);
 
 	try {
 		$key = forms_derive_key();
-	} catch ( \RuntimeException $e ) {
+	} catch (\RuntimeException $e) {
 		return false;
 	}
 

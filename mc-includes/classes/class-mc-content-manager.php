@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Content_Manager — Flat-file content CRUD.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Content_Manager {
-
+class MC_Content_Manager
+{
 	/**
 	 * @since {version}
 	 * @var MC_Content_Type_Registry
@@ -91,7 +92,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return string Directory path with trailing slash.
 	 */
-	public function item_dir(string $type, string $slug): string {
+	public function item_dir(string $type, string $slug): string
+	{
 
 		return $this->content_dir . $this->types->type_folder($type) . '/' . $slug . '/';
 	}
@@ -105,7 +107,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return string Absolute path.
 	 */
-	public function md_path(string $type, string $slug): string {
+	public function md_path(string $type, string $slug): string
+	{
 
 		return $this->item_dir($type, $slug) . $slug . '.md';
 	}
@@ -119,7 +122,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return string Absolute path.
 	 */
-	public function json_path(string $type, string $slug): string {
+	public function json_path(string $type, string $slug): string
+	{
 
 		return $this->item_dir($type, $slug) . $slug . '.json';
 	}
@@ -139,7 +143,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return array|null Content data or null if not found.
 	 */
-	public function get(string $type, string $slug): ?array {
+	public function get(string $type, string $slug): ?array
+	{
 
 		$json_path = $this->json_path($type, $slug);
 		$md_path   = $this->md_path($type, $slug);
@@ -205,7 +210,8 @@ class MC_Content_Manager {
 	 * @param string $body Markdown body content.
 	 * @return true|MC_Error True on success.
 	 */
-	public function save(string $type, string $slug, array $meta, string $body = ''): true|MC_Error {
+	public function save(string $type, string $slug, array $meta, string $body = ''): true|MC_Error
+	{
 
 		$slug = $this->formatter->sanitize_slug($slug);
 
@@ -281,7 +287,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return true|MC_Error True on success.
 	 */
-	public function delete(string $type, string $slug): true|MC_Error {
+	public function delete(string $type, string $slug): true|MC_Error
+	{
 
 		$item_dir = $this->item_dir($type, $slug);
 
@@ -306,7 +313,8 @@ class MC_Content_Manager {
 	 * @param string $slug Content item slug.
 	 * @return bool
 	 */
-	public function exists(string $type, string $slug): bool {
+	public function exists(string $type, string $slug): bool
+	{
 
 		return is_file($this->json_path($type, $slug));
 	}
@@ -325,7 +333,8 @@ class MC_Content_Manager {
 	 * @param array $args Query arguments.
 	 * @return array List of content arrays.
 	 */
-	public function query(array $args): array {
+	public function query(array $args): array
+	{
 
 		$defaults = array(
 			'type'     => 'page',
@@ -418,7 +427,8 @@ class MC_Content_Manager {
 	 * @param string $status Status filter. Default '' (all).
 	 * @return int
 	 */
-	public function count(string $type, string $status = ''): int {
+	public function count(string $type, string $status = ''): int
+	{
 
 		$dir = $this->content_dir . $this->types->type_folder($type) . '/';
 
@@ -470,7 +480,8 @@ class MC_Content_Manager {
 	 * @param string $dir Directory path.
 	 * @return void
 	 */
-	private function rmdir_recursive(string $dir): void {
+	private function rmdir_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;

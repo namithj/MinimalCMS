@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Content_Type_Registry class.
  *
@@ -14,13 +15,14 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Content_Type_Registry
  */
-class MCContentTypeRegistryClassTest extends TestCase {
-
+class MCContentTypeRegistryClassTest extends TestCase
+{
 	private MC_Content_Type_Registry $registry;
 	private MC_Hooks $hooks;
 	private string $content_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->content_dir = sys_get_temp_dir() . '/mc_ctr_test_' . uniqid() . '/';
 		mkdir($this->content_dir, 0755, true);
@@ -29,12 +31,14 @@ class MCContentTypeRegistryClassTest extends TestCase {
 		$this->registry = new MC_Content_Type_Registry($this->hooks, $this->content_dir);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->content_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -49,7 +53,8 @@ class MCContentTypeRegistryClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_register_content_type(): void {
+	public function test_register_content_type(): void
+	{
 
 		$this->registry->register('article', array(
 			'label'  => 'Article',
@@ -61,12 +66,14 @@ class MCContentTypeRegistryClassTest extends TestCase {
 		$this->assertSame('Article', $type['label']);
 	}
 
-	public function test_get_returns_null_for_unregistered(): void {
+	public function test_get_returns_null_for_unregistered(): void
+	{
 
 		$this->assertNull($this->registry->get('nonexistent'));
 	}
 
-	public function test_all_returns_registered_types(): void {
+	public function test_all_returns_registered_types(): void
+	{
 
 		$this->registry->register('page', array('label' => 'Page'));
 		$this->registry->register('post', array('label' => 'Post'));
@@ -76,20 +83,23 @@ class MCContentTypeRegistryClassTest extends TestCase {
 		$this->assertArrayHasKey('post', $all);
 	}
 
-	public function test_type_folder_returns_folder_name(): void {
+	public function test_type_folder_returns_folder_name(): void
+	{
 
 		$this->registry->register('page', array('label' => 'Page'));
 		$folder = $this->registry->type_folder('page');
 		$this->assertSame('page', $folder);
 	}
 
-	public function test_register_defaults(): void {
+	public function test_register_defaults(): void
+	{
 
 		$this->registry->register_defaults();
 		$this->assertNotNull($this->registry->get('page'));
 	}
 
-	public function test_register_fires_hook(): void {
+	public function test_register_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_registered_content_type', function () use (&$fired) {
@@ -100,7 +110,8 @@ class MCContentTypeRegistryClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_register_args_filter(): void {
+	public function test_register_args_filter(): void
+	{
 
 		$this->hooks->add_filter('mc_register_content_type_args', function ($args) {
 			$args['label'] = 'Filtered';

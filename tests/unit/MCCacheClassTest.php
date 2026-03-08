@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Cache class.
  *
@@ -13,12 +14,13 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Cache
  */
-class MCCacheClassTest extends TestCase {
-
+class MCCacheClassTest extends TestCase
+{
 	private MC_Cache $cache;
 	private string $cache_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->cache_dir = MC_TEST_TMP . 'v2_cache/';
 
@@ -29,7 +31,8 @@ class MCCacheClassTest extends TestCase {
 		$this->cache = new MC_Cache($this->cache_dir);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->cache->flush();
 	}
@@ -40,39 +43,45 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_get_returns_false_for_missing_key(): void {
+	public function test_get_returns_false_for_missing_key(): void
+	{
 
 		$this->assertFalse($this->cache->get('nonexistent'));
 	}
 
-	public function test_set_and_get(): void {
+	public function test_set_and_get(): void
+	{
 
 		$this->assertTrue($this->cache->set('key1', 'value1'));
 		$this->assertSame('value1', $this->cache->get('key1'));
 	}
 
-	public function test_set_and_get_with_group(): void {
+	public function test_set_and_get_with_group(): void
+	{
 
 		$this->cache->set('key', 'group_val', 'my_group');
 		$this->assertSame('group_val', $this->cache->get('key', 'my_group'));
 		$this->assertFalse($this->cache->get('key', 'other_group'));
 	}
 
-	public function test_set_array_value(): void {
+	public function test_set_array_value(): void
+	{
 
 		$data = array('foo' => 'bar', 'num' => 42);
 		$this->cache->set('arr', $data);
 		$this->assertSame($data, $this->cache->get('arr'));
 	}
 
-	public function test_delete(): void {
+	public function test_delete(): void
+	{
 
 		$this->cache->set('del_me', 'exists');
 		$this->assertTrue($this->cache->delete('del_me'));
 		$this->assertFalse($this->cache->get('del_me'));
 	}
 
-	public function test_delete_nonexistent(): void {
+	public function test_delete_nonexistent(): void
+	{
 
 		$this->assertFalse($this->cache->delete('nope'));
 	}
@@ -83,7 +92,8 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_expired_cache_returns_false(): void {
+	public function test_expired_cache_returns_false(): void
+	{
 
 		// Set with 1-second TTL and immediately expire it by modifying the file.
 		$this->cache->set('exp', 'val', 'default', 1);
@@ -100,7 +110,8 @@ class MCCacheClassTest extends TestCase {
 		$this->assertFalse($fresh->get('exp'));
 	}
 
-	public function test_zero_ttl_never_expires(): void {
+	public function test_zero_ttl_never_expires(): void
+	{
 
 		$this->cache->set('forever', 'eternal', 'default', 0);
 
@@ -118,7 +129,8 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_flush_clears_all(): void {
+	public function test_flush_clears_all(): void
+	{
 
 		$this->cache->set('a', 1);
 		$this->cache->set('b', 2, 'group2');
@@ -129,7 +141,8 @@ class MCCacheClassTest extends TestCase {
 		$this->assertFalse($fresh->get('b', 'group2'));
 	}
 
-	public function test_flush_specific_group(): void {
+	public function test_flush_specific_group(): void
+	{
 
 		$this->cache->set('a', 1, 'keep');
 		$this->cache->set('b', 2, 'nuke');
@@ -146,7 +159,8 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_runtime_cache_hit(): void {
+	public function test_runtime_cache_hit(): void
+	{
 
 		$this->cache->set('rt', 'val');
 
@@ -165,7 +179,8 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_file_path_structure(): void {
+	public function test_file_path_structure(): void
+	{
 
 		$path = $this->cache->file_path('mykey', 'mygroup');
 		$this->assertStringContainsString('mygroup/', $path);
@@ -179,7 +194,8 @@ class MCCacheClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_independent_instances(): void {
+	public function test_independent_instances(): void
+	{
 
 		$dir2   = MC_TEST_TMP . 'v2_cache2/';
 		mkdir($dir2, 0755, true);

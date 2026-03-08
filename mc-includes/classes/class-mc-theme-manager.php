@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Theme_Manager — Theme discovery, loading, and switching.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Theme_Manager {
-
+class MC_Theme_Manager
+{
 	/**
 	 * Discovered themes keyed by slug.
 	 *
@@ -55,7 +56,8 @@ class MC_Theme_Manager {
 	 * @param MC_Config $config     Configuration.
 	 * @param string    $themes_dir Themes directory path.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Config $config, string $themes_dir) {
+	public function __construct(MC_Hooks $hooks, MC_Config $config, string $themes_dir)
+	{
 
 		$this->hooks      = $hooks;
 		$this->config     = $config;
@@ -70,7 +72,8 @@ class MC_Theme_Manager {
 	 * @param string $dir Absolute path to the theme directory (with trailing slash).
 	 * @return array Theme metadata.
 	 */
-	public function get_theme_data(string $dir): array {
+	public function get_theme_data(string $dir): array
+	{
 
 		$defaults = array(
 			'name'        => basename(rtrim($dir, '/')),
@@ -106,7 +109,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return array slug => metadata.
 	 */
-	public function discover(): array {
+	public function discover(): array
+	{
 
 		if (!is_dir($this->themes_dir)) {
 			return array();
@@ -145,7 +149,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return void
 	 */
-	public function load(): void {
+	public function load(): void
+	{
 
 		$active_slug = $this->config->get('active_theme', 'default');
 		$theme_dir   = $this->themes_dir . $active_slug . '/';
@@ -195,7 +200,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return array Theme metadata.
 	 */
-	public function get_active(): array {
+	public function get_active(): array
+	{
 
 		$slug = $this->config->get('active_theme', 'default');
 		return $this->themes[$slug] ?? array();
@@ -208,7 +214,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return string
 	 */
-	public function get_active_dir(): string {
+	public function get_active_dir(): string
+	{
 
 		$slug = $this->config->get('active_theme', 'default');
 		return $this->themes_dir . $slug . '/';
@@ -221,7 +228,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return string Directory path or empty string.
 	 */
-	public function get_parent_dir(): string {
+	public function get_parent_dir(): string
+	{
 
 		$active      = $this->get_active();
 		$parent_slug = $active['template'] ?? '';
@@ -241,7 +249,8 @@ class MC_Theme_Manager {
 	 * @param string $slug Theme directory name.
 	 * @return true|MC_Error
 	 */
-	public function switch_theme(string $slug): true|MC_Error {
+	public function switch_theme(string $slug): true|MC_Error
+	{
 
 		$theme_dir = $this->themes_dir . $slug . '/';
 
@@ -273,7 +282,8 @@ class MC_Theme_Manager {
 	 *
 	 * @return array filename => {name, sections, global_sections}.
 	 */
-	public function get_page_templates(): array {
+	public function get_page_templates(): array
+	{
 
 		$dirs = array($this->get_active_dir());
 
@@ -348,7 +358,8 @@ class MC_Theme_Manager {
 	 * @param string $header_value Raw header value.
 	 * @return array<string,string> section_id => label.
 	 */
-	public function parse_section_header(string $header_value): array {
+	public function parse_section_header(string $header_value): array
+	{
 
 		$sections = array();
 

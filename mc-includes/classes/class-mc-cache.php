@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS File Cache
  *
@@ -17,8 +18,8 @@
  *
  * @since {version}
  */
-class MC_Cache {
-
+class MC_Cache
+{
 	/**
 	 * In-memory runtime cache.
 	 *
@@ -42,7 +43,8 @@ class MC_Cache {
 	 *
 	 * @param string $cache_dir Absolute path to the cache directory (with trailing slash).
 	 */
-	public function __construct(string $cache_dir) {
+	public function __construct(string $cache_dir)
+	{
 
 		$this->cache_dir = rtrim($cache_dir, '/') . '/';
 	}
@@ -58,7 +60,8 @@ class MC_Cache {
 	 * @param string $group Cache group. Default 'default'.
 	 * @return mixed Cached value or false if not found / expired.
 	 */
-	public function get(string $key, string $group = 'default'): mixed {
+	public function get(string $key, string $group = 'default'): mixed
+	{
 
 		$runtime_key = $group . ':' . $key;
 
@@ -99,7 +102,8 @@ class MC_Cache {
 	 * @param int    $ttl   Time-to-live in seconds. 0 = no expiry. Default 3600.
 	 * @return bool True on success.
 	 */
-	public function set(string $key, mixed $value, string $group = 'default', int $ttl = 3600): bool {
+	public function set(string $key, mixed $value, string $group = 'default', int $ttl = 3600): bool
+	{
 
 		$runtime_key                  = $group . ':' . $key;
 		$this->runtime[$runtime_key]  = $value;
@@ -133,7 +137,8 @@ class MC_Cache {
 	 * @param string $group Cache group. Default 'default'.
 	 * @return bool True if deleted.
 	 */
-	public function delete(string $key, string $group = 'default'): bool {
+	public function delete(string $key, string $group = 'default'): bool
+	{
 
 		$runtime_key = $group . ':' . $key;
 		unset($this->runtime[$runtime_key]);
@@ -155,7 +160,8 @@ class MC_Cache {
 	 * @param string $group Optional. Specific group to flush. Empty flushes all.
 	 * @return void
 	 */
-	public function flush(string $group = ''): void {
+	public function flush(string $group = ''): void
+	{
 
 		$this->runtime = array();
 
@@ -180,7 +186,8 @@ class MC_Cache {
 	 * @param string $group Cache group.
 	 * @return string Absolute file path.
 	 */
-	public function file_path(string $key, string $group): string {
+	public function file_path(string $key, string $group): string
+	{
 
 		$safe_group = $this->sanitize_group($group);
 		$hash       = md5($key);
@@ -196,7 +203,8 @@ class MC_Cache {
 	 * @param string $group Raw group name.
 	 * @return string Safe directory name.
 	 */
-	private function sanitize_group(string $group): string {
+	private function sanitize_group(string $group): string
+	{
 
 		$group = preg_replace('/[^a-zA-Z0-9._\-]/', '-', $group);
 		return trim($group, '.-');
@@ -210,7 +218,8 @@ class MC_Cache {
 	 * @param string $dir Directory path.
 	 * @return void
 	 */
-	private function rmdir_recursive(string $dir): void {
+	private function rmdir_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Settings class.
  *
@@ -14,13 +15,14 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Settings
  */
-class MCSettingsClassTest extends TestCase {
-
+class MCSettingsClassTest extends TestCase
+{
 	private MC_Settings $settings;
 	private MC_Hooks $hooks;
 	private string $settings_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->settings_dir = sys_get_temp_dir() . '/mc_settings_test_' . uniqid() . '/';
 		mkdir($this->settings_dir, 0755, true);
@@ -29,12 +31,14 @@ class MCSettingsClassTest extends TestCase {
 		$this->settings = new MC_Settings($this->hooks, $this->settings_dir);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->settings_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -49,26 +53,30 @@ class MCSettingsClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_get_all_empty(): void {
+	public function test_get_all_empty(): void
+	{
 
 		$result = $this->settings->get_all('core.general');
 		$this->assertIsArray($result);
 	}
 
-	public function test_update_and_get(): void {
+	public function test_update_and_get(): void
+	{
 
 		$this->settings->update('core.general', array('site_name' => 'Test Site'));
 		$value = $this->settings->get('core.general', 'site_name');
 		$this->assertSame('Test Site', $value);
 	}
 
-	public function test_get_default_value(): void {
+	public function test_get_default_value(): void
+	{
 
 		$value = $this->settings->get('core.general', 'nonexistent', 'default_val');
 		$this->assertSame('default_val', $value);
 	}
 
-	public function test_get_all_returns_saved(): void {
+	public function test_get_all_returns_saved(): void
+	{
 
 		$this->settings->update('core.general', array(
 			'key1' => 'val1',
@@ -80,7 +88,8 @@ class MCSettingsClassTest extends TestCase {
 		$this->assertSame('val2', $all['key2']);
 	}
 
-	public function test_delete_key(): void {
+	public function test_delete_key(): void
+	{
 
 		$this->settings->update('core.general', array(
 			'keep'   => 'yes',
@@ -93,7 +102,8 @@ class MCSettingsClassTest extends TestCase {
 		$this->assertArrayHasKey('keep', $all);
 	}
 
-	public function test_delete_group(): void {
+	public function test_delete_group(): void
+	{
 
 		$this->settings->update('temp.section', array('key' => 'value'));
 		$this->settings->delete('temp.section');
@@ -101,7 +111,8 @@ class MCSettingsClassTest extends TestCase {
 		$this->assertEmpty($all);
 	}
 
-	public function test_update_fires_hook(): void {
+	public function test_update_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_settings_updated', function () use (&$fired) {
@@ -112,7 +123,8 @@ class MCSettingsClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_path_generation(): void {
+	public function test_path_generation(): void
+	{
 
 		$path = $this->settings->path('core.general');
 		$this->assertStringEndsWith('core.general.json', $path);

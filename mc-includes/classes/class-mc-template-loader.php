@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Template_Loader — Template hierarchy resolution and loading.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Template_Loader {
-
+class MC_Template_Loader
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -45,7 +46,8 @@ class MC_Template_Loader {
 	 * @param MC_Router        $router Router.
 	 * @param MC_Theme_Manager $themes Theme manager.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Router $router, MC_Theme_Manager $themes) {
+	public function __construct(MC_Hooks $hooks, MC_Router $router, MC_Theme_Manager $themes)
+	{
 
 		$this->hooks  = $hooks;
 		$this->router = $router;
@@ -59,7 +61,8 @@ class MC_Template_Loader {
 	 *
 	 * @return void
 	 */
-	public function load(): void {
+	public function load(): void
+	{
 
 		/**
 		 * Fires before the template is determined.
@@ -108,7 +111,8 @@ class MC_Template_Loader {
 	 *
 	 * @return string[] Ordered list of template filenames.
 	 */
-	public function get_hierarchy(): array {
+	public function get_hierarchy(): array
+	{
 
 		$query     = $this->router->get_query();
 		$templates = array();
@@ -162,7 +166,8 @@ class MC_Template_Loader {
 	 * @param string[] $templates Candidate filenames.
 	 * @return string Absolute path to the first match, or empty string.
 	 */
-	public function locate(array $templates): string {
+	public function locate(array $templates): string
+	{
 
 		$theme_dir  = $this->themes->get_active_dir();
 		$parent_dir = $this->themes->get_parent_dir();

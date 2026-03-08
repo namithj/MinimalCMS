@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Content_Manager class.
  *
@@ -18,14 +19,15 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Content_Manager
  */
-class MCContentManagerClassTest extends TestCase {
-
+class MCContentManagerClassTest extends TestCase
+{
 	private MC_Content_Manager $content;
 	private MC_Content_Type_Registry $types;
 	private MC_Hooks $hooks;
 	private string $content_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->content_dir = sys_get_temp_dir() . '/mc_cm_test_' . uniqid() . '/';
 		mkdir($this->content_dir, 0755, true);
@@ -47,12 +49,14 @@ class MCContentManagerClassTest extends TestCase {
 		);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->content_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -67,7 +71,8 @@ class MCContentManagerClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_save_and_get(): void {
+	public function test_save_and_get(): void
+	{
 
 		$result = $this->content->save('page', 'hello', array(
 			'title' => 'Hello World',
@@ -81,13 +86,15 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertSame('Hello World', $item['title']);
 	}
 
-	public function test_get_nonexistent(): void {
+	public function test_get_nonexistent(): void
+	{
 
 		$item = $this->content->get('page', 'no-such-slug');
 		$this->assertNull($item);
 	}
 
-	public function test_exists(): void {
+	public function test_exists(): void
+	{
 
 		$this->content->save('page', 'test-exists', array(
 			'title' => 'Exists',
@@ -98,7 +105,8 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertFalse($this->content->exists('page', 'nonexistent'));
 	}
 
-	public function test_delete(): void {
+	public function test_delete(): void
+	{
 
 		$this->content->save('page', 'deleteme', array(
 			'title' => 'Delete Me',
@@ -110,7 +118,8 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertFalse($this->content->exists('page', 'deleteme'));
 	}
 
-	public function test_query_returns_array(): void {
+	public function test_query_returns_array(): void
+	{
 
 		$this->content->save('page', 'page-a', array('title' => 'A', 'body' => ''));
 		$this->content->save('page', 'page-b', array('title' => 'B', 'body' => ''));
@@ -120,7 +129,8 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertGreaterThanOrEqual(2, count($items));
 	}
 
-	public function test_count(): void {
+	public function test_count(): void
+	{
 
 		$this->content->save('post', 'post-1', array('title' => 'Post 1', 'body' => ''));
 		$this->content->save('post', 'post-2', array('title' => 'Post 2', 'body' => ''));
@@ -128,7 +138,8 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertGreaterThanOrEqual(2, $this->content->count('post'));
 	}
 
-	public function test_save_fires_hook(): void {
+	public function test_save_fires_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_content_saved', function () use (&$fired) {
@@ -139,7 +150,8 @@ class MCContentManagerClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_delete_fires_hook(): void {
+	public function test_delete_fires_hook(): void
+	{
 
 		$this->content->save('page', 'will-delete', array('title' => 'X', 'body' => ''));
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Application Container
  *
@@ -18,8 +19,8 @@
  *
  * @since {version}
  */
-class MC_App {
-
+class MC_App
+{
 	/**
 	 * Singleton instance.
 	 *
@@ -65,7 +66,8 @@ class MC_App {
 	 *
 	 * @since {version}
 	 */
-	private function __construct() {
+	private function __construct()
+	{
 	}
 
 	/**
@@ -73,7 +75,8 @@ class MC_App {
 	 *
 	 * @since {version}
 	 */
-	private function __clone() {
+	private function __clone()
+	{
 	}
 
 	/**
@@ -83,7 +86,8 @@ class MC_App {
 	 *
 	 * @return MC_App
 	 */
-	public static function instance(): MC_App {
+	public static function instance(): MC_App
+	{
 
 		if (null === self::$instance) {
 			self::$instance = new self();
@@ -103,7 +107,8 @@ class MC_App {
 	 * @param string $config_path Absolute path to config.json.
 	 * @return void
 	 */
-	public function boot(string $config_path): void {
+	public function boot(string $config_path): void
+	{
 
 		if ($this->booted) {
 			return;
@@ -430,7 +435,8 @@ class MC_App {
 	 * @param mixed  $value Value.
 	 * @return void
 	 */
-	private function maybe_define(string $name, mixed $value): void {
+	private function maybe_define(string $name, mixed $value): void
+	{
 
 		if (!defined($name)) {
 			define($name, $value);
@@ -447,35 +453,36 @@ class MC_App {
 	 * @param string    $content_rel Relative content directory name.
 	 * @return void
 	 */
-	private function define_constants(MC_Config $config, string $abspath, string $content_rel): void {
+	private function define_constants(MC_Config $config, string $abspath, string $content_rel): void
+	{
 
 		$content_dir = $abspath . $content_rel . '/';
 		$data_dir    = $abspath . rtrim($config->get('data_dir', 'mc-data'), '/') . '/';
 
-		$this->maybe_define('MC_INC',           $abspath . 'mc-includes/');
-		$this->maybe_define('MC_CONTENT_DIR',   $content_dir);
-		$this->maybe_define('MC_DATA_DIR',      $data_dir);
-		$this->maybe_define('MC_PLUGIN_DIR',    $content_dir . 'plugins/');
+		$this->maybe_define('MC_INC', $abspath . 'mc-includes/');
+		$this->maybe_define('MC_CONTENT_DIR', $content_dir);
+		$this->maybe_define('MC_DATA_DIR', $data_dir);
+		$this->maybe_define('MC_PLUGIN_DIR', $content_dir . 'plugins/');
 		$this->maybe_define('MC_MU_PLUGIN_DIR', $content_dir . 'mu-plugins/');
-		$this->maybe_define('MC_THEME_DIR',     $content_dir . 'themes/');
-		$this->maybe_define('MC_UPLOAD_DIR',    $content_dir . 'uploads/');
-		$this->maybe_define('MC_CACHE_DIR',     $content_dir . 'cache/');
-		$this->maybe_define('MC_SESSION_DIR',   $data_dir . 'sessions/');
-		$this->maybe_define('MC_LOG_DIR',       $data_dir . 'logs/');
+		$this->maybe_define('MC_THEME_DIR', $content_dir . 'themes/');
+		$this->maybe_define('MC_UPLOAD_DIR', $content_dir . 'uploads/');
+		$this->maybe_define('MC_CACHE_DIR', $content_dir . 'cache/');
+		$this->maybe_define('MC_SESSION_DIR', $data_dir . 'sessions/');
+		$this->maybe_define('MC_LOG_DIR', $data_dir . 'logs/');
 
 		// Runtime values from config.
-		$this->maybe_define('MC_SITE_URL',            rtrim((string) $config->get('site_url', ''), '/'));
-		$this->maybe_define('MC_SITE_NAME',           (string) $config->get('site_name', ''));
-		$this->maybe_define('MC_SITE_DESCRIPTION',    (string) $config->get('site_description', ''));
-		$this->maybe_define('MC_TIMEZONE',            (string) $config->get('timezone', 'UTC'));
-		$this->maybe_define('MC_DEBUG',               (bool)   $config->get('debug', false));
-		$this->maybe_define('MC_SECRET_KEY',          (string) $config->get('secret_key', ''));
-		$this->maybe_define('MC_ENCRYPTION_KEY',      (string) $config->get('encryption_key', ''));
-		$this->maybe_define('MC_FRONT_PAGE',          (string) $config->get('front_page', 'index'));
-		$this->maybe_define('MC_POSTS_PER_PAGE',      (int)    $config->get('posts_per_page', 10));
+		$this->maybe_define('MC_SITE_URL', rtrim((string) $config->get('site_url', ''), '/'));
+		$this->maybe_define('MC_SITE_NAME', (string) $config->get('site_name', ''));
+		$this->maybe_define('MC_SITE_DESCRIPTION', (string) $config->get('site_description', ''));
+		$this->maybe_define('MC_TIMEZONE', (string) $config->get('timezone', 'UTC'));
+		$this->maybe_define('MC_DEBUG', (bool)   $config->get('debug', false));
+		$this->maybe_define('MC_SECRET_KEY', (string) $config->get('secret_key', ''));
+		$this->maybe_define('MC_ENCRYPTION_KEY', (string) $config->get('encryption_key', ''));
+		$this->maybe_define('MC_FRONT_PAGE', (string) $config->get('front_page', 'index'));
+		$this->maybe_define('MC_POSTS_PER_PAGE', (int)    $config->get('posts_per_page', 10));
 		$this->maybe_define('MC_PERMALINK_STRUCTURE', (string) $config->get('permalink_structure', '/{type}/{slug}/'));
-		$this->maybe_define('MC_ACTIVE_THEME',        (string) $config->get('active_theme', 'default'));
-		$this->maybe_define('MC_VERSION',             self::VERSION);
+		$this->maybe_define('MC_ACTIVE_THEME', (string) $config->get('active_theme', 'default'));
+		$this->maybe_define('MC_VERSION', self::VERSION);
 	}
 
 	/**
@@ -486,7 +493,8 @@ class MC_App {
 	 * @param MC_Config $config Configuration object.
 	 * @return void
 	 */
-	private function configure_environment(MC_Config $config): void {
+	private function configure_environment(MC_Config $config): void
+	{
 
 		$timezone = $config->get('timezone', 'UTC');
 		if (is_string($timezone) && '' !== $timezone) {
@@ -513,7 +521,8 @@ class MC_App {
 	 * @param object $service Service instance.
 	 * @return void
 	 */
-	public function set(string $key, object $service): void {
+	public function set(string $key, object $service): void
+	{
 
 		$this->services[$key] = $service;
 	}
@@ -528,7 +537,8 @@ class MC_App {
 	 *
 	 * @throws \RuntimeException If service not registered.
 	 */
-	public function get(string $key): object {
+	public function get(string $key): object
+	{
 
 		if (!isset($this->services[$key])) {
 			throw new \RuntimeException(
@@ -547,7 +557,8 @@ class MC_App {
 	 * @param string $key Service identifier.
 	 * @return bool
 	 */
-	public function has(string $key): bool {
+	public function has(string $key): bool
+	{
 
 		return isset($this->services[$key]);
 	}
@@ -559,7 +570,8 @@ class MC_App {
 	 *
 	 * @return bool
 	 */
-	public function is_booted(): bool {
+	public function is_booted(): bool
+	{
 
 		return $this->booted;
 	}
@@ -577,7 +589,8 @@ class MC_App {
 	 *
 	 * @return MC_Config
 	 */
-	public function config(): MC_Config {
+	public function config(): MC_Config
+	{
 
 		return $this->services['config'];
 	}
@@ -589,7 +602,8 @@ class MC_App {
 	 *
 	 * @return MC_Hooks
 	 */
-	public function hooks(): MC_Hooks {
+	public function hooks(): MC_Hooks
+	{
 
 		return $this->services['hooks'];
 	}
@@ -601,7 +615,8 @@ class MC_App {
 	 *
 	 * @return MC_Formatter
 	 */
-	public function formatter(): MC_Formatter {
+	public function formatter(): MC_Formatter
+	{
 
 		return $this->services['formatter'];
 	}
@@ -613,7 +628,8 @@ class MC_App {
 	 *
 	 * @return MC_Http
 	 */
-	public function http(): MC_Http {
+	public function http(): MC_Http
+	{
 
 		return $this->services['http'];
 	}
@@ -625,7 +641,8 @@ class MC_App {
 	 *
 	 * @return MC_Cache
 	 */
-	public function cache(): MC_Cache {
+	public function cache(): MC_Cache
+	{
 
 		return $this->services['cache'];
 	}
@@ -643,7 +660,8 @@ class MC_App {
 	 *
 	 * @return MC_Capabilities
 	 */
-	public function capabilities(): MC_Capabilities {
+	public function capabilities(): MC_Capabilities
+	{
 
 		return $this->services['capabilities'];
 	}
@@ -655,7 +673,8 @@ class MC_App {
 	 *
 	 * @return MC_Session
 	 */
-	public function session(): MC_Session {
+	public function session(): MC_Session
+	{
 
 		return $this->services['session'];
 	}
@@ -667,7 +686,8 @@ class MC_App {
 	 *
 	 * @return MC_User_Manager
 	 */
-	public function users(): MC_User_Manager {
+	public function users(): MC_User_Manager
+	{
 
 		return $this->services['user_manager'];
 	}
@@ -685,7 +705,8 @@ class MC_App {
 	 *
 	 * @return MC_Field_Registry
 	 */
-	public function fields(): MC_Field_Registry {
+	public function fields(): MC_Field_Registry
+	{
 
 		return $this->services['fields'];
 	}
@@ -697,7 +718,8 @@ class MC_App {
 	 *
 	 * @return MC_Settings
 	 */
-	public function settings(): MC_Settings {
+	public function settings(): MC_Settings
+	{
 
 		return $this->services['settings'];
 	}
@@ -709,7 +731,8 @@ class MC_App {
 	 *
 	 * @return MC_Settings_Registry
 	 */
-	public function settings_registry(): MC_Settings_Registry {
+	public function settings_registry(): MC_Settings_Registry
+	{
 
 		return $this->services['settings_registry'];
 	}
@@ -721,7 +744,8 @@ class MC_App {
 	 *
 	 * @return MC_Content_Type_Registry
 	 */
-	public function content_types(): MC_Content_Type_Registry {
+	public function content_types(): MC_Content_Type_Registry
+	{
 
 		return $this->services['content_types'];
 	}
@@ -733,7 +757,8 @@ class MC_App {
 	 *
 	 * @return MC_Content_Manager
 	 */
-	public function content(): MC_Content_Manager {
+	public function content(): MC_Content_Manager
+	{
 
 		return $this->services['content'];
 	}
@@ -745,7 +770,8 @@ class MC_App {
 	 *
 	 * @return MC_Markdown
 	 */
-	public function markdown(): MC_Markdown {
+	public function markdown(): MC_Markdown
+	{
 
 		return $this->services['markdown'];
 	}
@@ -757,7 +783,8 @@ class MC_App {
 	 *
 	 * @return MC_Shortcodes
 	 */
-	public function shortcodes(): MC_Shortcodes {
+	public function shortcodes(): MC_Shortcodes
+	{
 
 		return $this->services['shortcodes'];
 	}
@@ -775,7 +802,8 @@ class MC_App {
 	 *
 	 * @return MC_Router
 	 */
-	public function router(): MC_Router {
+	public function router(): MC_Router
+	{
 
 		return $this->services['router'];
 	}
@@ -787,7 +815,8 @@ class MC_App {
 	 *
 	 * @return MC_Template_Loader
 	 */
-	public function template_loader(): MC_Template_Loader {
+	public function template_loader(): MC_Template_Loader
+	{
 
 		return $this->services['template_loader'];
 	}
@@ -799,7 +828,8 @@ class MC_App {
 	 *
 	 * @return MC_Template_Tags
 	 */
-	public function template_tags(): MC_Template_Tags {
+	public function template_tags(): MC_Template_Tags
+	{
 
 		return $this->services['template_tags'];
 	}
@@ -811,7 +841,8 @@ class MC_App {
 	 *
 	 * @return MC_Asset_Manager
 	 */
-	public function assets(): MC_Asset_Manager {
+	public function assets(): MC_Asset_Manager
+	{
 
 		return $this->services['assets'];
 	}
@@ -829,7 +860,8 @@ class MC_App {
 	 *
 	 * @return MC_Theme_Manager
 	 */
-	public function themes(): MC_Theme_Manager {
+	public function themes(): MC_Theme_Manager
+	{
 
 		return $this->services['themes'];
 	}
@@ -841,7 +873,8 @@ class MC_App {
 	 *
 	 * @return MC_Plugin_Manager
 	 */
-	public function plugins(): MC_Plugin_Manager {
+	public function plugins(): MC_Plugin_Manager
+	{
 
 		return $this->services['plugins'];
 	}
@@ -853,7 +886,8 @@ class MC_App {
 	 *
 	 * @return MC_Admin_Bar
 	 */
-	public function admin_bar(): MC_Admin_Bar {
+	public function admin_bar(): MC_Admin_Bar
+	{
 
 		return $this->services['admin_bar'];
 	}
@@ -865,7 +899,8 @@ class MC_App {
 	 *
 	 * @return MC_Setup
 	 */
-	public function setup(): MC_Setup {
+	public function setup(): MC_Setup
+	{
 
 		return $this->services['setup'];
 	}
@@ -878,7 +913,8 @@ class MC_App {
 	 *
 	 * @return void
 	 */
-	public static function reset(): void {
+	public static function reset(): void
+	{
 
 		self::$instance = null;
 	}

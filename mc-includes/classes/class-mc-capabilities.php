@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Capabilities — Role and permission management.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Capabilities {
-
+class MC_Capabilities
+{
 	/**
 	 * Registered roles keyed by slug.
 	 *
@@ -41,7 +42,8 @@ class MC_Capabilities {
 	 *
 	 * @param MC_Hooks $hooks Hooks engine.
 	 */
-	public function __construct(MC_Hooks $hooks) {
+	public function __construct(MC_Hooks $hooks)
+	{
 
 		$this->hooks = $hooks;
 	}
@@ -53,7 +55,8 @@ class MC_Capabilities {
 	 *
 	 * @return void
 	 */
-	public function initialise_roles(): void {
+	public function initialise_roles(): void
+	{
 
 		$roles = array(
 			'administrator' => array(
@@ -130,7 +133,8 @@ class MC_Capabilities {
 	 * @param array  $capabilities Associative array of capability => bool.
 	 * @return void
 	 */
-	public function add_role(string $slug, string $label, array $capabilities = array()): void {
+	public function add_role(string $slug, string $label, array $capabilities = array()): void
+	{
 
 		$this->roles[$slug] = array(
 			'label'        => $label,
@@ -148,7 +152,8 @@ class MC_Capabilities {
 	 * @param string $slug Role identifier.
 	 * @return void
 	 */
-	public function remove_role(string $slug): void {
+	public function remove_role(string $slug): void
+	{
 
 		unset($this->roles[$slug]);
 		$this->hooks->do_action('mc_role_removed', $slug);
@@ -162,7 +167,8 @@ class MC_Capabilities {
 	 * @param string $slug Role identifier.
 	 * @return array|null Role array or null if not found.
 	 */
-	public function get_role(string $slug): ?array {
+	public function get_role(string $slug): ?array
+	{
 
 		return $this->roles[$slug] ?? null;
 	}
@@ -174,7 +180,8 @@ class MC_Capabilities {
 	 *
 	 * @return array All roles.
 	 */
-	public function get_roles(): array {
+	public function get_roles(): array
+	{
 
 		return $this->roles;
 	}
@@ -189,7 +196,8 @@ class MC_Capabilities {
 	 * @param bool   $grant      Whether to grant. Default true.
 	 * @return void
 	 */
-	public function add_cap(string $role, string $capability, bool $grant = true): void {
+	public function add_cap(string $role, string $capability, bool $grant = true): void
+	{
 
 		if (isset($this->roles[$role])) {
 			$this->roles[$role]['capabilities'][$capability] = $grant;
@@ -206,7 +214,8 @@ class MC_Capabilities {
 	 * @param string $capability Capability name.
 	 * @return void
 	 */
-	public function remove_cap(string $role, string $capability): void {
+	public function remove_cap(string $role, string $capability): void
+	{
 
 		unset($this->roles[$role]['capabilities'][$capability]);
 		$this->hooks->do_action('mc_capability_removed', $role, $capability);
@@ -221,7 +230,8 @@ class MC_Capabilities {
 	 * @param string $capability Capability to check.
 	 * @return bool True if the role grants the capability.
 	 */
-	public function role_has_cap(string $role, string $capability): bool {
+	public function role_has_cap(string $role, string $capability): bool
+	{
 
 		if (!isset($this->roles[$role])) {
 			return false;
@@ -239,7 +249,8 @@ class MC_Capabilities {
 	 * @param string $capability Capability name.
 	 * @return bool
 	 */
-	public function user_can(array $user, string $capability): bool {
+	public function user_can(array $user, string $capability): bool
+	{
 
 		$role = $user['role'] ?? '';
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Template_Tags — Template helper functions.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Template_Tags {
-
+class MC_Template_Tags
+{
 	/**
 	 * @since {version}
 	 * @var MC_Hooks
@@ -123,7 +124,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function head(): void {
+	public function head(): void
+	{
 
 		$this->hooks->do_action('mc_head');
 	}
@@ -135,7 +137,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function body_open(): void {
+	public function body_open(): void
+	{
 
 		$this->hooks->do_action('mc_body_open');
 	}
@@ -147,7 +150,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function footer(): void {
+	public function footer(): void
+	{
 
 		$this->hooks->do_action('mc_footer');
 	}
@@ -165,7 +169,8 @@ class MC_Template_Tags {
 	 *
 	 * @return array|null
 	 */
-	public function get_the_content_item(): ?array {
+	public function get_the_content_item(): ?array
+	{
 
 		$query = $this->router->get_query();
 		return $query['content'] ?? null;
@@ -178,7 +183,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function the_title(): void {
+	public function the_title(): void
+	{
 
 		echo $this->formatter->esc_html($this->get_the_title());
 	}
@@ -190,7 +196,8 @@ class MC_Template_Tags {
 	 *
 	 * @return string
 	 */
-	public function get_the_title(): string {
+	public function get_the_title(): string
+	{
 
 		$content = $this->get_the_content_item();
 		$title   = $content['title'] ?? '';
@@ -212,7 +219,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function the_content(): void {
+	public function the_content(): void
+	{
 
 		echo $this->get_the_content();
 	}
@@ -224,7 +232,8 @@ class MC_Template_Tags {
 	 *
 	 * @return string
 	 */
-	public function get_the_content(): string {
+	public function get_the_content(): string
+	{
 
 		$content = $this->get_the_content_item();
 		$raw     = $content['body_raw'] ?? '';
@@ -249,7 +258,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function the_excerpt(): void {
+	public function the_excerpt(): void
+	{
 
 		$content = $this->get_the_content_item();
 		$excerpt = $content['excerpt'] ?? '';
@@ -278,7 +288,8 @@ class MC_Template_Tags {
 	 *
 	 * @return void
 	 */
-	public function document_title(): void {
+	public function document_title(): void
+	{
 
 		$parts = array();
 
@@ -324,7 +335,8 @@ class MC_Template_Tags {
 	 * @param string $name Optional specialised header name.
 	 * @return void
 	 */
-	public function get_header(string $name = ''): void {
+	public function get_header(string $name = ''): void
+	{
 
 		$this->hooks->do_action('mc_get_header', $name);
 
@@ -348,7 +360,8 @@ class MC_Template_Tags {
 	 * @param string $name Optional specialised footer name.
 	 * @return void
 	 */
-	public function get_footer(string $name = ''): void {
+	public function get_footer(string $name = ''): void
+	{
 
 		$this->hooks->do_action('mc_get_footer', $name);
 
@@ -372,7 +385,8 @@ class MC_Template_Tags {
 	 * @param string $name Optional specialised sidebar name.
 	 * @return void
 	 */
-	public function get_sidebar(string $name = ''): void {
+	public function get_sidebar(string $name = ''): void
+	{
 
 		$this->hooks->do_action('mc_get_sidebar', $name);
 
@@ -397,7 +411,8 @@ class MC_Template_Tags {
 	 * @param string $name Optional specialisation.
 	 * @return void
 	 */
-	public function get_template_part(string $slug, string $name = ''): void {
+	public function get_template_part(string $slug, string $name = ''): void
+	{
 
 		$templates = array();
 		if ('' !== $name) {
@@ -425,7 +440,8 @@ class MC_Template_Tags {
 	 * @param string $extra Optional extra classes.
 	 * @return void
 	 */
-	public function body_class(string $extra = ''): void {
+	public function body_class(string $extra = ''): void
+	{
 
 		$classes = array();
 		$query   = $this->router->get_query();

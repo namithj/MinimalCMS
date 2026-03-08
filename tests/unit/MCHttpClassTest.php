@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Http class.
  *
@@ -14,12 +15,13 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Http
  */
-class MCHttpClassTest extends TestCase {
-
+class MCHttpClassTest extends TestCase
+{
 	private MC_Http $http;
 	private MC_Hooks $hooks;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->hooks = new MC_Hooks();
 		$this->http  = new MC_Http($this->hooks, 'test-secret-key-for-phpunit');
@@ -31,43 +33,50 @@ class MCHttpClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_create_nonce_returns_hex_string(): void {
+	public function test_create_nonce_returns_hex_string(): void
+	{
 
 		$nonce = $this->http->create_nonce('test_action');
 		$this->assertMatchesRegularExpression('/^[a-f0-9]{20}$/', $nonce);
 	}
 
-	public function test_create_nonce_is_deterministic(): void {
+	public function test_create_nonce_is_deterministic(): void
+	{
 
 		$n1 = $this->http->create_nonce('same_action');
 		$n2 = $this->http->create_nonce('same_action');
 		$this->assertSame($n1, $n2);
 	}
 
-	public function test_create_nonce_differs_by_action(): void {
+	public function test_create_nonce_differs_by_action(): void
+	{
 
 		$n1 = $this->http->create_nonce('action_a');
 		$n2 = $this->http->create_nonce('action_b');
 		$this->assertNotSame($n1, $n2);
 	}
 
-	public function test_verify_nonce_valid(): void {
+	public function test_verify_nonce_valid(): void
+	{
 
 		$nonce = $this->http->create_nonce('verify_test');
 		$this->assertTrue($this->http->verify_nonce($nonce, 'verify_test'));
 	}
 
-	public function test_verify_nonce_invalid(): void {
+	public function test_verify_nonce_invalid(): void
+	{
 
 		$this->assertFalse($this->http->verify_nonce('bad_nonce_value_here', 'verify_test'));
 	}
 
-	public function test_verify_nonce_empty(): void {
+	public function test_verify_nonce_empty(): void
+	{
 
 		$this->assertFalse($this->http->verify_nonce('', 'any'));
 	}
 
-	public function test_nonce_varies_by_user(): void {
+	public function test_nonce_varies_by_user(): void
+	{
 
 		$this->http->set_current_user_id('user1');
 		$n1 = $this->http->create_nonce('action');
@@ -78,7 +87,8 @@ class MCHttpClassTest extends TestCase {
 		$this->assertNotSame($n1, $n2);
 	}
 
-	public function test_nonce_field_outputs_hidden_input(): void {
+	public function test_nonce_field_outputs_hidden_input(): void
+	{
 
 		ob_start();
 		$this->http->nonce_field('test_action', '_mc_nonce');
@@ -89,27 +99,31 @@ class MCHttpClassTest extends TestCase {
 		$this->assertStringContainsString('value="', $output);
 	}
 
-	public function test_nonce_url_appends_parameter(): void {
+	public function test_nonce_url_appends_parameter(): void
+	{
 
 		$url = $this->http->nonce_url('https://example.com/page', 'test_action');
 		$this->assertStringContainsString('_mc_nonce=', $url);
 		$this->assertStringContainsString('?', $url);
 	}
 
-	public function test_nonce_url_uses_ampersand_for_existing_query(): void {
+	public function test_nonce_url_uses_ampersand_for_existing_query(): void
+	{
 
 		$url = $this->http->nonce_url('https://example.com/page?foo=bar', 'test_action');
 		$this->assertStringContainsString('&_mc_nonce=', $url);
 	}
 
-	public function test_nonce_tick(): void {
+	public function test_nonce_tick(): void
+	{
 
 		$tick = $this->http->nonce_tick();
 		$this->assertIsInt($tick);
 		$this->assertGreaterThan(0, $tick);
 	}
 
-	public function test_nonce_tick_filter(): void {
+	public function test_nonce_tick_filter(): void
+	{
 
 		$this->hooks->add_filter('mc_nonce_tick_length', function () {
 			return 3600; // 1 hour.
@@ -126,7 +140,8 @@ class MCHttpClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_request_method_defaults_to_get(): void {
+	public function test_request_method_defaults_to_get(): void
+	{
 
 		$original = $_SERVER['REQUEST_METHOD'] ?? null;
 		unset($_SERVER['REQUEST_METHOD']);
@@ -138,7 +153,8 @@ class MCHttpClassTest extends TestCase {
 		}
 	}
 
-	public function test_is_post_request(): void {
+	public function test_is_post_request(): void
+	{
 
 		$original = $_SERVER['REQUEST_METHOD'] ?? null;
 		$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -152,12 +168,14 @@ class MCHttpClassTest extends TestCase {
 		}
 	}
 
-	public function test_input_returns_null_for_missing_key(): void {
+	public function test_input_returns_null_for_missing_key(): void
+	{
 
 		$this->assertNull($this->http->input('nonexistent_key_12345'));
 	}
 
-	public function test_input_with_sanitize_callback(): void {
+	public function test_input_with_sanitize_callback(): void
+	{
 
 		$_REQUEST['test_input_key'] = '  hello  ';
 
@@ -173,7 +191,8 @@ class MCHttpClassTest extends TestCase {
 	 * -------------------------------------------------------------------------
 	 */
 
-	public function test_send_404(): void {
+	public function test_send_404(): void
+	{
 
 		$this->http->send_404();
 		$this->assertSame(404, http_response_code());

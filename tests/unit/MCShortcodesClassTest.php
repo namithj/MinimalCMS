@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Shortcodes class.
  *
@@ -13,16 +14,18 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Shortcodes
  */
-class MCShortcodesClassTest extends TestCase {
-
+class MCShortcodesClassTest extends TestCase
+{
 	private MC_Shortcodes $shortcodes;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->shortcodes = new MC_Shortcodes();
 	}
 
-	public function test_add_and_exists(): void {
+	public function test_add_and_exists(): void
+	{
 
 		$this->shortcodes->add('test', function () {
 			return 'output';
@@ -31,12 +34,14 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertTrue($this->shortcodes->exists('test'));
 	}
 
-	public function test_exists_returns_false_for_unknown(): void {
+	public function test_exists_returns_false_for_unknown(): void
+	{
 
 		$this->assertFalse($this->shortcodes->exists('nope'));
 	}
 
-	public function test_remove(): void {
+	public function test_remove(): void
+	{
 
 		$this->shortcodes->add('removeme', function () {
 			return '';
@@ -46,7 +51,8 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertFalse($this->shortcodes->exists('removeme'));
 	}
 
-	public function test_do_shortcode_simple(): void {
+	public function test_do_shortcode_simple(): void
+	{
 
 		$this->shortcodes->add('hello', function () {
 			return 'Hi!';
@@ -56,7 +62,8 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertSame('Hi!', $result);
 	}
 
-	public function test_do_shortcode_with_attributes(): void {
+	public function test_do_shortcode_with_attributes(): void
+	{
 
 		$this->shortcodes->add('greet', function ($atts) {
 			return 'Hello ' . ($atts['name'] ?? 'World');
@@ -66,7 +73,8 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertSame('Hello Alice', $result);
 	}
 
-	public function test_do_shortcode_with_content(): void {
+	public function test_do_shortcode_with_content(): void
+	{
 
 		$this->shortcodes->add('wrap', function ($atts, $content) {
 			return '<div>' . $content . '</div>';
@@ -76,13 +84,15 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertSame('<div>inner</div>', $result);
 	}
 
-	public function test_do_shortcode_no_match(): void {
+	public function test_do_shortcode_no_match(): void
+	{
 
 		$text = 'No shortcodes here.';
 		$this->assertSame($text, $this->shortcodes->do_shortcode($text));
 	}
 
-	public function test_do_shortcode_multiple(): void {
+	public function test_do_shortcode_multiple(): void
+	{
 
 		$this->shortcodes->add('a', function () {
 			return 'A';
@@ -95,7 +105,8 @@ class MCShortcodesClassTest extends TestCase {
 		$this->assertSame('A and B', $result);
 	}
 
-	public function test_parse_attrs(): void {
+	public function test_parse_attrs(): void
+	{
 
 		$this->shortcodes->add('attrs', function ($atts) {
 			return ($atts['x'] ?? '') . '-' . ($atts['y'] ?? '');

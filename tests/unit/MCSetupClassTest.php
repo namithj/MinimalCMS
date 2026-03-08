@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Setup class.
  *
@@ -20,15 +21,16 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Setup
  */
-class MCSetupClassTest extends TestCase {
-
+class MCSetupClassTest extends TestCase
+{
 	private MC_Setup $setup;
 	private MC_User_Manager $users;
 	private MC_Config $config;
 	private MC_Hooks $hooks;
 	private string $temp_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_setup_test_' . uniqid() . '/';
 		mkdir($this->temp_dir, 0755, true);
@@ -62,12 +64,14 @@ class MCSetupClassTest extends TestCase {
 		$this->setup = new MC_Setup($this->config, $this->users, $this->hooks);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -82,12 +86,14 @@ class MCSetupClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_needs_setup_true_when_no_users(): void {
+	public function test_needs_setup_true_when_no_users(): void
+	{
 
 		$this->assertTrue($this->setup->needs_setup());
 	}
 
-	public function test_needs_setup_false_after_user_created(): void {
+	public function test_needs_setup_false_after_user_created(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'admin',
@@ -99,7 +105,8 @@ class MCSetupClassTest extends TestCase {
 		$this->assertFalse($this->setup->needs_setup());
 	}
 
-	public function test_generate_keys(): void {
+	public function test_generate_keys(): void
+	{
 
 		$keys = $this->setup->generate_keys();
 		$this->assertArrayHasKey('secret_key', $keys);
@@ -107,7 +114,8 @@ class MCSetupClassTest extends TestCase {
 		$this->assertSame(64, strlen($keys['secret_key'])); // 32 bytes hex-encoded.
 	}
 
-	public function test_run_success(): void {
+	public function test_run_success(): void
+	{
 
 		$result = $this->setup->run(array(
 			'site_name' => 'My New Site',
@@ -122,7 +130,8 @@ class MCSetupClassTest extends TestCase {
 		$this->assertNotNull($this->users->get_user('admin'));
 	}
 
-	public function test_run_fires_complete_hook(): void {
+	public function test_run_fires_complete_hook(): void
+	{
 
 		$fired = false;
 		$this->hooks->add_action('mc_setup_complete', function () use (&$fired) {
@@ -139,7 +148,8 @@ class MCSetupClassTest extends TestCase {
 		$this->assertTrue($fired);
 	}
 
-	public function test_run_missing_username_returns_error(): void {
+	public function test_run_missing_username_returns_error(): void
+	{
 
 		$result = $this->setup->run(array(
 			'site_name' => 'Test',

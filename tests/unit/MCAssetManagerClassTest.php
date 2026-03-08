@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Asset_Manager class.
  *
@@ -15,19 +16,21 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Asset_Manager
  */
-class MCAssetManagerClassTest extends TestCase {
-
+class MCAssetManagerClassTest extends TestCase
+{
 	private MC_Asset_Manager $assets;
 	private MC_Hooks $hooks;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->hooks  = new MC_Hooks();
 		$formatter    = new MC_Formatter($this->hooks);
 		$this->assets = new MC_Asset_Manager($this->hooks, $formatter);
 	}
 
-	public function test_enqueue_style(): void {
+	public function test_enqueue_style(): void
+	{
 
 		$this->assets->enqueue_style('main', '/css/main.css');
 
@@ -39,7 +42,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringContainsString('<link', $html);
 	}
 
-	public function test_enqueue_script_in_head(): void {
+	public function test_enqueue_script_in_head(): void
+	{
 
 		$this->assets->enqueue_script('app', '/js/app.js', false);
 
@@ -51,7 +55,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringContainsString('<script', $html);
 	}
 
-	public function test_enqueue_script_in_footer(): void {
+	public function test_enqueue_script_in_footer(): void
+	{
 
 		$this->assets->enqueue_script('footer-app', '/js/footer.js', true);
 
@@ -62,7 +67,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringContainsString('footer.js', $html);
 	}
 
-	public function test_dequeue_style(): void {
+	public function test_dequeue_style(): void
+	{
 
 		$this->assets->enqueue_style('remove-me', '/css/remove.css');
 		$this->assets->dequeue_style('remove-me');
@@ -74,7 +80,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringNotContainsString('remove.css', $html);
 	}
 
-	public function test_dequeue_script(): void {
+	public function test_dequeue_script(): void
+	{
 
 		$this->assets->enqueue_script('remove-js', '/js/remove.js');
 		$this->assets->dequeue_script('remove-js');
@@ -87,7 +94,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringNotContainsString('remove.js', $html);
 	}
 
-	public function test_localize_script(): void {
+	public function test_localize_script(): void
+	{
 
 		$this->assets->enqueue_script('localized', '/js/localized.js', false);
 		$this->assets->localize_script('localized', 'myData', array('key' => 'value'));
@@ -100,7 +108,8 @@ class MCAssetManagerClassTest extends TestCase {
 		$this->assertStringContainsString('value', $html);
 	}
 
-	public function test_style_with_custom_media(): void {
+	public function test_style_with_custom_media(): void
+	{
 
 		$this->assets->enqueue_style('print-css', '/css/print.css', 'print');
 

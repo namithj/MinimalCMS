@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Setup — First-run setup logic.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Setup {
-
+class MC_Setup
+{
 	/**
 	 * @since {version}
 	 * @var MC_Config
@@ -45,7 +46,8 @@ class MC_Setup {
 	 * @param MC_User_Manager $users  User manager.
 	 * @param MC_Hooks        $hooks  Hooks engine.
 	 */
-	public function __construct(MC_Config $config, MC_User_Manager $users, MC_Hooks $hooks) {
+	public function __construct(MC_Config $config, MC_User_Manager $users, MC_Hooks $hooks)
+	{
 
 		$this->config = $config;
 		$this->users  = $users;
@@ -59,7 +61,8 @@ class MC_Setup {
 	 *
 	 * @return bool
 	 */
-	public function needs_setup(): bool {
+	public function needs_setup(): bool
+	{
 
 		$all_users = $this->users->get_users();
 		return empty($all_users);
@@ -72,7 +75,8 @@ class MC_Setup {
 	 *
 	 * @return array{secret_key: string, encryption_key: string}
 	 */
-	public function generate_keys(): array {
+	public function generate_keys(): array
+	{
 
 		return array(
 			'secret_key'     => bin2hex(random_bytes(32)),
@@ -88,7 +92,8 @@ class MC_Setup {
 	 * @param array $overrides Key-value overrides to apply.
 	 * @return true|MC_Error
 	 */
-	public function seed_config(array $overrides = array()): true|MC_Error {
+	public function seed_config(array $overrides = array()): true|MC_Error
+	{
 
 		$sample = $this->config->all();
 		if (empty($sample)) {
@@ -133,7 +138,8 @@ class MC_Setup {
 	 * @param array $data Setup data.
 	 * @return true|MC_Error
 	 */
-	public function run(array $data): true|MC_Error {
+	public function run(array $data): true|MC_Error
+	{
 
 		// Generate keys.
 		$keys = $this->generate_keys();

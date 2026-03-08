@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_User_Manager class.
  *
@@ -18,14 +19,15 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_User_Manager
  */
-class MCUserManagerClassTest extends TestCase {
-
+class MCUserManagerClassTest extends TestCase
+{
 	private MC_User_Manager $users;
 	private string $users_file;
 	private string $temp_dir;
 	private string $encryption_key;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_user_test_' . uniqid();
 		mkdir($this->temp_dir, 0755, true);
@@ -42,12 +44,14 @@ class MCUserManagerClassTest extends TestCase {
 		$this->users = new MC_User_Manager($hooks, $fmt, $caps, $session, $this->users_file, $this->encryption_key);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -68,12 +72,14 @@ class MCUserManagerClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_get_users_empty(): void {
+	public function test_get_users_empty(): void
+	{
 
 		$this->assertSame(array(), $this->users->get_users());
 	}
 
-	public function test_create_user_success(): void {
+	public function test_create_user_success(): void
+	{
 
 		$result = $this->users->create_user(array(
 			'username' => 'alice',
@@ -85,7 +91,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertTrue($result);
 	}
 
-	public function test_create_user_and_get(): void {
+	public function test_create_user_and_get(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'bob',
@@ -101,7 +108,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertSame('editor', $user['role']);
 	}
 
-	public function test_create_user_missing_username(): void {
+	public function test_create_user_missing_username(): void
+	{
 
 		$result = $this->users->create_user(array(
 			'password' => 'pass1234',
@@ -112,7 +120,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertInstanceOf(MC_Error::class, $result);
 	}
 
-	public function test_create_user_missing_password(): void {
+	public function test_create_user_missing_password(): void
+	{
 
 		$result = $this->users->create_user(array(
 			'username' => 'carol',
@@ -123,7 +132,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertInstanceOf(MC_Error::class, $result);
 	}
 
-	public function test_create_duplicate_user(): void {
+	public function test_create_duplicate_user(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'dave',
@@ -142,7 +152,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertInstanceOf(MC_Error::class, $result);
 	}
 
-	public function test_delete_user(): void {
+	public function test_delete_user(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'eve',
@@ -156,7 +167,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertNull($this->users->get_user('eve'));
 	}
 
-	public function test_authenticate_success(): void {
+	public function test_authenticate_success(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'frank',
@@ -170,7 +182,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertSame('frank', $result['username']);
 	}
 
-	public function test_authenticate_wrong_password(): void {
+	public function test_authenticate_wrong_password(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'grace',
@@ -183,7 +196,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertInstanceOf(MC_Error::class, $result);
 	}
 
-	public function test_update_user(): void {
+	public function test_update_user(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'hank',
@@ -197,7 +211,8 @@ class MCUserManagerClassTest extends TestCase {
 		$this->assertSame('hank_new@example.com', $user['email']);
 	}
 
-	public function test_get_user_by_email(): void {
+	public function test_get_user_by_email(): void
+	{
 
 		$this->users->create_user(array(
 			'username' => 'iris',

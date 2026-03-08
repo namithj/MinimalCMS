@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Formatter
  *
@@ -17,8 +18,8 @@
  *
  * @since {version}
  */
-class MC_Formatter {
-
+class MC_Formatter
+{
 	/**
 	 * The hooks engine.
 	 *
@@ -34,7 +35,8 @@ class MC_Formatter {
 	 *
 	 * @param MC_Hooks $hooks The hooks engine.
 	 */
-	public function __construct(MC_Hooks $hooks) {
+	public function __construct(MC_Hooks $hooks)
+	{
 
 		$this->hooks = $hooks;
 	}
@@ -53,7 +55,8 @@ class MC_Formatter {
 	 * @param string $text Raw text.
 	 * @return string Escaped text.
 	 */
-	private function htmlspecialchars(string $text): string {
+	private function htmlspecialchars(string $text): string
+	{
 
 		return htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 	}
@@ -72,7 +75,8 @@ class MC_Formatter {
 	 * @param string $text Raw text.
 	 * @return string Escaped text.
 	 */
-	public function esc_html(string $text): string {
+	public function esc_html(string $text): string
+	{
 
 		return $this->htmlspecialchars($text);
 	}
@@ -85,7 +89,8 @@ class MC_Formatter {
 	 * @param string $text Raw text.
 	 * @return string Escaped text.
 	 */
-	public function esc_attr(string $text): string {
+	public function esc_attr(string $text): string
+	{
 
 		return $this->htmlspecialchars($text);
 	}
@@ -98,7 +103,8 @@ class MC_Formatter {
 	 * @param string $url Raw URL.
 	 * @return string Sanitised URL or empty string if invalid.
 	 */
-	public function esc_url(string $url): string {
+	public function esc_url(string $url): string
+	{
 
 		$url = trim($url);
 
@@ -140,7 +146,8 @@ class MC_Formatter {
 	 * @param string $text Raw text.
 	 * @return string JSON-encoded string (without surrounding quotes).
 	 */
-	public function esc_js(string $text): string {
+	public function esc_js(string $text): string
+	{
 
 		$encoded = json_encode($text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AMP | JSON_HEX_QUOT);
 
@@ -155,7 +162,8 @@ class MC_Formatter {
 	 * @param string $text Raw text.
 	 * @return string Escaped text.
 	 */
-	public function esc_textarea(string $text): string {
+	public function esc_textarea(string $text): string
+	{
 
 		return $this->htmlspecialchars($text);
 	}
@@ -174,7 +182,8 @@ class MC_Formatter {
 	 * @param string $text Input text.
 	 * @return string Cleaned text.
 	 */
-	public function sanitize_text(string $text): string {
+	public function sanitize_text(string $text): string
+	{
 
 		$text = strip_tags($text);
 		$text = preg_replace('/\s+/', ' ', $text);
@@ -190,7 +199,8 @@ class MC_Formatter {
 	 * @param string $slug Raw slug text.
 	 * @return string Cleaned slug (lowercase, hyphens, alphanumeric).
 	 */
-	public function sanitize_slug(string $slug): string {
+	public function sanitize_slug(string $slug): string
+	{
 
 		$slug = mb_strtolower($slug, 'UTF-8');
 		$slug = preg_replace('/[^a-z0-9\-]/', '-', $slug);
@@ -207,7 +217,8 @@ class MC_Formatter {
 	 * @param string $filename Raw filename.
 	 * @return string Safe filename.
 	 */
-	public function sanitize_filename(string $filename): string {
+	public function sanitize_filename(string $filename): string
+	{
 
 		$filename = str_replace(array('../', './'), '', $filename);
 		$filename = preg_replace('/[^a-zA-Z0-9._\-]/', '-', $filename);
@@ -223,7 +234,8 @@ class MC_Formatter {
 	 * @param string $email Raw email.
 	 * @return string Validated email or empty string.
 	 */
-	public function sanitize_email(string $email): string {
+	public function sanitize_email(string $email): string
+	{
 
 		$email = trim($email);
 		$clean = filter_var($email, FILTER_SANITIZE_EMAIL);
@@ -247,7 +259,8 @@ class MC_Formatter {
 	 * @param string $allowed_tags Allowed tag list for strip_tags, e.g. '<p><a><strong>'.
 	 * @return string Cleaned HTML.
 	 */
-	public function sanitize_html(string $html, string $allowed_tags = ''): string {
+	public function sanitize_html(string $html, string $allowed_tags = ''): string
+	{
 
 		if ('' === $allowed_tags) {
 			/**
@@ -314,7 +327,8 @@ class MC_Formatter {
 	 * @param string $text The title to convert.
 	 * @return string The slug.
 	 */
-	public function slugify(string $text): string {
+	public function slugify(string $text): string
+	{
 
 		return $this->sanitize_slug($text);
 	}
@@ -329,7 +343,8 @@ class MC_Formatter {
 	 * @param string $suffix Suffix to append. Default '&hellip;'.
 	 * @return string Truncated text.
 	 */
-	public function truncate(string $text, int $length = 150, string $suffix = '&hellip;'): string {
+	public function truncate(string $text, int $length = 150, string $suffix = '&hellip;'): string
+	{
 
 		$text = $this->sanitize_text($text);
 

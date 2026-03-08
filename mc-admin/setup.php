@@ -104,7 +104,6 @@ if (mc_is_post_request()) {
 			}
 		}
 	}
-
 }
 
 ?>

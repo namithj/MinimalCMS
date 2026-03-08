@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MC_Admin_Bar — DI-based admin bar.
  *
@@ -16,8 +17,8 @@ defined('MC_ABSPATH') || exit;
  *
  * @since {version}
  */
-class MC_Admin_Bar {
-
+class MC_Admin_Bar
+{
 	/**
 	 * Nodes registered for this render pass.
 	 *
@@ -60,7 +61,8 @@ class MC_Admin_Bar {
 	 * @param MC_Router       $router    Router.
 	 * @param MC_Formatter    $formatter Formatter.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_User_Manager $users, MC_Router $router, MC_Formatter $formatter) {
+	public function __construct(MC_Hooks $hooks, MC_User_Manager $users, MC_Router $router, MC_Formatter $formatter)
+	{
 
 		$this->hooks     = $hooks;
 		$this->users     = $users;
@@ -77,7 +79,8 @@ class MC_Admin_Bar {
 	 * @param array  $args Node configuration.
 	 * @return void
 	 */
-	public function add_node(string $id, array $args): void {
+	public function add_node(string $id, array $args): void
+	{
 
 		$this->nodes[$id] = array_merge(
 			array(
@@ -99,7 +102,8 @@ class MC_Admin_Bar {
 	 * @param string $id Node identifier.
 	 * @return void
 	 */
-	public function remove_node(string $id): void {
+	public function remove_node(string $id): void
+	{
 
 		unset($this->nodes[$id]);
 	}
@@ -111,7 +115,8 @@ class MC_Admin_Bar {
 	 *
 	 * @return void
 	 */
-	public function render(): void {
+	public function render(): void
+	{
 
 		if (!$this->users->is_logged_in()) {
 			return;
@@ -147,7 +152,8 @@ class MC_Admin_Bar {
 	 *
 	 * @return void
 	 */
-	private function add_default_nodes(): void {
+	private function add_default_nodes(): void
+	{
 
 		$query = $this->router->get_query();
 		$admin_url = defined('MC_ADMIN_URL') ? MC_ADMIN_URL : '/mc-admin/';
@@ -194,7 +200,8 @@ class MC_Admin_Bar {
 	 *
 	 * @return void
 	 */
-	private function output(): void {
+	private function output(): void
+	{
 
 		$pages_nodes   = $this->get_sorted_nodes('pages');
 		$actions_nodes = $this->get_sorted_nodes('actions');
@@ -231,7 +238,8 @@ class MC_Admin_Bar {
 	 * @param string $group Group identifier.
 	 * @return array Indexed, sorted node list.
 	 */
-	private function get_sorted_nodes(string $group): array {
+	private function get_sorted_nodes(string $group): array
+	{
 
 		$filtered = array_filter(
 			$this->nodes,

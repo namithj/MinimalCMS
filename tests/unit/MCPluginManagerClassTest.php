@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Tests for MC_Plugin_Manager class.
  *
@@ -15,8 +16,8 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers MC_Plugin_Manager
  */
-class MCPluginManagerClassTest extends TestCase {
-
+class MCPluginManagerClassTest extends TestCase
+{
 	private MC_Plugin_Manager $plugins;
 	private MC_Config $config;
 	private MC_Hooks $hooks;
@@ -24,7 +25,8 @@ class MCPluginManagerClassTest extends TestCase {
 	private string $plugins_dir;
 	private string $mu_plugins_dir;
 
-	protected function setUp(): void {
+	protected function setUp(): void
+	{
 
 		$this->temp_dir       = sys_get_temp_dir() . '/mc_plugin_test_' . uniqid() . '/';
 		$this->plugins_dir    = $this->temp_dir . 'plugins/';
@@ -50,12 +52,14 @@ class MCPluginManagerClassTest extends TestCase {
 		$this->plugins = new MC_Plugin_Manager($this->hooks, $this->config, $this->plugins_dir, $this->mu_plugins_dir);
 	}
 
-	protected function tearDown(): void {
+	protected function tearDown(): void
+	{
 
 		$this->rm_recursive($this->temp_dir);
 	}
 
-	private function rm_recursive(string $dir): void {
+	private function rm_recursive(string $dir): void
+	{
 
 		if (!is_dir($dir)) {
 			return;
@@ -70,33 +74,38 @@ class MCPluginManagerClassTest extends TestCase {
 		rmdir($dir);
 	}
 
-	public function test_discover(): void {
+	public function test_discover(): void
+	{
 
 		$plugins = $this->plugins->discover();
 		$this->assertIsArray($plugins);
 		$this->assertArrayHasKey('test-plugin/test-plugin.php', $plugins);
 	}
 
-	public function test_get_active(): void {
+	public function test_get_active(): void
+	{
 
 		$active = $this->plugins->get_active();
 		$this->assertContains('test-plugin/test-plugin.php', $active);
 	}
 
-	public function test_is_active(): void {
+	public function test_is_active(): void
+	{
 
 		$this->assertTrue($this->plugins->is_active('test-plugin/test-plugin.php'));
 		$this->assertFalse($this->plugins->is_active('nonexistent'));
 	}
 
-	public function test_get_plugin_data(): void {
+	public function test_get_plugin_data(): void
+	{
 
 		$data = $this->plugins->get_plugin_data($this->plugins_dir . 'test-plugin/test-plugin.php');
 		$this->assertIsArray($data);
 		$this->assertSame('Test Plugin', $data['name']);
 	}
 
-	public function test_activate(): void {
+	public function test_activate(): void
+	{
 
 		// Create another plugin.
 		$path = $this->plugins_dir . 'other/';
@@ -108,7 +117,8 @@ class MCPluginManagerClassTest extends TestCase {
 		$this->assertTrue($this->plugins->is_active('other/other.php'));
 	}
 
-	public function test_deactivate(): void {
+	public function test_deactivate(): void
+	{
 
 		$result = $this->plugins->deactivate('test-plugin/test-plugin.php');
 		$this->assertTrue($result);

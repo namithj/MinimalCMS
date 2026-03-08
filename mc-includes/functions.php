@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MinimalCMS Procedural API
  *
