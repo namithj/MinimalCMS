@@ -7,12 +7,18 @@
     "vendor:copy": "node mc-includes/scripts/vendor-copy.js",
     "build": "npm run vendor:copy && npx sass --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.css --style=expanded && npx sass --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.min.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.min.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.min.css --style=compressed",
     "watch": "npx sass --watch --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.css --style=expanded",
-    "version": "node scripts/update-version.js"
+    "version": "node scripts/update-version.js",
+    "setup": "node scripts/setup.js",
+    "serve": "docker compose up",
+    "serve:stop": "docker compose down",
+    "predev": "node scripts/check-env.js",
+    "dev": "concurrently --kill-others --names docker,scss --prefix-colors cyan,magenta \"docker compose up\" \"npm run watch\""
   },
   "dependencies": {
     "easymde": "^2.20.0"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "sass": "^1.97.3"
   }
 }

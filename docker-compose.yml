@@ -1,0 +1,20 @@
+# MinimalCMS — Docker Compose (Development)
+#
+# Usage:
+#   npm run setup        # First-time build + dependency install
+#   npm run dev          # Start dev server + SCSS watcher
+#   npm run serve:stop   # Stop the container
+#
+# Configure the host port with MC_PORT (default: 8080):
+#   MC_PORT=9000 npm run dev
+
+services:
+  app:
+    build: .
+    ports:
+      - "${MC_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APACHE_RUN_USER=#1000
+      - APACHE_RUN_GROUP=#1000
