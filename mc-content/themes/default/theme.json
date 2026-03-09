@@ -4,7 +4,7 @@
 	"author": "MinimalCMS",
 	"description": "The default MinimalCMS theme — clean, minimal, and responsive.",
 	"requires_mc": "1.0.0",
-	"license": "GPL-2.0-or-later",
+	"license": "MIT",
 	"template": "",
 	"text_domain": "default"
 }

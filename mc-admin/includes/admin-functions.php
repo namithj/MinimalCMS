@@ -160,6 +160,7 @@ function mc_render_admin_menu(): void
 		);
 
 		if (! empty($visible_children)) {
+			echo '<button type="button" class="submenu-toggle" aria-label="Toggle submenu">&#x25BE;</button>' . "\n";
 			echo '<ul class="submenu">' . "\n";
 			foreach ($visible_children as $child) {
 				$child_class = mc_is_current_admin_page($child['url']) ? ' class="active"' : '';

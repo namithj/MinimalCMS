@@ -262,6 +262,9 @@ class MC_Content_Manager
 			)
 		);
 
+		// Strip runtime-only keys — body belongs in the .md file, not the JSON sidecar.
+		unset($meta['body_raw'], $meta['body_html']);
+
 		$json = json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		if (false === file_put_contents($this->json_path($type, $slug), $json, LOCK_EX)) {
 			return new MC_Error('write_failed', 'Failed to write content metadata.');

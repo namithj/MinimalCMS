@@ -54,6 +54,12 @@ class MC_Router
 	private MC_Content_Type_Registry $types;
 
 	/**
+	 * @since {version}
+	 * @var MC_Http
+	 */
+	private MC_Http $http;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since {version}
@@ -61,13 +67,15 @@ class MC_Router
 	 * @param MC_Hooks                 $hooks   Hooks engine.
 	 * @param MC_Content_Manager       $content Content manager.
 	 * @param MC_Content_Type_Registry $types   Content type registry.
+	 * @param MC_Http                  $http    HTTP / nonce helper.
 	 */
-	public function __construct(MC_Hooks $hooks, MC_Content_Manager $content, MC_Content_Type_Registry $types)
+	public function __construct(MC_Hooks $hooks, MC_Content_Manager $content, MC_Content_Type_Registry $types, MC_Http $http)
 	{
 
 		$this->hooks   = $hooks;
 		$this->content = $content;
 		$this->types   = $types;
+		$this->http    = $http;
 
 		$this->query = $this->default_query();
 	}
@@ -212,12 +220,13 @@ class MC_Router
 			$front_slug = defined('MC_FRONT_PAGE') ? MC_FRONT_PAGE : 'home';
 			$item       = $this->content->get('page', $front_slug);
 
-			if (null !== $item && 'publish' === ($item['status'] ?? '')) {
+			if (null !== $item && $this->is_content_viewable($item, 'page', $front_slug)) {
 				$this->query['type']          = 'page';
 				$this->query['slug']          = $front_slug;
 				$this->query['content']       = $item;
 				$this->query['is_front_page'] = true;
 				$this->query['is_single']     = true;
+				$this->query['is_preview']    = 'publish' !== ($item['status'] ?? '');
 				return;
 			}
 
@@ -258,11 +267,12 @@ class MC_Router
 				$item_slug = substr($path, strlen($rewrite_slug) + 1);
 				$item      = $this->content->get($type_slug, $item_slug);
 
-				if (null !== $item && 'publish' === ($item['status'] ?? '')) {
-					$this->query['type']      = $type_slug;
-					$this->query['slug']      = $item_slug;
-					$this->query['content']   = $item;
-					$this->query['is_single'] = true;
+				if (null !== $item && $this->is_content_viewable($item, $type_slug, $item_slug)) {
+					$this->query['type']       = $type_slug;
+					$this->query['slug']       = $item_slug;
+					$this->query['content']    = $item;
+					$this->query['is_single']  = true;
+					$this->query['is_preview'] = 'publish' !== ($item['status'] ?? '');
 					return;
 				}
 			}
@@ -271,7 +281,7 @@ class MC_Router
 		// Pages: root-level URL.
 		$item = $this->content->get('page', $path);
 
-		if (null !== $item && 'publish' === ($item['status'] ?? '')) {
+		if (null !== $item && $this->is_content_viewable($item, 'page', $path)) {
 			$front_slug = defined('MC_FRONT_PAGE') ? MC_FRONT_PAGE : 'home';
 			if ($path === $front_slug) {
 				$site_url = defined('MC_SITE_URL') ? MC_SITE_URL : '/';
@@ -279,10 +289,11 @@ class MC_Router
 				exit;
 			}
 
-			$this->query['type']      = 'page';
-			$this->query['slug']      = $path;
-			$this->query['content']   = $item;
-			$this->query['is_single'] = true;
+			$this->query['type']       = 'page';
+			$this->query['slug']       = $path;
+			$this->query['content']    = $item;
+			$this->query['is_single']  = true;
+			$this->query['is_preview'] = 'publish' !== ($item['status'] ?? '');
 			return;
 		}
 
@@ -383,6 +394,54 @@ class MC_Router
 	}
 
 	/**
+	 * Check whether the current request is a valid draft preview.
+	 *
+	 * Verifies the ?preview=true&key={nonce} parameters. The nonce is tied
+	 * to the current logged-in user, so it cannot be reused by another user.
+	 *
+	 * @since {version}
+	 *
+	 * @param string $type Content type slug.
+	 * @param string $slug Content item slug.
+	 * @return bool
+	 */
+	private function is_valid_preview(string $type, string $slug): bool
+	{
+
+		$preview = $this->http->input('preview', 'GET');
+		$key     = $this->http->input('key', 'GET');
+
+		if ('true' !== $preview || empty($key) || !is_string($key)) {
+			return false;
+		}
+
+		return $this->http->verify_nonce($key, 'preview_' . $type . '_' . $slug);
+	}
+
+	/**
+	 * Check whether a content item is viewable on the front end.
+	 *
+	 * An item is viewable if it is published or if the current request
+	 * carries a valid preview nonce for the item.
+	 *
+	 * @since {version}
+	 *
+	 * @param array  $item Content item data.
+	 * @param string $type Content type slug.
+	 * @param string $slug Content item slug.
+	 * @return bool
+	 */
+	private function is_content_viewable(array $item, string $type, string $slug): bool
+	{
+
+		if ('publish' === ($item['status'] ?? '')) {
+			return true;
+		}
+
+		return $this->is_valid_preview($type, $slug);
+	}
+
+	/**
 	 * Default empty query state.
 	 *
 	 * @since {version}
@@ -402,6 +461,7 @@ class MC_Router
 			'is_single'     => false,
 			'is_404'        => false,
 			'is_admin'      => false,
+			'is_preview'    => false,
 			'page_num'      => 1,
 			'archive_items' => array(),
 		);

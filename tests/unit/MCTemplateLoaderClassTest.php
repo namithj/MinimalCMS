@@ -14,6 +14,7 @@ use MC_Content_Manager;
 use MC_Content_Type_Registry;
 use MC_Formatter;
 use MC_Hooks;
+use MC_Http;
 use MC_Router;
 use MC_Template_Loader;
 use MC_Theme_Manager;
@@ -60,7 +61,8 @@ class MCTemplateLoaderClassTest extends TestCase
 		$types->register('page', array('label' => 'Page'));
 
 		$content      = new MC_Content_Manager($types, $this->hooks, $cache, $formatter, $content_dir);
-		$this->router = new MC_Router($this->hooks, $content, $types);
+		$http         = new MC_Http($this->hooks, 'test-secret-key');
+		$this->router = new MC_Router($this->hooks, $content, $types, $http);
 		$this->themes = new MC_Theme_Manager($this->hooks, $config, $themes_dir);
 
 		$this->loader = new MC_Template_Loader($this->hooks, $this->router, $this->themes);

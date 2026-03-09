@@ -308,17 +308,37 @@ if ($supports_editor || ! empty($section_fields)) {
 	define('MC_LOAD_EDITOR', true);
 }
 
-// Body field definition — rendered via Fields API so the markdown type is used.
-$body_field = array(
-	'id'          => 'body',
-	'type'        => 'markdown',
-	'label'       => 'Content (Markdown)',
-	'default'     => '',
-	'attributes'  => array(
-		'placeholder'  => 'Write your content in Markdown…',
-		'data-autosave' => '1',
-	),
-);
+// Determine the active editor mode.
+$editor_mode = mc_get_setting('core.general', 'editor_mode', 'markdown');
+
+/** This filter is documented in mc-admin/admin-header.php. */
+$editor_mode = mc_apply_filters('mc_editor_mode', $editor_mode);
+
+// Body field definition — type switches based on editor mode.
+if ('text' === $editor_mode) {
+	$body_field = array(
+		'id'          => 'body',
+		'type'        => 'markdown',
+		'label'       => 'Content',
+		'default'     => '',
+		'attributes'  => array(
+			'placeholder'   => 'Write your content…',
+			'data-autosave' => '1',
+			'data-toolbar'  => 'none',
+		),
+	);
+} else {
+	$body_field = array(
+		'id'          => 'body',
+		'type'        => 'markdown',
+		'label'       => 'Content (Markdown)',
+		'default'     => '',
+		'attributes'  => array(
+			'placeholder'   => 'Write your content in Markdown…',
+			'data-autosave' => '1',
+		),
+	);
+}
 
 require MC_ABSPATH . 'mc-admin/admin-header.php';
 
@@ -396,7 +416,11 @@ require MC_ABSPATH . 'mc-admin/admin-header.php';
 				<div class="form-actions">
 					<button type="submit" class="btn btn-primary">Save <?php echo mc_esc_html($type_single); ?></button>
 					<?php if (! $is_new) : ?>
+						<?php if ('draft' === ($item['status'] ?? '')) : ?>
+						<a href="<?php echo mc_esc_url(mc_get_preview_url($content_type, $item['slug'])); ?>" class="btn btn-secondary" target="_blank">Preview</a>
+						<?php else : ?>
 						<a href="<?php echo mc_esc_url(mc_get_content_permalink($content_type, $item['slug'])); ?>" class="btn btn-secondary" target="_blank">View</a>
+						<?php endif; ?>
 					<?php endif; ?>
 				</div>
 			</div>

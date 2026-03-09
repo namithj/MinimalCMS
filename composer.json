@@ -3,7 +3,7 @@
     "description": "A lightweight flat-file CMS with a hook-based, plugin-driven architecture.",
     "version": "0.0.4",
     "type": "project",
-    "license": "GPL-2.0-or-later",
+    "license": "MIT",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {

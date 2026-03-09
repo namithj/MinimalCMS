@@ -20,6 +20,11 @@ if ($app->setup()->needs_setup()) {
 }
 
 // Step 2: Route — parse the request and resolve content.
+// Start the session for preview requests so the nonce can be tied to the user.
+if (isset($_GET['preview']) && isset($_GET['key'])) {
+	mc_start_session();
+}
+
 $app->router()->parse_request();
 
 // Step 3: Render.

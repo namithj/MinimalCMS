@@ -79,11 +79,11 @@ mc_render_page_header_bar(
 <!-- Filters -->
 <div class="filter-bar">
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type))); ?>"
-		class="<?php echo ! $status_filter ? 'filter-link-active' : ''; ?>">All</a> |
+		class="filter-link <?php echo ! $status_filter ? 'filter-link-active' : ''; ?>">All</a>
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type) . '&status=publish')); ?>"
-		class="<?php echo 'publish' === $status_filter ? 'filter-link-active' : ''; ?>">Published</a> |
+		class="filter-link <?php echo 'publish' === $status_filter ? 'filter-link-active' : ''; ?>">Published</a>
 	<a href="<?php echo mc_esc_url(mc_admin_url('pages.php?type=' . urlencode($content_type) . '&status=draft')); ?>"
-		class="<?php echo 'draft' === $status_filter ? 'filter-link-active' : ''; ?>">Drafts</a>
+		class="filter-link <?php echo 'draft' === $status_filter ? 'filter-link-active' : ''; ?>">Drafts</a>
 </div>
 
 <?php if ($items) : ?>
@@ -120,6 +120,8 @@ mc_render_page_header_bar(
 						<a href="<?php echo mc_esc_url(mc_admin_url('edit-page.php?type=' . urlencode($content_type) . '&slug=' . urlencode($item['slug']))); ?>">Edit</a>
 						<?php if ('form' === $content_type) : ?>
 							<a href="<?php echo mc_esc_url(mc_admin_url('form-submissions.php?form=' . urlencode($item['slug']))); ?>">Submissions</a>
+						<?php elseif ('draft' === ($item['status'] ?? '')) : ?>
+							<a href="<?php echo mc_esc_url(mc_get_preview_url($content_type, $item['slug'])); ?>" target="_blank">Preview</a>
 						<?php else : ?>
 							<a href="<?php echo mc_esc_url(mc_get_content_permalink($content_type, $item['slug'])); ?>" target="_blank">View</a>
 						<?php endif; ?>

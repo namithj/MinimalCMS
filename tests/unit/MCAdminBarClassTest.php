@@ -15,6 +15,7 @@ use MC_Content_Manager;
 use MC_Content_Type_Registry;
 use MC_Formatter;
 use MC_Hooks;
+use MC_Http;
 use MC_Router;
 use MC_Session;
 use MC_User_Manager;
@@ -55,7 +56,8 @@ class MCAdminBarClassTest extends TestCase
 		$types = new MC_Content_Type_Registry($this->hooks, $content_dir);
 		$types->register('page', array('label' => 'Page'));
 		$content = new MC_Content_Manager($types, $this->hooks, $cache, $formatter, $content_dir);
-		$router  = new MC_Router($this->hooks, $content, $types);
+		$http    = new MC_Http($this->hooks, 'test-secret-key');
+		$router  = new MC_Router($this->hooks, $content, $types, $http);
 
 		$this->bar = new MC_Admin_Bar($this->hooks, $users, $router, $formatter);
 

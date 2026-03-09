@@ -74,6 +74,12 @@ class MC_Template_Tags
 	private MC_Template_Loader $template_loader;
 
 	/**
+	 * @since {version}
+	 * @var MC_Settings
+	 */
+	private MC_Settings $settings;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since {version}
@@ -87,6 +93,7 @@ class MC_Template_Tags
 	 * @param MC_Asset_Manager   $assets          Asset manager.
 	 * @param MC_User_Manager    $users           User manager.
 	 * @param MC_Template_Loader $template_loader Template loader.
+	 * @param MC_Settings        $settings        Settings storage.
 	 */
 	public function __construct(
 		MC_Hooks $hooks,
@@ -97,7 +104,8 @@ class MC_Template_Tags
 		MC_Theme_Manager $themes,
 		MC_Asset_Manager $assets,
 		MC_User_Manager $users,
-		MC_Template_Loader $template_loader
+		MC_Template_Loader $template_loader,
+		MC_Settings $settings
 	) {
 
 		$this->hooks           = $hooks;
@@ -109,6 +117,7 @@ class MC_Template_Tags
 		$this->assets          = $assets;
 		$this->users           = $users;
 		$this->template_loader = $template_loader;
+		$this->settings        = $settings;
 	}
 
 	/*
@@ -235,10 +244,17 @@ class MC_Template_Tags
 	public function get_the_content(): string
 	{
 
-		$content = $this->get_the_content_item();
-		$raw     = $content['body_raw'] ?? '';
-		$html    = $this->markdown->parse($raw);
-		$html    = $this->shortcodes->do_shortcode($html);
+		$content     = $this->get_the_content_item();
+		$raw         = $content['body_raw'] ?? '';
+		$editor_mode = $this->settings->get('core.general', 'editor_mode', 'markdown');
+
+		if ('text' === $editor_mode) {
+			$html = $raw;
+		} else {
+			$html = $this->markdown->parse($raw);
+		}
+
+		$html = $this->shortcodes->do_shortcode($html);
 
 		/**
 		 * Filter the content HTML before output.

@@ -617,6 +617,48 @@ class MC_Settings_Registry
 		);
 
 		/*
+		 * Section: Writing
+		 */
+		$this->register_section(
+			'general',
+			'writing',
+			array(
+				'title'    => 'Writing',
+				'priority' => 15,
+			)
+		);
+
+		/**
+		 * Filter the available editor mode choices.
+		 *
+		 * Plugins can add custom editor modes via this filter.
+		 *
+		 * @since {version}
+		 *
+		 * @param array $choices Key => label map of editor modes.
+		 */
+		$editor_choices = $this->hooks->apply_filters(
+			'mc_editor_mode_choices',
+			array(
+				'markdown' => 'Markdown',
+				'text'     => 'Plain Text',
+			)
+		);
+
+		$this->register_field(
+			'general',
+			'writing',
+			'editor_mode',
+			array(
+				'type'        => 'select',
+				'label'       => 'Default Editor',
+				'description' => 'Choose the editor used for content creation.',
+				'default'     => 'markdown',
+				'options'     => array( 'choices' => $editor_choices ),
+			)
+		);
+
+		/*
 		 * Section: Viewing
 		 */
 		$this->register_section(

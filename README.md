@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/badge/version-0.0.4-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.2%2B-8892BF)
-![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
 ![Status](https://img.shields.io/badge/status-early%20development-orange)
 
 > A lightweight, flat-file CMS built with a familiar hook, plugin, and theme architecture — no database, no bloat, just PHP and Markdown.
@@ -595,8 +595,6 @@ composer cs:fix            # Auto-fix coding standard violations
 
 ## License
 
-MinimalCMS is licensed under the [GNU General Public License v2.0 or later](https://www.gnu.org/licenses/gpl-2.0.html) (GPL-2.0-or-later).
+MinimalCMS is licensed under the [MIT License](LICENSE).
 
-You are free to use, modify, and distribute this software under the terms of the GPL. Any derivative work must also be distributed under the same license.
-
-> Note: The bundled [Parsedown](https://github.com/erusev/parsedown) and [Parsedown Extra](https://github.com/erusev/parsedown-extra) libraries remain under their own MIT license.
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this software, subject to the conditions in the LICENSE file.

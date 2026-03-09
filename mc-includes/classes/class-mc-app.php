@@ -224,7 +224,7 @@ class MC_App
 		 */
 
 		// 16. Router.
-		$router = new MC_Router($hooks, $content_manager, $content_types);
+		$router = new MC_Router($hooks, $content_manager, $content_types, $http);
 		$this->set('router', $router);
 
 		// 17. Asset Manager.
@@ -256,7 +256,8 @@ class MC_App
 			$theme_manager,
 			$assets,
 			$user_manager,
-			$template_loader
+			$template_loader,
+			$settings
 		);
 		$this->set('template_tags', $template_tags);
 
@@ -283,6 +284,17 @@ class MC_App
 
 		// Initialise built-in roles (administrator, editor, author, contributor).
 		$capabilities->initialise_roles();
+
+		// Sync session user → HTTP nonce identity whenever a session starts.
+		$hooks->add_action(
+			'mc_session_started',
+			static function () use ($http, $user_manager): void {
+				$uid = $user_manager->get_current_user_id();
+				if ('' !== $uid) {
+					$http->set_current_user_id($uid);
+				}
+			}
+		);
 
 		// Register built-in content types (page, post).
 		$content_types->register_defaults();

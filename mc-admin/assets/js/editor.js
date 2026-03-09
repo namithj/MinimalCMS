@@ -41,19 +41,20 @@
 	const form = document.querySelector( 'form[data-slug]' );
 
 	document.querySelectorAll( 'textarea.mc-markdown-editor' ).forEach( function ( textarea ) {
-		const isMain = textarea.dataset.autosave === '1';
+		const isMain   = textarea.dataset.autosave === '1';
+		const noToolbar = textarea.dataset.toolbar === 'none';
 
 		const mde = new EasyMDE( {
 			element:   textarea,
 			spellChecker: false,
-			autoDownloadFontAwesome: true,
+			autoDownloadFontAwesome: ! noToolbar,
 			placeholder: textarea.placeholder || '',
 			minHeight:  isMain ? '400px' : '180px',
 			autofocus:  false,
 			forceSync:  true,
 			tabSize:    4,
-			toolbar:    isMain ? TOOLBAR_FULL : TOOLBAR_COMPACT,
-			status:     isMain ? [ 'lines', 'words', 'cursor' ] : false,
+			toolbar:    noToolbar ? false : ( isMain ? TOOLBAR_FULL : TOOLBAR_COMPACT ),
+			status:     noToolbar ? false : ( isMain ? [ 'lines', 'words', 'cursor' ] : false ),
 			renderingConfig: {
 				singleLineBreaks: false,
 				codeSyntaxHighlighting: false,

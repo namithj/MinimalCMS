@@ -2624,6 +2624,27 @@ function mc_the_permalink(): void
 }
 
 /**
+ * Build a preview URL for a draft content item.
+ *
+ * The URL includes a nonce tied to the current user so only they can view it.
+ *
+ * @since {version}
+ *
+ * @param string $type Content type slug.
+ * @param string $slug Content item slug.
+ * @return string Full preview URL with query parameters.
+ */
+function mc_get_preview_url(string $type, string $slug): string
+{
+	$permalink = mc_get_content_permalink($type, $slug);
+	$nonce     = mc_create_nonce('preview_' . $type . '_' . $slug);
+
+	$separator = str_contains($permalink, '?') ? '&' : '?';
+
+	return $permalink . $separator . 'preview=true&key=' . urlencode($nonce);
+}
+
+/**
  * Get the featured image URL for the current content item.
  *
  * @since {version}

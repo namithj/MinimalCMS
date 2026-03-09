@@ -16,9 +16,11 @@ use MC_Content_Manager;
 use MC_Content_Type_Registry;
 use MC_Formatter;
 use MC_Hooks;
+use MC_Http;
 use MC_Markdown;
 use MC_Router;
 use MC_Session;
+use MC_Settings;
 use MC_Shortcodes;
 use MC_Template_Loader;
 use MC_Template_Tags;
@@ -65,7 +67,8 @@ class MCTemplateTagsClassTest extends TestCase
 		$types->register('page', array('label' => 'Page'));
 
 		$this->content = new MC_Content_Manager($types, $this->hooks, $cache, $formatter, $content_dir);
-		$this->router  = new MC_Router($this->hooks, $this->content, $types);
+		$http          = new MC_Http($this->hooks, 'test-secret-key');
+		$this->router  = new MC_Router($this->hooks, $this->content, $types, $http);
 		$themes        = new MC_Theme_Manager($this->hooks, $config, $themes_dir);
 		$assets        = new MC_Asset_Manager($this->hooks, $formatter);
 
@@ -83,6 +86,10 @@ class MCTemplateTagsClassTest extends TestCase
 
 		$loader = new MC_Template_Loader($this->hooks, $this->router, $themes);
 
+		$settings_dir = $this->temp_dir . 'settings/';
+		mkdir($settings_dir, 0755, true);
+		$settings = new MC_Settings($this->hooks, $settings_dir);
+
 		$this->tags = new MC_Template_Tags(
 			$this->hooks,
 			$this->router,
@@ -92,7 +99,8 @@ class MCTemplateTagsClassTest extends TestCase
 			$themes,
 			$assets,
 			$users,
-			$loader
+			$loader,
+			$settings
 		);
 	}
 

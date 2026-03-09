@@ -28,14 +28,6 @@ const packages = {
 			'node_modules/easymde/dist/easymde.min.js',
 		],
 	},
-	// Example: add more packages here
-	// codemirror: {
-	//     dest: 'codemirror',
-	//     files: [
-	//         'node_modules/codemirror/lib/codemirror.min.js',
-	//         'node_modules/codemirror/lib/codemirror.min.css',
-	//     ],
-	// },
 };
 
 let copied = 0;

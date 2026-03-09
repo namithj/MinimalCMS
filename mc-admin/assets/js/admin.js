@@ -29,11 +29,11 @@
 	}
 
 	/* ── Submenu toggles ─────────────────────────────────────────────────── */
-	document.querySelectorAll( '.has-submenu > a' ).forEach( function ( link ) {
-		link.addEventListener( 'click', function ( e ) {
-			const li = link.closest( 'li' );
-			if ( ! li ) { return; }
+	document.querySelectorAll( '.submenu-toggle' ).forEach( function ( btn ) {
+		btn.addEventListener( 'click', function ( e ) {
 			e.preventDefault();
+			const li = btn.closest( 'li' );
+			if ( ! li ) { return; }
 			li.classList.toggle( 'open' );
 		} );
 	} );

@@ -13,6 +13,7 @@ use MC_Content_Manager;
 use MC_Content_Type_Registry;
 use MC_Formatter;
 use MC_Hooks;
+use MC_Http;
 use MC_Router;
 use PHPUnit\Framework\TestCase;
 
@@ -25,6 +26,7 @@ class MCRouterClassTest extends TestCase
 	private MC_Hooks $hooks;
 	private MC_Content_Manager $content;
 	private MC_Content_Type_Registry $types;
+	private MC_Http $http;
 	private string $content_dir;
 
 	protected function setUp(): void
@@ -48,7 +50,9 @@ class MCRouterClassTest extends TestCase
 			$this->content_dir
 		);
 
-		$this->router = new MC_Router($this->hooks, $this->content, $this->types);
+		$this->http = new MC_Http($this->hooks, 'test-secret-key');
+
+		$this->router = new MC_Router($this->hooks, $this->content, $this->types, $this->http);
 	}
 
 	protected function tearDown(): void
