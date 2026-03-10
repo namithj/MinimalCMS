@@ -7,7 +7,7 @@
 
 FROM composer:2 AS composer
 
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Enable Apache mod_rewrite for .htaccess URL rewriting.
 RUN a2enmod rewrite

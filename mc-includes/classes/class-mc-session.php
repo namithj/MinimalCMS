@@ -44,6 +44,14 @@ class MC_Session
 	private int $lifetime;
 
 	/**
+	 * Re-entrancy guard for start().
+	 *
+	 * @since {version}
+	 * @var bool
+	 */
+	private bool $starting = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since {version}
@@ -74,34 +82,52 @@ class MC_Session
 			return;
 		}
 
-		if (!is_dir($this->session_dir)) {
-			mkdir($this->session_dir, 0700, true);
+		if ($this->starting) {
+			return;
 		}
 
-		session_save_path($this->session_dir);
+		// Session ini/cookie parameters must be configured before any output.
+		if (headers_sent()) {
+			return;
+		}
 
-		$cookie_params = array(
-			'lifetime' => $this->lifetime,
-			'path'     => '/',
-			'secure'   => (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']),
-			'httponly'  => true,
-			'samesite' => 'Strict',
-		);
+		$this->starting = true;
 
-		/**
-		 * Filter session cookie parameters.
-		 *
-		 * @since {version}
-		 *
-		 * @param array $cookie_params Cookie parameter array.
-		 */
-		$cookie_params = $this->hooks->apply_filters('mc_session_cookie_params', $cookie_params);
+		try {
 
-		session_set_cookie_params($cookie_params);
-		session_name('mc_session');
-		session_start();
+			if (!is_dir($this->session_dir)) {
+				mkdir($this->session_dir, 0700, true);
+			}
 
-		$this->hooks->do_action('mc_session_started');
+			session_save_path($this->session_dir);
+
+			$cookie_params = array(
+				'lifetime' => $this->lifetime,
+				'path'     => '/',
+				'secure'   => (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']),
+				'httponly'  => true,
+				'samesite' => 'Strict',
+			);
+
+			/**
+			 * Filter session cookie parameters.
+			 *
+			 * @since {version}
+			 *
+			 * @param array $cookie_params Cookie parameter array.
+			 */
+			$cookie_params = $this->hooks->apply_filters('mc_session_cookie_params', $cookie_params);
+
+			session_set_cookie_params($cookie_params);
+			session_name('mc_session');
+			session_start();
+
+			if (PHP_SESSION_ACTIVE === session_status()) {
+				$this->hooks->do_action('mc_session_started');
+			}
+		} finally {
+			$this->starting = false;
+		}
 	}
 
 	/**
@@ -116,6 +142,10 @@ class MC_Session
 	{
 
 		$this->start();
+
+		if (PHP_SESSION_ACTIVE !== session_status()) {
+			return;
+		}
 
 		$_SESSION['mc_user']       = $username;
 		$_SESSION['mc_login_time'] = time();
@@ -134,6 +164,10 @@ class MC_Session
 	{
 
 		$this->start();
+
+		if (PHP_SESSION_ACTIVE !== session_status()) {
+			return;
+		}
 
 		$_SESSION = array();
 
@@ -166,6 +200,10 @@ class MC_Session
 	{
 
 		$this->start();
+
+		if (PHP_SESSION_ACTIVE !== session_status()) {
+			return null;
+		}
 
 		if (empty($_SESSION['mc_user'])) {
 			return null;
