@@ -1,7 +1,7 @@
 {
     "name": "minimalcms/minimalcms",
     "description": "A lightweight flat-file CMS with a hook-based, plugin-driven architecture.",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "type": "project",
     "license": "MIT",
     "minimum-stability": "stable",
