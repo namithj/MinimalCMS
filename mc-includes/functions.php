@@ -1704,7 +1704,7 @@ function mc_populate_front_page_choices(): void
 }
 
 /**
- * Sync core settings back to config.json after save.
+ * Sync core settings back to config.php after save.
  *
  * @since {version}
  *
@@ -1735,7 +1735,7 @@ function mc_sync_core_settings_to_config(string $page_slug, array $values): void
 }
 
 /**
- * Seed core settings from config.json on first run.
+ * Seed core settings from config.php on first run.
  *
  * @since {version}
  *
@@ -1770,7 +1770,7 @@ function mc_maybe_seed_core_settings(): void
 }
 
 /**
- * Persist the current config to config.json.
+ * Persist the current config to config.php.
  *
  * @since {version}
  *
@@ -1875,7 +1875,7 @@ function mc_content_md_path(string $type, string $slug): string
 }
 
 /**
- * Get the absolute path to a content item's JSON meta file.
+ * Get the absolute path to a content item's PHP-guarded meta file.
  *
  * @since {version}
  *
@@ -1885,7 +1885,7 @@ function mc_content_md_path(string $type, string $slug): string
  */
 function mc_content_json_path(string $type, string $slug): string
 {
-	return mc_content_item_dir($type, $slug) . 'content.json';
+	return mc_content_item_dir($type, $slug) . $slug . '.php';
 }
 
 /**
@@ -2807,7 +2807,7 @@ function mc_get_page_templates(): array
  *
  * @since {version}
  *
- * @param string $header_value Raw header value from theme.json or template comment.
+ * @param string $header_value Raw header value from theme.php or template comment.
  * @return array
  */
 function mc_parse_section_header(string $header_value): array

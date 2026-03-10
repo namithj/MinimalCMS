@@ -68,7 +68,7 @@ function fsub_get_submissions(string $form_slug): array
 		return array();
 	}
 
-	$files = glob($dir . '*.json');
+	$files = glob($dir . '*.php');
 	if (! $files) {
 		return array();
 	}
@@ -78,8 +78,8 @@ function fsub_get_submissions(string $form_slug): array
 
 	$submissions = array();
 	foreach ($files as $file) {
-		$raw = file_get_contents($file);
-		if (false === $raw) {
+		$raw = MC_File_Guard::read($file);
+		if (false === $raw || '' === $raw) {
 			continue;
 		}
 		$plain = forms_decrypt_submission(trim($raw));
@@ -99,7 +99,7 @@ function fsub_get_submissions(string $form_slug): array
  * Load a single submission by form slug and submission ID.
  *
  * @param string $form_slug     Form slug.
- * @param string $submission_id Submission ID (filename without .json).
+ * @param string $submission_id Submission ID (filename without .php).
  * @return array|null
  */
 function fsub_get_submission(string $form_slug, string $submission_id): ?array
@@ -110,13 +110,16 @@ function fsub_get_submission(string $form_slug, string $submission_id): ?array
 	}
 
 	$base = fsub_get_submissions_dir();
-	$path = $base . $form_slug . '/' . $submission_id . '.json';
+	$path = $base . $form_slug . '/' . $submission_id . '.php';
 
 	if (! file_exists($path)) {
 		return null;
 	}
 
-	$raw   = file_get_contents($path);
+	$raw   = MC_File_Guard::read($path);
+	if (false === $raw || '' === $raw) {
+		return null;
+	}
 	$plain = forms_decrypt_submission(trim($raw));
 
 	if (false === $plain) {
@@ -143,7 +146,7 @@ function fsub_delete_submission(string $form_slug, string $submission_id): bool
 	}
 
 	$base = fsub_get_submissions_dir();
-	$path = $base . $form_slug . '/' . $submission_id . '.json';
+	$path = $base . $form_slug . '/' . $submission_id . '.php';
 
 	if (! file_exists($path)) {
 		return false;

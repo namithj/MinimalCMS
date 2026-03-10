@@ -3,7 +3,7 @@
 /**
  * MC_Theme_Manager — Theme discovery, loading, and switching.
  *
- * Replaces theme.php. Handles theme.json parsing, child theme support,
+ * Replaces theme.php. Handles theme.php metadata parsing, child theme support,
  * page template discovery, and theme switching.
  *
  * @package MinimalCMS
@@ -65,7 +65,7 @@ class MC_Theme_Manager
 	}
 
 	/**
-	 * Parse theme.json metadata for a theme directory.
+	 * Parse theme.php metadata for a theme directory.
 	 *
 	 * @since {version}
 	 *
@@ -86,14 +86,13 @@ class MC_Theme_Manager
 			'text_domain' => '',
 		);
 
-		$manifest = $dir . 'theme.json';
+		$manifest = $dir . 'theme.php';
 
 		if (!is_file($manifest)) {
 			return $defaults;
 		}
 
-		$raw  = file_get_contents($manifest);
-		$data = json_decode($raw, true);
+		$data = MC_File_Guard::read_json($manifest);
 
 		if (!is_array($data)) {
 			return $defaults;
@@ -125,7 +124,7 @@ class MC_Theme_Manager
 				continue;
 			}
 
-			if (!is_file($theme_dir . 'theme.json') && !is_file($theme_dir . 'style.css')) {
+			if (!is_file($theme_dir . 'theme.php') && !is_file($theme_dir . 'style.css')) {
 				continue;
 			}
 

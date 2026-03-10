@@ -545,7 +545,7 @@ class MC_Settings_Registry
 
 		/*
 		 * ── Core "Site Settings" page ──────────────────────────────────────
-		 * Storage namespace: core.general → mc-data/settings/core.general.json
+		 * Storage namespace: core.general → mc-data/settings/core.general.php
 		 */
 		$this->register_page(
 			'general',

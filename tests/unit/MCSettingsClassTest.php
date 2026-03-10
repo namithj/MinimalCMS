@@ -127,6 +127,6 @@ class MCSettingsClassTest extends TestCase
 	{
 
 		$path = $this->settings->path('core.general');
-		$this->assertStringEndsWith('core.general.json', $path);
+		$this->assertStringEndsWith('core.general.php', $path);
 	}
 }

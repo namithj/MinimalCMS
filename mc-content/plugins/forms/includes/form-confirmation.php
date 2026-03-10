@@ -90,16 +90,51 @@ function forms_get_flash_confirmation(string $form_slug): string
 		return '';
 	}
 
-	$type    = $flash['type'] ?? 'success';
-	$message = $flash['message'] ?? '';
+	$type = $flash['type'] ?? 'success';
 
-	if ('' === $message && 'success' === $type) {
-		$message = 'Thank you! Your submission has been received.';
+	// Error flashes are shown inline above the form by the renderer —
+	// don't replace the entire form with just an error message.
+	if ('error' === $type) {
+		return '';
 	}
 
-	$class = 'success' === $type ? 'mc-form-success' : 'mc-form-error';
+	// Resolve the success message from the stored form configuration
+	// rather than from URL parameters.
+	$message = forms_resolve_success_message($form_slug);
 
-	return '<div class="mc-form-message ' . mc_esc_attr($class) . '">'
+	return '<div class="mc-form-message mc-form-success">'
 		. '<p>' . mc_esc_html($message) . '</p>'
 		. '</div>';
+}
+
+/**
+ * Resolve the success confirmation message from stored form settings.
+ *
+ * Looks up the per-form confirmation message, falling back to the
+ * global plugin default.
+ *
+ * @since {version}
+ *
+ * @param string $form_slug Form slug.
+ * @return string Confirmation message text.
+ */
+function forms_resolve_success_message(string $form_slug): string
+{
+
+	$form = mc_get_content('form', $form_slug);
+
+	if ($form && ! mc_is_error($form)) {
+		$meta    = forms_normalize_meta($form['meta'] ?? array());
+		$message = $meta['confirmation']['message'] ?? '';
+
+		if ('' !== $message) {
+			return $message;
+		}
+	}
+
+	return mc_get_setting(
+		'plugin.forms',
+		'default_confirmation_message',
+		'Thank you! Your submission has been received.'
+	);
 }

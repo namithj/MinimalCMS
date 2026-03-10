@@ -714,7 +714,7 @@
         <ul>
           <li>Template fallback chain (type → singular → index)</li>
           <li>Child theme support</li>
-          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">theme.json</code> manifest with metadata</li>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">theme.php</code> manifest with metadata</li>
           <li>Live theme switching from the admin panel</li>
         </ul>
       </div>
@@ -868,7 +868,7 @@
           <pre class="dir-tree"><span class="d">minimalcms/</span>
 ├── index.php          <span class="cm"># front controller</span>
 ├── .htaccess          <span class="cm"># rewrite all → index.php</span>
-├── config.json        <span class="cm"># keys, active theme/plugins</span>
+├── config.php         <span class="cm"># keys in encrypted keystore, active theme/plugins</span>
 ├── mc-load.php        <span class="cm"># constants &amp; autoload</span>
 ├── mc-settings.php    <span class="cm"># boot sequence</span>
 ├── <span class="d">mc-includes/</span>       <span class="cm"># core libraries</span>

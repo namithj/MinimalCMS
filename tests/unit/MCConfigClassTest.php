@@ -9,6 +9,7 @@
 namespace MinimalCMS\Tests\Unit;
 
 use MC_Config;
+use MC_File_Guard;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,15 +23,15 @@ class MCConfigClassTest extends TestCase
 	protected function setUp(): void
 	{
 
-		$this->config_path = MC_TEST_TMP . 'v2_config.json';
-		$this->sample_path = MC_TEST_TMP . 'v2_config.sample.json';
+		$this->config_path = MC_TEST_TMP . 'v2_config.php';
+		$this->sample_path = MC_TEST_TMP . 'v2_config.sample.php';
 
 		// Create a sample config.
-		file_put_contents($this->sample_path, json_encode(array(
+		MC_File_Guard::write_json($this->sample_path, array(
 			'site_url'  => 'http://default.example.com',
 			'site_name' => 'Sample Site',
 			'debug'     => false,
-		)));
+		));
 	}
 
 	protected function tearDown(): void
@@ -53,10 +54,10 @@ class MCConfigClassTest extends TestCase
 	public function test_load_from_config_file(): void
 	{
 
-		file_put_contents($this->config_path, json_encode(array(
+		MC_File_Guard::write_json($this->config_path, array(
 			'site_url'  => 'http://test.example.com',
 			'site_name' => 'Test Site',
-		)));
+		));
 
 		$config = new MC_Config($this->config_path, $this->sample_path);
 		$data   = $config->load();
@@ -78,7 +79,7 @@ class MCConfigClassTest extends TestCase
 	public function test_load_returns_empty_when_no_files(): void
 	{
 
-		$config = new MC_Config('/nonexistent/config.json', '/nonexistent/sample.json');
+		$config = new MC_Config('/nonexistent/config.php', '/nonexistent/sample.php');
 		$data   = $config->load();
 
 		$this->assertSame(array(), $data);
@@ -93,10 +94,10 @@ class MCConfigClassTest extends TestCase
 	public function test_get_after_load(): void
 	{
 
-		file_put_contents($this->config_path, json_encode(array(
+		MC_File_Guard::write_json($this->config_path, array(
 			'site_url' => 'http://test.example.com',
 			'nested'   => array('key' => 'value'),
-		)));
+		));
 
 		$config = new MC_Config($this->config_path, $this->sample_path);
 		$config->load();
@@ -116,9 +117,9 @@ class MCConfigClassTest extends TestCase
 	public function test_get_dot_notation(): void
 	{
 
-		file_put_contents($this->config_path, json_encode(array(
+		MC_File_Guard::write_json($this->config_path, array(
 			'nested' => array('deep' => array('key' => 'found')),
-		)));
+		));
 
 		$config = new MC_Config($this->config_path, $this->sample_path);
 		$config->load();
@@ -148,7 +149,7 @@ class MCConfigClassTest extends TestCase
 	public function test_all(): void
 	{
 
-		file_put_contents($this->config_path, json_encode(array('a' => 1, 'b' => 2)));
+		MC_File_Guard::write_json($this->config_path, array('a' => 1, 'b' => 2));
 
 		$config = new MC_Config($this->config_path, $this->sample_path);
 		$config->load();
@@ -194,7 +195,7 @@ class MCConfigClassTest extends TestCase
 	public function test_is_fresh_install_false(): void
 	{
 
-		file_put_contents($this->config_path, '{}');
+		MC_File_Guard::write_json($this->config_path, array());
 		$config = new MC_Config($this->config_path, $this->sample_path);
 		$this->assertFalse($config->is_fresh_install());
 	}

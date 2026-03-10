@@ -38,7 +38,7 @@ composer.phar
 .phpunit.result.cache
 /coverage/
 wp-config.php
-config.json
+config.php
 .phpunit.cache/*
 
 .github/instructions

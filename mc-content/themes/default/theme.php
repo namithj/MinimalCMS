@@ -1,3 +1,4 @@
+<?php die('Access denied'); ?>
 {
 	"name": "Default",
 	"version": "1.0.0",

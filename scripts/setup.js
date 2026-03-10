@@ -41,16 +41,16 @@ run('Installing PHP dependencies (Composer)', 'docker compose run --rm app compo
 
 run('Building front-end assets', 'npm run build');
 
-// ── 5. Seed config.json from sample ───────────────────────────────────────
+// ── 5. Seed config.php from sample ──────────────────────────────────────────
 
-const configPath = path.join(ROOT, 'config.json');
-const samplePath = path.join(ROOT, 'config.sample.json');
+const configPath = path.join(ROOT, 'config.php');
+const samplePath = path.join(ROOT, 'config.sample.php');
 
 if (!fs.existsSync(configPath) && fs.existsSync(samplePath)) {
 	fs.copyFileSync(samplePath, configPath);
-	console.log('\n\x1b[36m▸ Created config.json from config.sample.json\x1b[0m');
+	console.log('\n\x1b[36m▸ Created config.php from config.sample.php\x1b[0m');
 } else if (fs.existsSync(configPath)) {
-	console.log('\n\x1b[33m▸ config.json already exists — skipping.\x1b[0m');
+	console.log('\n\x1b[33m▸ config.php already exists — skipping.\x1b[0m');
 }
 
 // ── Done ───────────────────────────────────────────────────────────────────

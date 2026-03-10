@@ -119,6 +119,11 @@ function forms_register_settings(): void
 }
 mc_add_action('mc_register_settings', 'forms_register_settings');
 
+// Register field types on mc_init as well, because mc_register_settings fires
+// before plugins are loaded and the email validator would be unavailable on
+// frontend submissions.
+mc_add_action('mc_init', 'forms_register_field_types', 5);
+
 /*
  * -------------------------------------------------------------------------
  *  Frontend assets

@@ -1,3 +1,4 @@
+<?php die('Access denied'); ?>
 {
     "title": "Welcome to MinimalCMS",
     "slug": "home",

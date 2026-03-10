@@ -9,6 +9,7 @@
 namespace MinimalCMS\Tests\Unit;
 
 use MC_Config;
+use MC_File_Guard;
 use MC_Hooks;
 use MC_Plugin_Manager;
 use PHPUnit\Framework\TestCase;
@@ -40,10 +41,10 @@ class MCPluginManagerClassTest extends TestCase
 		file_put_contents($plugin_path . 'test-plugin.php', "<?php\n/**\n * Plugin Name: Test Plugin\n * Description: A test plugin.\n * Version: 1.0\n */\n");
 
 		// Create config.
-		$config_path = $this->temp_dir . 'config.json';
-		file_put_contents($config_path, json_encode(array(
+		$config_path = $this->temp_dir . 'config.php';
+		MC_File_Guard::write_json($config_path, array(
 			'active_plugins' => array('test-plugin/test-plugin.php'),
-		)));
+		));
 
 		$this->hooks  = new MC_Hooks();
 		$this->config = new MC_Config($config_path, $config_path);

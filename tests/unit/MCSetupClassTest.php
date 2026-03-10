@@ -11,6 +11,7 @@ namespace MinimalCMS\Tests\Unit;
 use MC_Capabilities;
 use MC_Config;
 use MC_Error;
+use MC_File_Guard;
 use MC_Formatter;
 use MC_Hooks;
 use MC_Session;
@@ -34,14 +35,15 @@ class MCSetupClassTest extends TestCase
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_setup_test_' . uniqid() . '/';
 		mkdir($this->temp_dir, 0755, true);
+		mkdir($this->temp_dir . 'mc-data/', 0755, true);
 
-		$config_path   = $this->temp_dir . 'config.json';
-		$sample_path   = $this->temp_dir . 'config.sample.json';
+		$config_path   = $this->temp_dir . 'config.php';
+		$sample_path   = $this->temp_dir . 'config.sample.php';
 
-		file_put_contents($sample_path, json_encode(array(
+		MC_File_Guard::write_json($sample_path, array(
 			'site_name' => 'Sample Site',
-		)));
-		file_put_contents($config_path, json_encode(array()));
+		));
+		MC_File_Guard::write_json($config_path, array());
 
 		$this->hooks  = new MC_Hooks();
 		$this->config = new MC_Config($config_path, $sample_path);
@@ -61,7 +63,7 @@ class MCSetupClassTest extends TestCase
 			base64_encode(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES))
 		);
 
-		$this->setup = new MC_Setup($this->config, $this->users, $this->hooks);
+		$this->setup = new MC_Setup($this->config, $this->users, $this->hooks, $this->temp_dir);
 	}
 
 	protected function tearDown(): void

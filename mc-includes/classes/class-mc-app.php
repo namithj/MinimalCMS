@@ -104,7 +104,7 @@ class MC_App
 	 *
 	 * @since {version}
 	 *
-	 * @param string $config_path Absolute path to config.json.
+	 * @param string $config_path Absolute path to config.php.
 	 * @return void
 	 */
 	public function boot(string $config_path): void
@@ -115,7 +115,7 @@ class MC_App
 		}
 
 		$abspath     = defined('MC_ABSPATH') ? MC_ABSPATH : dirname($config_path) . '/';
-		$sample_path = dirname($config_path) . '/config.sample.json';
+		$sample_path = dirname($config_path) . '/config.sample.php';
 
 		// 1. Config.
 		$config = new MC_Config($config_path, $sample_path);
@@ -144,11 +144,24 @@ class MC_App
 		$formatter = new MC_Formatter($hooks);
 		$this->set('formatter', $formatter);
 
-		// 4. Http (needs Hooks + secret key).
-		$secret_key = $config->get('secret_key', '');
-		if (defined('MC_SECRET_KEY') && '' === $secret_key) {
-			$secret_key = MC_SECRET_KEY;
+		// 3b. Keystore — resolve master key and load application keys.
+		$data_dir = $abspath . rtrim($config->get('data_dir', 'mc-data'), '/') . '/';
+		$keystore = new MC_Keystore();
+		$this->set('keystore', $keystore);
+
+		$secret_key     = '';
+		$encryption_key = '';
+
+		try {
+			$master_key     = MC_Keystore::resolve_master_key($data_dir, $abspath);
+			$app_keys       = MC_Keystore::load_keys($data_dir, $master_key);
+			$secret_key     = $app_keys['secret_key'];
+			$encryption_key = $app_keys['encryption_key'];
+		} catch (\RuntimeException $e) {
+			// Keys unavailable — setup wizard will generate them.
 		}
+
+		// 4. Http (needs Hooks + secret key).
 		$http = new MC_Http($hooks, $secret_key);
 		$this->set('http', $http);
 
@@ -177,7 +190,6 @@ class MC_App
 
 		// 8. User Manager.
 		$users_file     = $abspath . rtrim($config->get('data_dir', 'mc-data'), '/') . '/users.php';
-		$encryption_key = $config->get('encryption_key', '');
 		$user_manager   = new MC_User_Manager($hooks, $formatter, $capabilities, $session, $users_file, $encryption_key);
 		$this->set('user_manager', $user_manager);
 
@@ -266,7 +278,7 @@ class MC_App
 		$this->set('admin_bar', $admin_bar);
 
 		// 23. Setup.
-		$setup = new MC_Setup($config, $user_manager, $hooks);
+		$setup = new MC_Setup($config, $user_manager, $hooks, $abspath);
 		$this->set('setup', $setup);
 
 		// Mark booted before running lifecycle so re-entrant calls from
@@ -279,7 +291,7 @@ class MC_App
 		 * -----------------------------------------------------------------
 		 */
 
-		$this->define_constants($config, $abspath, $content_rel);
+		$this->define_constants($config, $abspath, $content_rel, $secret_key, $encryption_key);
 		$this->configure_environment($config);
 
 		// Initialise built-in roles (administrator, editor, author, contributor).
@@ -320,7 +332,7 @@ class MC_App
 		$hooks->add_filter('mc_the_content', array($shortcodes, 'do_shortcode'), 11);
 
 		/*
-		 * Sync "general" settings page back to config.json so that
+		 * Sync "general" settings page back to config.php so that
 		 * constants and legacy consumers continue to work after save.
 		 */
 		$hooks->add_action(
@@ -355,9 +367,9 @@ class MC_App
 
 		$settings_registry->register_core_pages();
 
-		// Seed settings from config.json values if the settings file has
+		// Seed settings from config.php values if the settings file has
 		// not been created yet (first-run or migration scenario).
-		$settings_file = $settings_dir . 'core.general.json';
+		$settings_file = $settings_dir . 'core.general.php';
 		if (!is_file($settings_file)) {
 			$seed_keys = array(
 				'site_name', 'site_description', 'site_url', 'timezone',
@@ -460,12 +472,14 @@ class MC_App
 	 *
 	 * @since {version}
 	 *
-	 * @param MC_Config $config      Configuration object.
-	 * @param string    $abspath     Absolute path to the site root.
-	 * @param string    $content_rel Relative content directory name.
+	 * @param MC_Config $config         Configuration object.
+	 * @param string    $abspath        Absolute path to the site root.
+	 * @param string    $content_rel    Relative content directory name.
+	 * @param string    $secret_key     HMAC secret key from keystore.
+	 * @param string    $encryption_key Encryption key from keystore.
 	 * @return void
 	 */
-	private function define_constants(MC_Config $config, string $abspath, string $content_rel): void
+	private function define_constants(MC_Config $config, string $abspath, string $content_rel, string $secret_key = '', string $encryption_key = ''): void
 	{
 
 		$content_dir = $abspath . $content_rel . '/';
@@ -488,8 +502,8 @@ class MC_App
 		$this->maybe_define('MC_SITE_DESCRIPTION', (string) $config->get('site_description', ''));
 		$this->maybe_define('MC_TIMEZONE', (string) $config->get('timezone', 'UTC'));
 		$this->maybe_define('MC_DEBUG', (bool)   $config->get('debug', false));
-		$this->maybe_define('MC_SECRET_KEY', (string) $config->get('secret_key', ''));
-		$this->maybe_define('MC_ENCRYPTION_KEY', (string) $config->get('encryption_key', ''));
+		$this->maybe_define('MC_SECRET_KEY', $secret_key);
+		$this->maybe_define('MC_ENCRYPTION_KEY', $encryption_key);
 		$this->maybe_define('MC_FRONT_PAGE', (string) $config->get('front_page', 'index'));
 		$this->maybe_define('MC_POSTS_PER_PAGE', (int)    $config->get('posts_per_page', 10));
 		$this->maybe_define('MC_PERMALINK_STRUCTURE', (string) $config->get('permalink_structure', '/{type}/{slug}/'));

@@ -9,6 +9,7 @@
 namespace MinimalCMS\Tests\Unit;
 
 use MC_App;
+use MC_File_Guard;
 use MC_Hooks;
 use MC_Formatter;
 use MC_Http;
@@ -99,11 +100,10 @@ class MCAppTest extends TestCase
 	public function test_boot_creates_foundation_services(): void
 	{
 
-		$config_path = MC_TEST_TMP . 'v2_app_config.json';
-		file_put_contents($config_path, json_encode(array(
+		$config_path = MC_TEST_TMP . 'v2_app_config.php';
+		MC_File_Guard::write_json($config_path, array(
 			'site_url'   => 'http://test.example.com',
-			'secret_key' => 'test-secret',
-		)));
+		));
 
 		$app = MC_App::instance();
 		$app->boot($config_path);
@@ -121,8 +121,8 @@ class MCAppTest extends TestCase
 	public function test_boot_is_idempotent(): void
 	{
 
-		$config_path = MC_TEST_TMP . 'v2_app_config2.json';
-		file_put_contents($config_path, '{}');
+		$config_path = MC_TEST_TMP . 'v2_app_config2.php';
+		MC_File_Guard::write_json($config_path, array());
 
 		$app = MC_App::instance();
 		$app->boot($config_path);
@@ -137,10 +137,10 @@ class MCAppTest extends TestCase
 	public function test_boot_loads_config_data(): void
 	{
 
-		$config_path = MC_TEST_TMP . 'v2_app_config3.json';
-		file_put_contents($config_path, json_encode(array(
+		$config_path = MC_TEST_TMP . 'v2_app_config3.php';
+		MC_File_Guard::write_json($config_path, array(
 			'site_name' => 'Boot Test',
-		)));
+		));
 
 		$app = MC_App::instance();
 		$app->boot($config_path);
@@ -153,10 +153,10 @@ class MCAppTest extends TestCase
 	public function test_mc_config_loaded_filter(): void
 	{
 
-		$config_path = MC_TEST_TMP . 'v2_app_config4.json';
-		file_put_contents($config_path, json_encode(array(
+		$config_path = MC_TEST_TMP . 'v2_app_config4.php';
+		MC_File_Guard::write_json($config_path, array(
 			'site_name' => 'Original',
-		)));
+		));
 
 		// We can't hook before boot, but we can test the filter ran by checking the data.
 		$app = MC_App::instance();
@@ -177,8 +177,8 @@ class MCAppTest extends TestCase
 	public function test_typed_accessors_after_boot(): void
 	{
 
-		$config_path = MC_TEST_TMP . 'v2_app_config5.json';
-		file_put_contents($config_path, '{}');
+		$config_path = MC_TEST_TMP . 'v2_app_config5.php';
+		MC_File_Guard::write_json($config_path, array());
 
 		$app = MC_App::instance();
 		$app->boot($config_path);

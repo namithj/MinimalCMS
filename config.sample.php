@@ -1,3 +1,4 @@
+<?php die('Access denied'); ?>
 {
     "site_name": "",
     "site_url": "",
@@ -10,7 +11,5 @@
     "permalink_structure": "/{type}/{slug}",
     "front_page": "home",
     "posts_per_page": 10,
-    "debug": false,
-    "secret_key": "",
-    "encryption_key": ""
+    "debug": false
 }

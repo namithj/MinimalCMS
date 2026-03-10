@@ -48,10 +48,10 @@ if (2 === $step && mc_is_post_request()) {
 
 	if (! $notice) {
 		/*
-		 * 1. Seed config.json from the sample file if it does not exist yet.
+		 * 1. Seed config.php from the sample file if it does not exist yet.
 		 */
-		$config_path = MC_ABSPATH . 'config.json';
-		$sample_path = MC_ABSPATH . 'config.sample.json';
+		$config_path = MC_ABSPATH . 'config.php';
+		$sample_path = MC_ABSPATH . 'config.sample.php';
 
 		if (! is_file($config_path) && is_file($sample_path)) {
 			copy($sample_path, $config_path);
@@ -60,74 +60,94 @@ if (2 === $step && mc_is_post_request()) {
 		$config = mc_app()->config()->all();
 
 		/*
-		 * 2. Generate cryptographic keys if they are still placeholder/empty.
+		 * 2. Provision keystore (master key + encrypted app keys).
 		 */
-		if (empty($config['encryption_key']) || 'CHANGE_ME_RANDOM_HEX_64' === $config['encryption_key']) {
-			$config['encryption_key'] = bin2hex(random_bytes(32));
+		$data_dir   = MC_ABSPATH . 'mc-data/';
+		try {
+			$master_key = MC_Keystore::resolve_master_key($data_dir, MC_ABSPATH);
+		} catch (\RuntimeException $e) {
+			$master_key = '';
 		}
 
-		if (empty($config['secret_key']) || 'CHANGE_ME_RANDOM_STRING' === $config['secret_key']) {
-			$config['secret_key'] = bin2hex(random_bytes(32));
+		if ('' === $master_key) {
+			$master_key_hex = MC_Keystore::generate_master_key($data_dir);
+			if ('' !== $master_key_hex) {
+				$master_key = hex2bin($master_key_hex);
+			}
 		}
 
-		$config['site_name']  = $site_name;
-		$config['front_page'] = 'home';
-
-		/*
-		 * 2b. Auto-detect site_url when it is blank (fresh install).
-		 */
-		if (empty($config['site_url'])) {
-			$scheme = (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
-			$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
-			$base   = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/mc-admin/setup.php'));
-			$base   = ('/' === $base || '\\' === $base) ? '' : $base;
-			$config['site_url'] = $scheme . '://' . $host . $base;
-		}
-
-		/*
-		 * 3. Save config first (encryption_key needed for user file).
-		 */
-		$saved = mc_save_config($config);
-
-		if (! $saved) {
-			$notice = 'Could not save configuration. Check file permissions.';
+		if ('' === $master_key) {
+			$notice = 'Failed to generate master key. Check file permissions on mc-data/.';
 		} else {
-			/*
-			 * 4. Update the user manager's encryption key to the newly
-			 *    generated one so the user file is encrypted correctly.
-			 */
-			mc_app()->users()->set_encryption_key($config['encryption_key']);
-
-			/*
-			 * 5. Create admin user.
-			 */
-			$user = mc_create_user(
-				array(
-					'username'     => $username,
-					'password'     => $password,
-					'email'        => $email,
-					'role'         => 'administrator',
-					'display_name' => $username,
-				)
+			$app_keys = array(
+				'secret_key'     => bin2hex(random_bytes(32)),
+				'encryption_key' => bin2hex(random_bytes(32)),
 			);
 
-			if (mc_is_error($user)) {
-				$notice = 'Could not create user: ' . $user->get_error_message();
+			if (!MC_Keystore::save_keys($data_dir, $master_key, $app_keys)) {
+				$notice = 'Failed to write keystore. Check file permissions on mc-data/.';
+			}
+		}
+
+		if (! $notice) {
+			$config['site_name']  = $site_name;
+			$config['front_page'] = 'home';
+
+			/*
+			 * 2b. Auto-detect site_url when it is blank (fresh install).
+			 */
+			if (empty($config['site_url'])) {
+				$scheme = (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
+				$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+				$base   = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/mc-admin/setup.php'));
+				$base   = ('/' === $base || '\\' === $base) ? '' : $base;
+				$config['site_url'] = $scheme . '://' . $host . $base;
+			}
+
+			/*
+			 * 3. Save config (keys are in keystore, not config).
+			 */
+			$saved = mc_save_config($config);
+
+			if (! $saved) {
+				$notice = 'Could not save configuration. Check file permissions.';
 			} else {
 				/*
-				 * 6. Seed general settings from the setup form values.
+				 * 4. Update the user manager's encryption key from keystore.
 				 */
-				mc_update_settings('core.general', array(
-					'site_name'  => $site_name,
-					'site_url'   => $config['site_url'],
-					'front_page' => 'home',
-				));
+				mc_app()->users()->set_encryption_key($app_keys['encryption_key']);
 
-				// Log in and advance to success step.
-				mc_start_session();
-				mc_set_auth_session($username);
+				/*
+				 * 5. Create admin user.
+				 */
+				$user = mc_create_user(
+					array(
+						'username'     => $username,
+						'password'     => $password,
+						'email'        => $email,
+						'role'         => 'administrator',
+						'display_name' => $username,
+					)
+				);
 
-				$step = 3;
+				if (mc_is_error($user)) {
+					$notice = 'Could not create user: ' . $user->get_error_message();
+				} else {
+					/*
+					 * 6. Seed general settings from the setup form values.
+					 */
+					mc_update_settings('core.general', array(
+						'site_name'  => $site_name,
+						'site_url'   => $config['site_url'],
+						'front_page' => 'home',
+					));
+
+					// Log in and advance to success step.
+					mc_start_session();
+					mc_set_auth_session($username);
+
+					$step = 3;
+				}
 			}
 		}
 	}

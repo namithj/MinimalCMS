@@ -3,8 +3,8 @@
 /**
  * MinimalCMS Configuration
  *
- * Loads, reads, and persists config.json. Replaces the global $mc_config
- * and config-related functions from load.php.
+ * Loads, reads, and persists config.php (PHP-guarded). Replaces the global
+ * $mc_config and config-related functions from load.php.
  *
  * @package MinimalCMS
  * @since   {version}
@@ -14,7 +14,7 @@
  * Class MC_Config
  *
  * Configuration loader / writer. Supports dot-notation access and
- * fires hooks on load and save.
+ * fires hooks on load and save. Uses MC_File_Guard for secure file I/O.
  *
  * @since {version}
  */
@@ -29,7 +29,7 @@ class MC_Config
 	private array $data = array();
 
 	/**
-	 * Absolute path to config.json.
+	 * Absolute path to config.php.
 	 *
 	 * @since {version}
 	 * @var string
@@ -37,7 +37,7 @@ class MC_Config
 	private string $config_path;
 
 	/**
-	 * Absolute path to config.sample.json.
+	 * Absolute path to config.sample.php.
 	 *
 	 * @since {version}
 	 * @var string
@@ -49,8 +49,8 @@ class MC_Config
 	 *
 	 * @since {version}
 	 *
-	 * @param string $config_path Absolute path to config.json.
-	 * @param string $sample_path Absolute path to config.sample.json.
+	 * @param string $config_path Absolute path to config.php.
+	 * @param string $sample_path Absolute path to config.sample.php.
 	 */
 	public function __construct(string $config_path, string $sample_path)
 	{
@@ -60,9 +60,9 @@ class MC_Config
 	}
 
 	/**
-	 * Load and parse config.json.
+	 * Load and parse config.php.
 	 *
-	 * Falls back to the sample file if config.json does not exist.
+	 * Falls back to the sample file if config.php does not exist.
 	 *
 	 * @since {version}
 	 *
@@ -73,19 +73,9 @@ class MC_Config
 
 		$path = is_file($this->config_path) ? $this->config_path : $this->sample_path;
 
-		if (!is_readable($path)) {
-			return $this->data;
-		}
+		$data = MC_File_Guard::read_json($path);
 
-		$raw = file_get_contents($path);
-
-		if (false === $raw) {
-			return $this->data;
-		}
-
-		$data = json_decode($raw, true);
-
-		if (!is_array($data)) {
+		if (null === $data) {
 			return $this->data;
 		}
 
@@ -150,21 +140,15 @@ class MC_Config
 	public function save(): bool
 	{
 
-		$json = json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-		if (false === $json) {
-			return false;
-		}
-
-		return false !== file_put_contents($this->config_path, $json, LOCK_EX);
+		return MC_File_Guard::write_json($this->config_path, $this->data);
 	}
 
 	/**
-	 * Check if this is a fresh install (no config.json).
+	 * Check if this is a fresh install (no config.php).
 	 *
 	 * @since {version}
 	 *
-	 * @return bool True if config.json does not exist.
+	 * @return bool True if config.php does not exist.
 	 */
 	public function is_fresh_install(): bool
 	{
@@ -217,8 +201,6 @@ class MC_Config
 		$this->maybe_define('MC_SITE_DESCRIPTION', $this->data['site_description'] ?? '');
 		$this->maybe_define('MC_TIMEZONE', $this->data['timezone'] ?? 'UTC');
 		$this->maybe_define('MC_DEBUG', (bool) ($this->data['debug'] ?? false));
-		$this->maybe_define('MC_SECRET_KEY', $this->data['secret_key'] ?? '');
-		$this->maybe_define('MC_ENCRYPTION_KEY', $this->data['encryption_key'] ?? '');
 		$this->maybe_define('MC_FRONT_PAGE', $this->data['front_page'] ?? 'index');
 		$this->maybe_define('MC_POSTS_PER_PAGE', (int) ($this->data['posts_per_page'] ?? 10));
 		$this->maybe_define('MC_PERMALINK_STRUCTURE', $this->data['permalink_structure'] ?? '/{type}/{slug}');

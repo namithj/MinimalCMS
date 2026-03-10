@@ -16,6 +16,9 @@ defined('MC_ABSPATH') || exit;
 // Ensure the flash-pending global is always initialized.
 $GLOBALS['mc_forms_flash_pending'] ??= array();
 
+// Holds per-field validation errors + submitted values for inline display.
+$GLOBALS['mc_forms_validation'] ??= array();
+
 /**
  * Process a form submission.
  *
@@ -26,6 +29,10 @@ $GLOBALS['mc_forms_flash_pending'] ??= array();
  */
 function forms_process_submission(string $form_slug): void
 {
+
+	// Start the session so the nonce identity (current_user_id) matches
+	// what was used when the form was rendered on the frontend.
+	mc_start_session();
 
 	$form = mc_get_content('form', $form_slug);
 
@@ -81,11 +88,13 @@ function forms_process_submission(string $form_slug): void
 	 */
 	$processed['values'] = mc_apply_filters('forms_submission_values', $processed['values'], $processed['errors'], $form);
 
-	// Validation failed — redirect back with errors.
+	// Validation failed — store errors for inline display (no redirect).
 	if (! empty($processed['errors'])) {
-		$error_messages = implode(' ', $processed['errors']);
-		forms_set_flash($form_slug, 'error', $error_messages);
-		forms_redirect_back($form_slug);
+		global $mc_forms_validation;
+		$mc_forms_validation[ $form_slug ] = array(
+			'errors' => $processed['errors'],
+			'values' => $processed['values'],
+		);
 		return;
 	}
 
@@ -147,7 +156,7 @@ function forms_save_submission(string $form_slug, array $values): string|false
 	);
 
 	$json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-	$path = $dir . $submission_id . '.json';
+	$path = $dir . $submission_id . '.php';
 
 	try {
 		$payload = forms_encrypt_submission($json);
@@ -155,7 +164,7 @@ function forms_save_submission(string $form_slug, array $values): string|false
 		return false;
 	}
 
-	if (false === file_put_contents($path, $payload . "\n", LOCK_EX)) {
+	if (!MC_File_Guard::write($path, $payload)) {
 		return false;
 	}
 
@@ -204,7 +213,7 @@ function forms_set_flash(string $form_slug, string $type, string $message): void
 /**
  * Get the flash result for a form from URL query params.
  *
- * Reads mc_form / mc_result / mc_msg params written by forms_redirect_back().
+ * Reads mc_form / mc_result params written by forms_redirect_back().
  *
  * @since 1.0.0
  *
@@ -220,10 +229,9 @@ function forms_get_flash(string $form_slug): ?array
 		return null;
 	}
 
-	$type    = ('success' === $result) ? 'success' : 'error';
-	$message = mc_sanitize_text(mc_input('mc_msg', 'get') ?? '');
+	$type = ('success' === $result) ? 'success' : 'error';
 
-	return array( 'type' => $type, 'message' => $message );
+	return array( 'type' => $type );
 }
 
 /**
@@ -250,15 +258,12 @@ function forms_redirect_back(string $form_slug): void
 	}
 
 	parse_str($parts['query'] ?? '', $qp);
-	unset($qp['mc_form'], $qp['mc_result'], $qp['mc_msg']);
+	unset($qp['mc_form'], $qp['mc_result']);
 
 	$flash = $mc_forms_flash_pending[ $form_slug ] ?? null;
 	if (null !== $flash) {
 		$qp['mc_form']   = $form_slug;
 		$qp['mc_result'] = $flash['type'];
-		if ('' !== $flash['message']) {
-			$qp['mc_msg'] = $flash['message'];
-		}
 		unset($mc_forms_flash_pending[ $form_slug ]);
 	}
 

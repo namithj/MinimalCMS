@@ -1,10 +1,10 @@
 <?php
 
 /**
- * MC_Settings — File-backed JSON settings storage.
+ * MC_Settings — File-backed settings storage.
  *
  * Replaces Part 1 of the procedural settings.php. Each settings "namespace"
- * (e.g. 'core.general') maps to a JSON file under the data directory.
+ * (e.g. 'core.general') maps to a PHP-guarded file under the data directory.
  *
  * @package MinimalCMS
  * @since   {version}
@@ -47,7 +47,7 @@ class MC_Settings
 	 * @since {version}
 	 *
 	 * @param MC_Hooks $hooks        Hooks engine.
-	 * @param string   $settings_dir Directory for JSON files.
+	 * @param string   $settings_dir Directory for settings files.
 	 */
 	public function __construct(MC_Hooks $hooks, string $settings_dir)
 	{
@@ -62,13 +62,13 @@ class MC_Settings
 	 * @since {version}
 	 *
 	 * @param string $namespace Dot-separated namespace (e.g. 'core.general').
-	 * @return string Absolute path to the JSON file.
+	 * @return string Absolute path to the PHP-guarded settings file.
 	 */
 	public function path(string $namespace): string
 	{
 
 		$safe = preg_replace('/[^a-z0-9._-]/', '-', strtolower($namespace));
-		return $this->settings_dir . $safe . '.json';
+		return $this->settings_dir . $safe . '.php';
 	}
 
 	/**
@@ -92,8 +92,7 @@ class MC_Settings
 			return array();
 		}
 
-		$raw  = file_get_contents($path);
-		$data = json_decode($raw, true);
+		$data = MC_File_Guard::read_json($path);
 		if (!is_array($data)) {
 			$data = array();
 		}
@@ -159,9 +158,8 @@ class MC_Settings
 
 		$merged = array_merge($existing, $values);
 		$path   = $this->path($namespace);
-		$json   = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-		if (false === file_put_contents($path, $json . "\n", LOCK_EX)) {
+		if (!MC_File_Guard::write_json($path, $merged)) {
 			return new MC_Error('settings_write_failed', "Failed to write settings for namespace '{$namespace}'.");
 		}
 
@@ -200,7 +198,7 @@ class MC_Settings
 		$path = $this->path($namespace);
 		$json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
-		if (false === file_put_contents($path, $json . "\n", LOCK_EX)) {
+		if (!MC_File_Guard::write_json($path, $data)) {
 			return new MC_Error('settings_write_failed', "Failed to write settings for namespace '{$namespace}'.");
 		}
 

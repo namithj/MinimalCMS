@@ -30,4 +30,4 @@ require_once MC_ABSPATH . 'mc-includes/functions.php';
 // Boot the application container. All constants, environment config,
 // plugins, and theme are initialised inside boot().
 $GLOBALS['mc_app'] = MC_App::instance();
-$GLOBALS['mc_app']->boot( MC_ABSPATH . 'config.json' );
+$GLOBALS['mc_app']->boot( MC_ABSPATH . 'config.php' );

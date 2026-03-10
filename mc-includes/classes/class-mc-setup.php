@@ -4,7 +4,7 @@
  * MC_Setup — First-run setup logic.
  *
  * Extracted from mc-admin/setup.php. Handles initial installation:
- * config seeding, key generation, and first user creation.
+ * config seeding, master key + keystore generation, and first user creation.
  *
  * @package MinimalCMS
  * @since   {version}
@@ -38,20 +38,30 @@ class MC_Setup
 	private MC_Hooks $hooks;
 
 	/**
+	 * Absolute path to the site root (with trailing slash).
+	 *
+	 * @since {version}
+	 * @var string
+	 */
+	private string $abspath;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since {version}
 	 *
-	 * @param MC_Config       $config Configuration.
-	 * @param MC_User_Manager $users  User manager.
-	 * @param MC_Hooks        $hooks  Hooks engine.
+	 * @param MC_Config       $config  Configuration.
+	 * @param MC_User_Manager $users   User manager.
+	 * @param MC_Hooks        $hooks   Hooks engine.
+	 * @param string          $abspath Absolute path to the site root.
 	 */
-	public function __construct(MC_Config $config, MC_User_Manager $users, MC_Hooks $hooks)
+	public function __construct(MC_Config $config, MC_User_Manager $users, MC_Hooks $hooks, string $abspath = '')
 	{
 
-		$this->config = $config;
-		$this->users  = $users;
-		$this->hooks  = $hooks;
+		$this->config  = $config;
+		$this->users   = $users;
+		$this->hooks   = $hooks;
+		$this->abspath = '' !== $abspath ? rtrim($abspath, '/') . '/' : '';
 	}
 
 	/**
@@ -84,12 +94,53 @@ class MC_Setup
 
 		return array(
 			'secret_key'     => bin2hex(random_bytes(32)),
-			'encryption_key' => base64_encode(random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES)),
+			'encryption_key' => bin2hex(random_bytes(32)),
 		);
 	}
 
 	/**
-	 * Seed config.json from the sample file with overrides.
+	 * Provision the master key and keystore for a new installation.
+	 *
+	 * Generates a master key, then creates the encrypted keystore
+	 * containing the application secret_key and encryption_key.
+	 *
+	 * @since {version}
+	 *
+	 * @return array{secret_key: string, encryption_key: string, master_key: string}|MC_Error
+	 */
+	public function provision_keystore(): array|MC_Error
+	{
+
+		$data_dir = $this->abspath . 'mc-data/';
+
+		// Generate or resolve master key.
+		try {
+			$master_key = MC_Keystore::resolve_master_key($data_dir, $this->abspath);
+		} catch (\RuntimeException $e) {
+			$master_key = '';
+		}
+
+		if ('' === $master_key) {
+			$master_key_hex = MC_Keystore::generate_master_key($data_dir);
+			if ('' === $master_key_hex) {
+				return new MC_Error('master_key_failed', 'Failed to generate master key.');
+			}
+			$master_key = hex2bin($master_key_hex);
+		}
+
+		// Generate application keys.
+		$keys = $this->generate_keys();
+
+		// Save to encrypted keystore.
+		if (!MC_Keystore::save_keys($data_dir, $master_key, $keys)) {
+			return new MC_Error('keystore_write_failed', 'Failed to write encrypted keystore.');
+		}
+
+		return array_merge($keys, array('master_key' => $master_key));
+	}
+
+	/**
+	 * Seed config.php from the sample file with overrides.
 	 *
 	 * @since {version}
 	 *
@@ -122,7 +173,7 @@ class MC_Setup
 		}
 
 		if (!$this->config->save()) {
-			return new MC_Error('config_write_failed', 'Failed to write config.json.');
+			return new MC_Error('config_write_failed', 'Failed to write config.php.');
 		}
 
 		return true;
@@ -145,20 +196,25 @@ class MC_Setup
 	public function run(array $data): true|MC_Error
 	{
 
-		// Generate keys.
-		$keys = $this->generate_keys();
+		// Provision keystore (master key + app keys).
+		$keystore_result = $this->provision_keystore();
+		if (is_a($keystore_result, 'MC_Error')) {
+			return $keystore_result;
+		}
 
-		// Seed config.
-		$config_overrides = array_merge($keys, array(
+		// Seed config (without keys — they live in the keystore).
+		$config_overrides = array(
 			'site_name' => $data['site_name'] ?? 'My Site',
-		));
+		);
 
 		$result = $this->seed_config($config_overrides);
 		if (is_a($result, 'MC_Error')) {
 			return $result;
 		}
 
-		// Create the first admin user.
+		// Create the first admin user — set the encryption key from keystore.
+		$this->users->set_encryption_key($keystore_result['encryption_key']);
+
 		$user_result = $this->users->create_user(array(
 			'username' => $data['username'] ?? '',
 			'password' => $data['password'] ?? '',

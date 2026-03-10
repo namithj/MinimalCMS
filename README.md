@@ -13,7 +13,7 @@
 
 MinimalCMS is a file-based content management system with a familiar hook, plugin, and theme architecture — without requiring a database, a framework, or complex infrastructure.
 
-Content is written in **Markdown**, metadata lives in **JSON sidecars**, user data is **sodium-encrypted at rest**, and the entire system boots from a single `index.php` front controller through an **`MC_App` singleton container** that wires 25 object-oriented classes. If you can upload files to a PHP + Apache host, you can run MinimalCMS.
+Content is written in **Markdown**, metadata lives in **PHP-guarded sidecars**, user data is **sodium-encrypted at rest**, and the entire system boots from a single `index.php` front controller through an **`MC_App` singleton container** that wires 27 object-oriented classes. If you can upload files to a PHP + Apache host, you can run MinimalCMS.
 
 It is designed as a learning reference, a lightweight CMS for small sites, and a clean base for developers who want a hook-driven, extensible CMS without the overhead.
 
@@ -23,8 +23,8 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 
 | Property | Detail |
 |---|---|
-| **Architecture** | 25 OOP classes, `MC_App` singleton container |
-| **Storage** | Flat files (Markdown + JSON) |
+| **Architecture** | 27 OOP classes, `MC_App` singleton container |
+| **Storage** | Flat files (Markdown + PHP-guarded JSON) |
 | **Language** | PHP 8.2+ |
 | **Server** | Apache + `mod_rewrite` (via Docker or standalone) |
 | **Dependencies** | Parsedown + Parsedown Extra (Markdown), EasyMDE (editor) |
@@ -38,12 +38,14 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 ## Features
 
 **Content**
-- Write pages and posts in Markdown (`.md`) with JSON sidecar metadata
+- Write pages and posts in Markdown (`.md`) with PHP-guarded sidecar metadata
 - Custom content types, archive routes, and permalink slugs
 - Shortcode parser — `[greet name="World"]` syntax
 - Field Registry with built-in types: text, textarea, number, url, checkbox, select, markdown, html
 
 **Security**
+- All data files use PHP Guard pattern (`<?php die(); ?>` header + `.php` extension) — no web server can serve raw data
+- Cryptographic keys isolated in an encrypted keystore (sodium secretbox) with master key hierarchy
 - User data encrypted with `sodium_crypto_secretbox` (256-bit key)
 - Passwords hashed with bcrypt
 - All forms protected by HMAC-based nonces
@@ -52,15 +54,15 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 **Extensibility**
 - 92 documented hooks (44 actions, 48 filters) across all subsystems
 - Action & filter hooks with `mc_add_action()` / `mc_add_filter()`
-- Plugin lifecycle (activate, deactivate) driven by `config.json`
-- Theme system with template hierarchy, child theme support, and `theme.json` manifests
+- Plugin lifecycle (activate, deactivate) driven by `config.php`
+- Theme system with template hierarchy, child theme support, and `theme.php` manifests
 - MU-plugins directory for must-use code
 - 3-layer Settings API: storage (`MC_Settings`), registry (`MC_Settings_Registry`), fields (`MC_Field_Registry`)
 - Dashboard widgets (site info, recent pages, quick links)
 
 **Developer Experience**
 - Single front controller — no framework magic
-- 25 focused classes with typed methods (PHP 8.0+ union types)
+- 27 focused classes with typed methods (PHP 8.0+ union types)
 - 7 ES Module JavaScript classes — no jQuery, no global soup
 - File-based PHP cache with TTL
 - Full PHPUnit test suite (unit + integration)
@@ -123,7 +125,7 @@ npm install && npm run build       # Compile SCSS assets
 ```
 
 The **setup wizard** runs automatically on the first visit. It will:
-- Generate a `secret_key` and `encryption_key` in `config.json`
+- Generate a master key and provision an encrypted keystore
 - Create the initial administrator account
 - Redirect you to the dashboard
 
@@ -189,7 +191,7 @@ minimalcms/
 ├── .htaccess                    # Rewrite all non-file requests to index.php
 ├── mc-blog-header.php           # Orchestrates: boot → route → render
 ├── mc-load.php                  # Bootstrap: constants, autoload, MC_App::boot()
-├── config.sample.json           # Template config — copied to config.json on setup
+├── config.sample.php            # Template config — copied to config.php on setup
 ├── composer.json                # PHP dependencies & dev scripts
 ├── package.json                 # Node dependencies & build scripts
 ├── Dockerfile                   # PHP 8.2 + Apache dev image
@@ -200,9 +202,9 @@ minimalcms/
 ├── mc-includes/                 # Core PHP classes & autoloader
 │   ├── autoload.php             # PSR-4 style autoloader for MC_* classes
 │   ├── functions.php            # Global helpers (mc_app, mc_site_url, mc_is_error, etc.)
-│   ├── classes/                 # 25 core classes
+│   ├── classes/                 # 27 core classes
 │   │   ├── class-mc-app.php              # Singleton service container
-│   │   ├── class-mc-config.php           # Config loader (config.json)
+│   │   ├── class-mc-config.php           # Config loader (config.php)
 │   │   ├── class-mc-hooks.php            # Action & filter engine
 │   │   ├── class-mc-formatter.php        # Escaping & sanitisation
 │   │   ├── class-mc-http.php             # Nonces, redirects, AJAX, JSON
@@ -210,8 +212,8 @@ minimalcms/
 │   │   ├── class-mc-capabilities.php     # Roles & permission checks
 │   │   ├── class-mc-session.php          # PHP session lifecycle
 │   │   ├── class-mc-user-manager.php     # User CRUD, auth, encrypted storage
-│   │   ├── class-mc-field-registry.php   # Field type registration & rendering
-│   │   ├── class-mc-settings.php         # File-based JSON settings storage
+│   │   ├── class-mc-keystore.php          # Encrypted key storage with master key hierarchy
+│   │   ├── class-mc-settings.php         # File-based settings storage (PHP-guarded)
 │   │   ├── class-mc-settings-registry.php # Settings pages, sections, fields
 │   │   ├── class-mc-content-type-registry.php # Content type definitions
 │   │   ├── class-mc-content-manager.php  # Content CRUD (get, save, delete, query)
@@ -225,8 +227,8 @@ minimalcms/
 │   │   ├── class-mc-plugin-manager.php   # Plugin discovery & lifecycle
 │   │   ├── class-mc-admin-bar.php        # Front-end admin toolbar
 │   │   ├── class-mc-setup.php            # First-run wizard logic
-│   │   └── class-mc-error.php            # Error container object
-│   └── vendor/                  # Composer dependencies (Parsedown, dev tools)
+│   │   └── class-mc-error.php            # Error container object│   │   ├── class-mc-field-registry.php   # Field type registration & rendering
+│   │   ├── class-mc-file-guard.php       # PHP Guard file I/O (read/write guarded files)│   └── vendor/                  # Composer dependencies (Parsedown, dev tools)
 │
 ├── mc-admin/                    # Admin panel
 │   ├── admin.php                # Admin bootstrap + auth gate
@@ -265,7 +267,7 @@ minimalcms/
 │   │   └── posts/               # Bundled posts plugin (blog content type)
 │   └── themes/
 │       └── default/             # Default theme
-│           ├── theme.json       # Theme metadata & settings
+│           ├── theme.php        # Theme metadata & settings (PHP-guarded)
 │           ├── functions.php    # Theme hooks & customization
 │           ├── style.css        # Compiled stylesheet
 │           ├── style.min.css    # Minified stylesheet
@@ -283,8 +285,9 @@ minimalcms/
 │
 ├── mc-data/                     # Protected data directory
 │   ├── .htaccess                # Deny all direct access
+│   ├── keys.php                 # Encrypted keystore (sodium secretbox)
 │   ├── sessions/                # PHP session files
-│   └── settings/                # Settings JSON files ({group}.{section}.json)
+│   └── settings/                # Settings files ({group}.{section}.php, PHP-guarded)
 │
 ├── docs/                        # Documentation
 │   └── architecture/            # In-depth architecture reference
@@ -313,12 +316,15 @@ Each content item lives in its own folder with two files:
 ```
 mc-content/pages/my-page/
 ├── my-page.md       # Markdown body
-└── my-page.json     # Metadata (title, slug, status, excerpt, etc.)
+└── my-page.php      # Metadata sidecar (PHP-guarded JSON)
 ```
 
-### JSON sidecar example
+### Sidecar example
 
-```json
+Sidecar files use the PHP Guard pattern — a `<?php die('Access denied'); ?>` header followed by JSON. This prevents any web server from serving the raw data:
+
+```php
+<?php die('Access denied'); ?>
 {
     "title": "About Us",
     "slug": "about",
@@ -334,7 +340,7 @@ mc-content/pages/my-page/
 }
 ```
 
-The `meta` field holds arbitrary key-value data for custom fields. Content is managed through `MC_Content_Manager` with `get()`, `save()`, `delete()`, `query()`, `exists()`, and `count()` methods.
+The `meta` field holds arbitrary key-value data for custom fields. Content is managed through `MC_Content_Manager` with `get()`, `save()`, `delete()`, `query()`, `exists()`, and `count()` methods. All file I/O goes through `MC_File_Guard` which transparently handles the guard header.
 
 ---
 
@@ -352,7 +358,7 @@ mc_register_content_type( 'post', array(
 ) );
 ```
 
-Then create content in `mc-content/posts/{slug}/{slug}.md` + `.json`.
+Then create content in `mc-content/posts/{slug}/{slug}.md` + `.php` (PHP-guarded sidecar).
 
 MinimalCMS ships with two bundled plugins: **forms** (form builder with submissions) and **posts** (blog content type with archives).
 
@@ -387,15 +393,16 @@ mc_add_shortcode( 'greet', function ( array $atts ): string {
 } );
 ```
 
-Activate plugins from **Admin → Plugins** or by adding the path to `config.json`'s `active_plugins` array. All plugin functions must be prefixed with `{slug}_` (e.g. `forms_register_content_type`).
+Activate plugins from **Admin → Plugins** or by adding the path to `config.php`'s `active_plugins` array. All plugin functions must be prefixed with `{slug}_` (e.g. `forms_register_content_type`).
 
 ---
 
 ## Theme Development
 
-Themes live in `mc-content/themes/{theme-name}/` and require a `theme.json` manifest:
+Themes live in `mc-content/themes/{theme-name}/` and require a `theme.php` manifest (PHP-guarded JSON):
 
-```json
+```php
+<?php die('Access denied'); ?>
 {
     "name": "My Theme",
     "version": "1.0.0",
@@ -546,7 +553,9 @@ Server data is passed via `mc_localize_script()` and accessed as `window.mcData`
 
 ## Security
 
-- **User file encryption**: All user data (including bcrypt-hashed passwords) is encrypted with `sodium_crypto_secretbox` using a 256-bit key from `config.json`
+- **PHP Guard pattern**: All data files (config, settings, sidecars, theme manifests) use `<?php die('Access denied'); ?>` + `.php` extension — no web server can serve raw data, regardless of server software
+- **Encrypted keystore**: Cryptographic keys are isolated from config and stored in a sodium-encrypted keystore (`mc-data/keys.php`) with master key hierarchy (env var → above-webroot file → in-webroot guarded file)
+- **User file encryption**: All user data (including bcrypt-hashed passwords) is encrypted with `sodium_crypto_secretbox` using a 256-bit key from the keystore
 - **Nonces**: HMAC-based tokens protect all form submissions and admin actions
 - **Capabilities**: Role-based permission system with 4 default roles (administrator, editor, author, contributor)
 - **Data protection**: `mc-data/` folder has an `.htaccess` deny rule and a PHP `die()` guard in the users file
@@ -585,7 +594,7 @@ composer cs:fix            # Auto-fix coding standard violations
 
 | File | Purpose |
 |------|---------|
-| `config.sample.json` | Template config — copied to `config.json` on first setup |
+| `config.sample.php` | Template config — copied to `config.php` on first setup |
 | `phpunit.xml` | PHPUnit test suites (unit + integration), coverage source |
 | `phpcs.xml.dist` | MinimalCMS coding standards ruleset |
 | `Dockerfile` | PHP 8.2 + Apache + Composer dev image |

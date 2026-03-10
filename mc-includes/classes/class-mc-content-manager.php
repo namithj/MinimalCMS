@@ -4,7 +4,7 @@
  * MC_Content_Manager — Flat-file content CRUD.
  *
  * Replaces the CRUD portion of content.php. Each content item is stored as
- * a JSON sidecar + Markdown body in mc-content/{type-folder}/{slug}/.
+ * a PHP-guarded JSON sidecar + Markdown body in mc-content/{type-folder}/{slug}/.
  *
  * @package MinimalCMS
  * @since   {version}
@@ -114,7 +114,7 @@ class MC_Content_Manager
 	}
 
 	/**
-	 * Get the JSON sidecar path for a content item.
+	 * Get the PHP-guarded JSON sidecar path for a content item.
 	 *
 	 * @since {version}
 	 *
@@ -125,7 +125,7 @@ class MC_Content_Manager
 	public function json_path(string $type, string $slug): string
 	{
 
-		return $this->item_dir($type, $slug) . $slug . '.json';
+		return $this->item_dir($type, $slug) . $slug . '.php';
 	}
 
 	/*
@@ -153,8 +153,7 @@ class MC_Content_Manager
 			return null;
 		}
 
-		$meta_raw = file_get_contents($json_path);
-		$meta     = json_decode($meta_raw, true);
+		$meta = MC_File_Guard::read_json($json_path);
 		if (!is_array($meta)) {
 			$meta = array();
 		}
@@ -262,11 +261,10 @@ class MC_Content_Manager
 			)
 		);
 
-		// Strip runtime-only keys — body belongs in the .md file, not the JSON sidecar.
+		// Strip runtime-only keys — body belongs in the .md file, not the PHP sidecar.
 		unset($meta['body_raw'], $meta['body_html']);
 
-		$json = json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-		if (false === file_put_contents($this->json_path($type, $slug), $json, LOCK_EX)) {
+		if (!MC_File_Guard::write_json($this->json_path($type, $slug), $meta)) {
 			return new MC_Error('write_failed', 'Failed to write content metadata.');
 		}
 
@@ -452,12 +450,12 @@ class MC_Content_Manager
 				continue;
 			}
 
-			$json_path = $dir . $slug . '/' . $slug . '.json';
+			$json_path = $dir . $slug . '/' . $slug . '.php';
 			if (!is_file($json_path)) {
 				continue;
 			}
 
-			$meta = json_decode(file_get_contents($json_path), true);
+			$meta = MC_File_Guard::read_json($json_path);
 			if (($meta['status'] ?? '') === $status) {
 				++$count;
 			}

@@ -9,6 +9,7 @@
 namespace MinimalCMS\Tests\Unit;
 
 use MC_Config;
+use MC_File_Guard;
 use MC_Hooks;
 use MC_Theme_Manager;
 use PHPUnit\Framework\TestCase;
@@ -34,17 +35,17 @@ class MCThemeManagerClassTest extends TestCase
 		// Create a minimal theme.
 		$theme_path = $this->themes_dir . 'default/';
 		mkdir($theme_path, 0755, true);
-		file_put_contents($theme_path . 'theme.json', json_encode(array(
+		MC_File_Guard::write_json($theme_path . 'theme.php', array(
 			'name'    => 'Default',
 			'version' => '1.0',
-		)));
+		));
 		file_put_contents($theme_path . 'index.php', '<?php // index');
 
 		// Create a config.
-		$config_path = $this->temp_dir . 'config.json';
-		file_put_contents($config_path, json_encode(array(
+		$config_path = $this->temp_dir . 'config.php';
+		MC_File_Guard::write_json($config_path, array(
 			'active_theme' => 'default',
-		)));
+		));
 
 		$this->hooks  = new MC_Hooks();
 		$this->config = new MC_Config($config_path, $config_path);
@@ -122,9 +123,9 @@ class MCThemeManagerClassTest extends TestCase
 		// Create another theme.
 		$alt_path = $this->themes_dir . 'alt/';
 		mkdir($alt_path, 0755, true);
-		file_put_contents($alt_path . 'theme.json', json_encode(array(
+		MC_File_Guard::write_json($alt_path . 'theme.php', array(
 			'name' => 'Alt Theme',
-		)));
+		));
 
 		$result = $this->themes->switch_theme('alt');
 		$this->assertTrue($result);

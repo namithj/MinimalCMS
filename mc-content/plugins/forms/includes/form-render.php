@@ -108,9 +108,31 @@ function forms_render_form(array $form): string
 
 	$honeypot_enabled = (bool) mc_get_setting('plugin.forms', 'enable_honeypot', true);
 
+	// Check for pending validation errors from a failed submission.
+	global $mc_forms_validation;
+	$validation    = $mc_forms_validation[ $slug ] ?? null;
+	$field_errors  = $validation['errors'] ?? array();
+	$field_values  = $validation['values'] ?? array();
+
+	// Check for a URL-based error flash (e.g. save failure after redirect).
+	$url_flash     = forms_get_flash($slug);
+	$generic_error = '';
+	if (null !== $url_flash && 'error' === ($url_flash['type'] ?? '')) {
+		$generic_error = 'Something went wrong. Please try again.';
+	}
+
 	ob_start();
 	?>
 	<div class="mc-form-wrapper" id="mc-form-<?php echo mc_esc_attr($slug); ?>">
+		<?php if ('' !== $generic_error) : ?>
+			<div class="mc-form-notice mc-form-notice--error" role="alert">
+				<?php echo mc_esc_html($generic_error); ?>
+			</div>
+		<?php elseif (! empty($field_errors)) : ?>
+			<div class="mc-form-notice mc-form-notice--error" role="alert">
+				<?php echo mc_esc_html('Please fix the errors below and try again.'); ?>
+			</div>
+		<?php endif; ?>
 		<form method="post" action="" class="mc-form" novalidate>
 			<input type="hidden" name="_mc_form_slug" value="<?php echo mc_esc_attr($slug); ?>">
 			<?php mc_nonce_field('form_submit_' . $slug); ?>
@@ -122,8 +144,12 @@ function forms_render_form(array $form): string
 				</div>
 			<?php endif; ?>
 
-			<?php foreach ($meta['fields'] as $field) : ?>
-				<?php forms_render_form_field($field); ?>
+			<?php foreach ($meta['fields'] as $field) :
+				$fname = $field['name'] ?? '';
+				$ferror = $field_errors[ $fname ] ?? '';
+				$fvalue = $field_values[ $fname ] ?? null;
+			?>
+				<?php forms_render_form_field($field, $ferror, $fvalue); ?>
 			<?php endforeach; ?>
 
 			<div class="mc-form-actions">
@@ -142,13 +168,18 @@ function forms_render_form(array $form): string
  *
  * @since 1.0.0
  *
- * @param array $field Normalized field definition.
+ * @param array  $field Normalized field definition.
+ * @param string $error Validation error message for this field (empty if none).
+ * @param mixed  $value Previously submitted value to repopulate, or null.
  * @return void
  */
-function forms_render_form_field(array $field): void
+function forms_render_form_field(array $field, string $error = '', mixed $value = null): void
 {
 
-	echo '<div class="mc-form-field mc-form-field--' . mc_esc_attr($field['type']) . '">' . "\n";
+	$has_error   = '' !== $error;
+	$error_class = $has_error ? ' mc-field-error' : '';
+
+	echo '<div class="mc-form-field mc-form-field--' . mc_esc_attr($field['type']) . $error_class . '">' . "\n";
 
 	if ('hidden' === $field['type']) {
 		echo '<input type="hidden" name="' . mc_esc_attr($field['name']) . '" value="">' . "\n";
@@ -167,28 +198,32 @@ function forms_render_form_field(array $field): void
 		case 'textarea':
 			echo '<textarea id="field-' . mc_esc_attr($field['name']) . '" name="' . mc_esc_attr($field['name']) . '" placeholder="' . mc_esc_attr($field['placeholder'] ?? '') . '"';
 			echo $field['required'] ? ' required' : '';
-			echo '></textarea>' . "\n";
+			echo $has_error ? ' aria-invalid="true" aria-describedby="error-' . mc_esc_attr($field['name']) . '"' : '';
+			echo '>' . (null !== $value ? mc_esc_textarea((string) $value) : '') . '</textarea>' . "\n";
 			break;
 
 		case 'select':
 			echo '<select id="field-' . mc_esc_attr($field['name']) . '" name="' . mc_esc_attr($field['name']) . '"';
 			echo $field['required'] ? ' required' : '';
+			echo $has_error ? ' aria-invalid="true" aria-describedby="error-' . mc_esc_attr($field['name']) . '"' : '';
 			echo '>' . "\n";
 			echo '<option value="">— Select —</option>' . "\n";
 			foreach ($field['options'] as $opt) {
-				if (is_array($opt)) {
-					echo '<option value="' . mc_esc_attr($opt['value'] ?? '') . '">' . mc_esc_html($opt['label'] ?? $opt['value'] ?? '') . '</option>' . "\n";
-				} else {
-					echo '<option value="' . mc_esc_attr((string) $opt) . '">' . mc_esc_html((string) $opt) . '</option>' . "\n";
-				}
+				$opt_value = is_array($opt) ? ($opt['value'] ?? '') : (string) $opt;
+				$opt_label = is_array($opt) ? ($opt['label'] ?? $opt_value) : (string) $opt;
+				$selected  = (null !== $value && (string) $value === (string) $opt_value) ? ' selected' : '';
+				echo '<option value="' . mc_esc_attr($opt_value) . '"' . $selected . '>' . mc_esc_html($opt_label) . '</option>' . "\n";
 			}
 			echo '</select>' . "\n";
 			break;
 
 		case 'checkbox':
+			$checked = (null !== $value && '' !== $value && '0' !== $value) ? ' checked' : '';
 			echo '<label>' . "\n";
 			echo '  <input type="checkbox" id="field-' . mc_esc_attr($field['name']) . '" name="' . mc_esc_attr($field['name']) . '" value="1"';
 			echo $field['required'] ? ' required' : '';
+			echo $has_error ? ' aria-invalid="true" aria-describedby="error-' . mc_esc_attr($field['name']) . '"' : '';
+			echo $checked;
 			echo '>' . "\n";
 			echo '  ' . mc_esc_html($field['label']);
 			echo $field['required'] ? ' <span class="required">*</span>' : '';
@@ -198,9 +233,15 @@ function forms_render_form_field(array $field): void
 
 		default: // text, email, number, url.
 			echo '<input type="' . mc_esc_attr($field['type']) . '" id="field-' . mc_esc_attr($field['name']) . '" name="' . mc_esc_attr($field['name']) . '" placeholder="' . mc_esc_attr($field['placeholder'] ?? '') . '"';
+			echo null !== $value ? ' value="' . mc_esc_attr((string) $value) . '"' : '';
 			echo $field['required'] ? ' required' : '';
+			echo $has_error ? ' aria-invalid="true" aria-describedby="error-' . mc_esc_attr($field['name']) . '"' : '';
 			echo '>' . "\n";
 			break;
+	}
+
+	if ($has_error) {
+		echo '<span class="mc-field-error-message" id="error-' . mc_esc_attr($field['name']) . '" role="alert">' . mc_esc_html($error) . '</span>' . "\n";
 	}
 
 	echo '</div>' . "\n";
