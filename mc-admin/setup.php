@@ -12,37 +12,111 @@
 
 require_once __DIR__ . '/admin.php';
 
+mc_start_session();
+
+$step = (int) ($_GET['step'] ?? 1);
+
+$has_pending_backup = !empty($_SESSION['mc_setup_backup']) && is_array($_SESSION['mc_setup_backup']);
+
 /*
  * ── Guard: redirect away if already set up ─────────────────────────────────
  */
-if (!mc_app()->setup()->needs_setup()) {
+if (!mc_app()->setup()->needs_setup() && !(3 === $step && $has_pending_backup)) {
 	mc_redirect(mc_admin_url('login.php'));
 	exit;
 }
 
-$step        = (int) ($_GET['step'] ?? 1);
 $notice      = '';
 $notice_type = 'error';
+$config      = mc_app()->config()->all();
+
+/*
+ * ── Step 3: Handle backup generation and completion gate ───────────────────
+ */
+if (3 === $step && mc_is_post_request()) {
+	$action = mc_sanitize_slug(mc_input('setup_action', 'post') ?? '');
+
+	if ('download_backup' === $action) {
+		if (!mc_verify_nonce((string) mc_input('_mc_nonce', 'post'), 'setup_backup_download')) {
+			$notice = 'Invalid backup download request.';
+		} elseif (!$has_pending_backup) {
+			$notice = 'No pending setup backup data was found.';
+		} else {
+			$passphrase = (string) (mc_input('backup_passphrase', 'post') ?? '');
+			$confirm    = (string) (mc_input('backup_passphrase_confirm', 'post') ?? '');
+
+			if ('' === trim($passphrase)) {
+				$notice = 'Backup passphrase is required.';
+			} elseif (strlen($passphrase) < 12) {
+				$notice = 'Backup passphrase must be at least 12 characters.';
+			} elseif ($passphrase !== $confirm) {
+				$notice = 'Backup passphrases do not match.';
+			} else {
+				$master_key_hex = (string) ($_SESSION['mc_setup_backup']['master_key_hex'] ?? '');
+				$bundle         = mc_app()->setup()->generate_backup_bundle($master_key_hex, $passphrase);
+
+				if (mc_is_error($bundle)) {
+					$notice = $bundle->get_error_message();
+				} else {
+					$_SESSION['mc_setup_backup']['downloaded'] = true;
+					$filename = basename((string) $bundle['filename']);
+
+					header('Content-Type: application/json; charset=UTF-8');
+					header('Content-Disposition: attachment; filename="' . $filename . '"');
+					header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+					header('Pragma: no-cache');
+					header('Expires: 0');
+
+					echo $bundle['content'];
+					exit;
+				}
+			}
+		}
+	} elseif ('finish_setup' === $action) {
+		if (!mc_verify_nonce((string) mc_input('_mc_nonce', 'post'), 'setup_finish')) {
+			$notice = 'Invalid setup completion request.';
+		} elseif (!$has_pending_backup) {
+			$notice = 'No pending setup backup data was found.';
+		} else {
+			$downloaded = !empty($_SESSION['mc_setup_backup']['downloaded']);
+			$confirmed  = '1' === (string) (mc_input('backup_confirmed', 'post') ?? '');
+
+			if (!$downloaded) {
+				$notice = 'You must generate and download a backup before continuing.';
+			} elseif (!$confirmed) {
+				$notice = 'Please confirm that you saved the backup bundle.';
+			} else {
+				unset($_SESSION['mc_setup_backup']);
+				mc_redirect(mc_admin_url());
+				exit;
+			}
+		}
+	}
+}
 
 /*
  * ── Step 2: Process form submission ────────────────────────────────────────
  */
 if (2 === $step && mc_is_post_request()) {
+	if (!mc_verify_nonce((string) mc_input('_mc_nonce', 'post'), 'setup_install')) {
+		$notice = 'Invalid setup request.';
+	}
+
 	$site_name = mc_sanitize_text(mc_input('site_name', 'post') ?? '');
 	$username  = mc_sanitize_slug(mc_input('username', 'post') ?? '');
 	$email     = mc_sanitize_email(mc_input('email', 'post') ?? '');
 	$password  = mc_input('password', 'post');
 	$password2 = mc_input('password_confirm', 'post');
 
-	if (empty($site_name)) {
+	if (!$notice && empty($site_name)) {
 		$notice = 'Site name is required.';
-	} elseif (empty($username)) {
+	} elseif (!$notice && empty($username)) {
 		$notice = 'Username is required.';
-	} elseif (empty($email)) {
+	} elseif (!$notice && empty($email)) {
 		$notice = 'Email is required.';
-	} elseif (empty($password)) {
+	} elseif (!$notice && empty($password)) {
 		$notice = 'Password is required.';
-	} elseif ($password !== $password2) {
+	} elseif (!$notice && $password !== $password2) {
 		$notice = 'Passwords do not match.';
 	}
 
@@ -146,6 +220,12 @@ if (2 === $step && mc_is_post_request()) {
 					mc_start_session();
 					mc_set_auth_session($username);
 
+					$_SESSION['mc_setup_backup'] = array(
+						'master_key_hex' => bin2hex($master_key),
+						'downloaded'     => false,
+						'created_at'     => time(),
+					);
+
 					$step = 3;
 				}
 			}
@@ -174,10 +254,51 @@ if (2 === $step && mc_is_post_request()) {
 
 		<?php if (3 === $step) : // ── Success ──────────────────────────── ?>
 			<div style="text-align:center;font-size:3rem;margin-bottom:16px;">&#x2705;</div>
-			<h1 style="text-align:center;">All Set!</h1>
-			<p class="lead" style="text-align:center;">Your site is ready. You've been logged in as the admin.</p>
-			<div style="text-align:center;margin-top:20px;">
-				<a href="<?php echo mc_esc_url(rtrim($config['site_url'] ?? mc_site_url(), '/') . '/mc-admin/'); ?>" class="btn btn-full-width">Go to Dashboard</a>
+			<h1 style="text-align:center;">One Last Step: Backup Your Recovery Bundle</h1>
+			<p class="lead" style="text-align:center;">Your admin account is ready. Before entering the dashboard, download and securely store your encrypted key backup.</p>
+
+			<?php if ($notice) : ?>
+				<div class="notice notice-error"><?php echo mc_esc_html($notice); ?></div>
+			<?php endif; ?>
+
+			<div class="notice notice-error" style="margin-top:16px;">
+				If this backup is lost and the server key files are lost, encrypted users and submissions cannot be recovered.
+			</div>
+
+			<form method="post" action="?step=3" style="margin-top:20px;">
+				<div class="form-group">
+					<label for="backup_passphrase">Backup Passphrase</label>
+					<input type="password" id="backup_passphrase" name="backup_passphrase" autocomplete="new-password" required>
+				</div>
+				<div class="form-group">
+					<label for="backup_passphrase_confirm">Confirm Backup Passphrase</label>
+					<input type="password" id="backup_passphrase_confirm" name="backup_passphrase_confirm" autocomplete="new-password" required>
+				</div>
+
+				<?php mc_nonce_field('setup_backup_download'); ?>
+				<input type="hidden" name="setup_action" value="download_backup">
+				<button type="submit" class="btn btn-full-width">Generate and Download Recovery Backup</button>
+			</form>
+
+			<?php if (!empty($_SESSION['mc_setup_backup']['downloaded'])) : ?>
+				<div class="notice notice-success" style="margin-top:16px;">Backup download completed for this setup session.</div>
+			<?php endif; ?>
+
+			<form method="post" action="?step=3" style="margin-top:16px;">
+				<div class="form-group">
+					<label>
+						<input type="checkbox" name="backup_confirmed" value="1" required>
+						I have saved the recovery backup in a secure location.
+					</label>
+				</div>
+
+				<?php mc_nonce_field('setup_finish'); ?>
+				<input type="hidden" name="setup_action" value="finish_setup">
+				<button type="submit" class="btn btn-full-width" <?php echo empty($_SESSION['mc_setup_backup']['downloaded']) ? 'disabled' : ''; ?>>Go to Dashboard</button>
+			</form>
+
+			<div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#6b7280;">
+				Dashboard access is blocked until backup download and confirmation are complete.
 			</div>
 
 		<?php else : // ── Setup Form ──────────────────────────────────────── ?>
@@ -189,6 +310,7 @@ if (2 === $step && mc_is_post_request()) {
 			<?php endif; ?>
 
 			<form method="post" action="?step=2">
+				<?php mc_nonce_field('setup_install'); ?>
 				<div class="form-group">
 					<label for="site_name">Site Name</label>
 					<input type="text" id="site_name" name="site_name"

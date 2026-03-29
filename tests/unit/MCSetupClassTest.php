@@ -14,6 +14,7 @@ use MC_Error;
 use MC_File_Guard;
 use MC_Formatter;
 use MC_Hooks;
+use MC_Keystore;
 use MC_Session;
 use MC_Setup;
 use MC_User_Manager;
@@ -160,5 +161,88 @@ class MCSetupClassTest extends TestCase
 		));
 
 		$this->assertInstanceOf(MC_Error::class, $result);
+	}
+
+	public function test_generate_backup_bundle_success(): void
+	{
+
+		$keystore = $this->setup->provision_keystore();
+		$this->assertIsArray($keystore);
+
+		$master_key_hex = bin2hex($keystore['master_key']);
+		$bundle         = $this->setup->generate_backup_bundle($master_key_hex, 'backup-passphrase-123');
+
+		$this->assertIsArray($bundle);
+		$this->assertStringEndsWith('.json', $bundle['filename']);
+
+		$envelope = json_decode($bundle['content'], true);
+		$this->assertIsArray($envelope);
+		$this->assertSame('minimalcms-key-backup-v1', $envelope['format']);
+
+		$salt       = base64_decode($envelope['salt'], true);
+		$nonce      = base64_decode($envelope['nonce'], true);
+		$ciphertext = base64_decode($envelope['ciphertext'], true);
+		$key        = hash_pbkdf2('sha256', 'backup-passphrase-123', $salt, (int) $envelope['iterations'], SODIUM_CRYPTO_SECRETBOX_KEYBYTES, true);
+
+		$decrypted = sodium_crypto_secretbox_open($ciphertext, $nonce, $key);
+		$this->assertNotFalse($decrypted);
+
+		$payload = json_decode($decrypted, true);
+		$this->assertSame($master_key_hex, $payload['master_key']);
+		$this->assertNotEmpty($payload['keystore']);
+	}
+
+	public function test_generate_backup_bundle_missing_passphrase_returns_error(): void
+	{
+
+		$keystore = $this->setup->provision_keystore();
+		$this->assertIsArray($keystore);
+
+		$master_key_hex = bin2hex($keystore['master_key']);
+		$result         = $this->setup->generate_backup_bundle($master_key_hex, '');
+
+		$this->assertInstanceOf(MC_Error::class, $result);
+		$this->assertSame('missing_passphrase', $result->get_error_code());
+	}
+
+	public function test_restore_backup_bundle_roundtrip_rehydrates_key_files(): void
+	{
+
+		$keystore = $this->setup->provision_keystore();
+		$this->assertIsArray($keystore);
+
+		$master_key_hex = bin2hex($keystore['master_key']);
+		$bundle         = $this->setup->generate_backup_bundle($master_key_hex, 'restore-passphrase-123');
+		$this->assertIsArray($bundle);
+
+		$data_dir = $this->temp_dir . 'mc-data/';
+
+		MC_File_Guard::write($data_dir . MC_Keystore::WEBROOT_FILE, str_repeat('a', 64));
+		MC_File_Guard::write($data_dir . MC_Keystore::KEYS_FILE, base64_encode('invalid'));
+
+		$result = MC_Setup::restore_backup_bundle($this->temp_dir, $bundle['content'], 'restore-passphrase-123');
+		$this->assertTrue($result);
+
+		$resolved_master = MC_Keystore::resolve_master_key($data_dir, $this->temp_dir);
+		$this->assertSame(hex2bin($master_key_hex), $resolved_master);
+
+		$loaded = MC_Keystore::load_keys($data_dir, $resolved_master);
+		$this->assertNotEmpty($loaded['secret_key']);
+		$this->assertNotEmpty($loaded['encryption_key']);
+	}
+
+	public function test_restore_backup_bundle_wrong_passphrase_returns_error(): void
+	{
+
+		$keystore = $this->setup->provision_keystore();
+		$this->assertIsArray($keystore);
+
+		$master_key_hex = bin2hex($keystore['master_key']);
+		$bundle         = $this->setup->generate_backup_bundle($master_key_hex, 'restore-passphrase-123');
+		$this->assertIsArray($bundle);
+
+		$result = MC_Setup::restore_backup_bundle($this->temp_dir, $bundle['content'], 'wrong-passphrase');
+		$this->assertInstanceOf(MC_Error::class, $result);
+		$this->assertSame('backup_decrypt_failed', $result->get_error_code());
 	}
 }
