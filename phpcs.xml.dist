@@ -4,13 +4,13 @@
 
 	<!-- What to scan -->
 	<file>mc-includes</file>
-	<file>mc-admin</file>
+	<file>minimal/admin-themes</file>
 	<file>mc-content/plugins</file>
 	<file>tests</file>
 
 	<!-- Exclusions -->
 	<exclude-pattern>mc-includes/vendor/*</exclude-pattern>
-	<exclude-pattern>mc-admin/assets/vendor/*</exclude-pattern>
+	<exclude-pattern>minimal/admin-themes/*/assets/vendor/*</exclude-pattern>
 	<exclude-pattern>mc-content/themes/*/assets/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*\.min\.php</exclude-pattern>

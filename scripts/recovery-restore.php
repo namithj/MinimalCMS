@@ -22,13 +22,14 @@ if ('cli' !== PHP_SAPI && 'phpdbg' !== PHP_SAPI) {
 
 $abspath = dirname(__DIR__) . '/';
 define('MC_ABSPATH', $abspath);
+define('MC_CORE_DIR', MC_ABSPATH . 'minimal/');
 
-$composer_autoload = MC_ABSPATH . 'mc-includes/vendor/autoload.php';
+$composer_autoload = MC_CORE_DIR . 'mc-includes/vendor/autoload.php';
 if (is_file($composer_autoload)) {
 	require_once $composer_autoload;
 }
 
-require_once MC_ABSPATH . 'mc-includes/autoload.php';
+require_once MC_CORE_DIR . 'mc-includes/autoload.php';
 
 $options = getopt('', array('bundle:', 'passphrase::', 'abspath::', 'help::'));
 
@@ -56,8 +57,8 @@ if (!is_file($bundle_path) || !is_readable($bundle_path)) {
 $target_abspath = (string) ($options['abspath'] ?? MC_ABSPATH);
 $target_abspath = rtrim($target_abspath, '/') . '/';
 
-if (!is_dir($target_abspath . 'mc-data/')) {
-	fwrite(STDERR, "Target path does not look like a MinimalCMS root (missing mc-data/).\n");
+if (!is_dir($target_abspath . 'content/data/')) {
+	fwrite(STDERR, "Target path does not look like a MinimalCMS root (missing content/data/).\n");
 	exit(1);
 }
 
@@ -86,8 +87,8 @@ if ($result instanceof MC_Error) {
 
 echo "Recovery restore completed.\n";
 echo "Rehydrated files:\n";
-echo "- " . $target_abspath . 'mc-data/' . MC_Keystore::WEBROOT_FILE . "\n";
-echo "- " . $target_abspath . 'mc-data/' . MC_Keystore::KEYS_FILE . "\n";
+echo "- " . $target_abspath . 'content/data/' . MC_Keystore::WEBROOT_FILE . "\n";
+echo "- " . $target_abspath . 'content/data/' . MC_Keystore::KEYS_FILE . "\n";
 
 exit(0);
 

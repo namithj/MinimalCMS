@@ -1,13 +1,16 @@
 # Dependencies
-/mc-includes/vendor/
+/minimal/mc-includes/vendor/
 /node_modules/
 
 # Build output
-/mc-admin/assets/css/*.css
-/mc-admin/assets/css/*.css.map
-/mc-admin/assets/vendor/
-/mc-content/themes/default/*.css
-/mc-content/themes/default/*.css.map
+/minimal/admin-themes/default/assets/css/*.css
+/minimal/admin-themes/default/assets/css/*.css.map
+/minimal/admin-themes/default/assets/vendor/
+/minimal/admin-themes/classic/assets/css/*.css
+/minimal/admin-themes/classic/assets/css/*.css.map
+/minimal/admin-themes/classic/assets/vendor/
+/content/themes/default/*.css
+/content/themes/default/*.css.map
 
 # IDE
 /.idea/
@@ -20,16 +23,16 @@
 Thumbs.db
 
 # Data (sensitive)
-/mc-data/users.php
-/mc-data/sessions/
-/mc-data/settings/
+/content/data/users.php
+/content/data/sessions/
+/content/data/settings/
 
 # Pages (keep only home)
-/mc-content/pages/*
-!/mc-content/pages/home/
+/content/data/pages/*
+!/content/data/pages/home/
 
 # Cache
-/mc-content/cache/
+/content/data/cache/
 
 # Composer
 composer.phar
@@ -47,8 +50,8 @@ config.php
 docs/architecture
 docs/architecture/*
 
-mc-content/forms-submissions/.htaccess
-mc-content/forms-submissions/index.php
-mc-content/posts/hello-world/hello-world.json
-mc-content/posts/hello-world/hello-world.md
+content/data/forms-submissions/.htaccess
+content/data/forms-submissions/index.php
+content/data/posts/hello-world/hello-world.json
+content/data/posts/hello-world/hello-world.md
 .phpunit.cache/test-results

@@ -55,4 +55,4 @@ if ( PHP_SAPI !== 'cli' ) {
 
 define( 'MC_USE_THEMES', true );
 
-require __DIR__ . '/mc-blog-header.php';
+require __DIR__ . '/minimal/mc-blog-header.php';

@@ -4,9 +4,9 @@
   "description": "MinimalCMS build tools",
   "private": true,
   "scripts": {
-    "vendor:copy": "node mc-includes/scripts/vendor-copy.js",
-    "build": "npm run vendor:copy && npx sass --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.css --style=expanded && npx sass --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.min.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.min.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.min.css --style=compressed",
-    "watch": "npx sass --watch --no-source-map mc-admin/assets/src/scss/admin.scss:mc-admin/assets/css/admin.css mc-admin/assets/src/scss/auth.scss:mc-admin/assets/css/auth.css mc-content/themes/default/src/scss/style.scss:mc-content/themes/default/style.css --style=expanded",
+    "vendor:copy": "node minimal/mc-includes/scripts/vendor-copy.js",
+    "build": "npm run vendor:copy && npx sass --no-source-map minimal/admin-themes/default/assets/src/scss/admin.scss:minimal/admin-themes/default/assets/css/admin.css minimal/admin-themes/default/assets/src/scss/auth.scss:minimal/admin-themes/default/assets/css/auth.css content/themes/default/src/scss/style.scss:content/themes/default/style.css --style=expanded && npx sass --no-source-map minimal/admin-themes/default/assets/src/scss/admin.scss:minimal/admin-themes/default/assets/css/admin.min.css minimal/admin-themes/default/assets/src/scss/auth.scss:minimal/admin-themes/default/assets/css/auth.min.css content/themes/default/src/scss/style.scss:content/themes/default/style.min.css --style=compressed",
+    "watch": "npx sass --watch --no-source-map minimal/admin-themes/default/assets/src/scss/admin.scss:minimal/admin-themes/default/assets/css/admin.css minimal/admin-themes/default/assets/src/scss/auth.scss:minimal/admin-themes/default/assets/css/auth.css content/themes/default/src/scss/style.scss:content/themes/default/style.css --style=expanded",
     "version": "node scripts/update-version.js",
     "setup": "node scripts/setup.js",
     "serve": "docker compose up",

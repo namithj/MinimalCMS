@@ -16,17 +16,18 @@ if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
 
 // MinimalCMS root directory.
 define('MC_ABSPATH', dirname(__DIR__) . '/');
+define('MC_CORE_DIR', MC_ABSPATH . 'minimal/');
 
 // Composer autoloader (loads PHPUnit, Parsedown, and PSR-4 test namespaces).
-require_once MC_ABSPATH . 'mc-includes/vendor/autoload.php';
+require_once MC_CORE_DIR . 'mc-includes/vendor/autoload.php';
 
 // PSR-0-style autoloader for MC_ classes in mc-includes/classes/.
-require_once MC_ABSPATH . 'mc-includes/autoload.php';
+require_once MC_CORE_DIR . 'mc-includes/autoload.php';
 
 // Procedural API — provides mc_maybe_define(), mc_rmdir_recursive(), and
 // all thin wrappers needed by test helpers. The functions are only defined
 // here; no MC_App boot occurs in unit tests.
-require_once MC_ABSPATH . 'mc-includes/functions.php';
+require_once MC_CORE_DIR . 'mc-includes/functions.php';
 
 // ── Temporary test data directories ─────────────────────────────────────────
 
@@ -40,16 +41,16 @@ define('MC_TEST_TMP', $test_tmp);
 
 // ── Define core constants with test-safe values ─────────────────────────────
 
-mc_maybe_define('MC_INC', MC_ABSPATH . 'mc-includes/');
-mc_maybe_define('MC_CONTENT_DIR', MC_TEST_TMP . 'mc-content/');
-mc_maybe_define('MC_DATA_DIR', MC_TEST_TMP . 'mc-data/');
-mc_maybe_define('MC_PLUGIN_DIR', MC_TEST_TMP . 'mc-content/plugins/');
-mc_maybe_define('MC_MU_PLUGIN_DIR', MC_TEST_TMP . 'mc-content/mu-plugins/');
-mc_maybe_define('MC_THEME_DIR', MC_TEST_TMP . 'mc-content/themes/');
-mc_maybe_define('MC_UPLOAD_DIR', MC_TEST_TMP . 'mc-content/uploads/');
-mc_maybe_define('MC_CACHE_DIR', MC_TEST_TMP . 'mc-content/cache/');
-mc_maybe_define('MC_SESSION_DIR', MC_TEST_TMP . 'mc-data/sessions/');
-mc_maybe_define('MC_LOG_DIR', MC_TEST_TMP . 'mc-data/logs/');
+mc_maybe_define('MC_INC', MC_CORE_DIR . 'mc-includes/');
+mc_maybe_define('MC_CONTENT_DIR', MC_TEST_TMP . 'content/');
+mc_maybe_define('MC_DATA_DIR', MC_TEST_TMP . 'content/data/');
+mc_maybe_define('MC_PLUGIN_DIR', MC_TEST_TMP . 'content/plugins/');
+mc_maybe_define('MC_MU_PLUGIN_DIR', MC_TEST_TMP . 'content/mu-plugins/');
+mc_maybe_define('MC_THEME_DIR', MC_TEST_TMP . 'content/themes/');
+mc_maybe_define('MC_UPLOAD_DIR', MC_TEST_TMP . 'content/uploads/');
+mc_maybe_define('MC_CACHE_DIR', MC_TEST_TMP . 'content/cache/');
+mc_maybe_define('MC_SESSION_DIR', MC_TEST_TMP . 'content/data/sessions/');
+mc_maybe_define('MC_LOG_DIR', MC_TEST_TMP . 'content/data/logs/');
 
 mc_maybe_define('MC_SITE_URL', 'http://localhost/minimal');
 mc_maybe_define('MC_SITE_NAME', 'Test Site');

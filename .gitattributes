@@ -20,5 +20,6 @@
 /docs/**                export-ignore
 
 # Source assets (compiled output is overlaid separately)
-/mc-admin/assets/src/** export-ignore
-/mc-content/themes/default/src/** export-ignore
+/minimal/admin-themes/default/assets/src/** export-ignore
+/minimal/admin-themes/classic/assets/src/** export-ignore
+/content/themes/default/src/** export-ignore

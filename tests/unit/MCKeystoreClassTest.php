@@ -24,7 +24,7 @@ class MCKeystoreClassTest extends TestCase
 	{
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_keystore_test_' . uniqid() . '/';
-		$this->data_dir = $this->temp_dir . 'mc-data/';
+		$this->data_dir = $this->temp_dir . 'content/data/';
 		mkdir($this->data_dir, 0755, true);
 	}
 

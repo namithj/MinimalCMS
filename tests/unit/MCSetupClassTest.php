@@ -36,7 +36,7 @@ class MCSetupClassTest extends TestCase
 
 		$this->temp_dir = sys_get_temp_dir() . '/mc_setup_test_' . uniqid() . '/';
 		mkdir($this->temp_dir, 0755, true);
-		mkdir($this->temp_dir . 'mc-data/', 0755, true);
+		mkdir($this->temp_dir . 'content/data/', 0755, true);
 
 		$config_path   = $this->temp_dir . 'config.php';
 		$sample_path   = $this->temp_dir . 'config.sample.php';
@@ -215,7 +215,7 @@ class MCSetupClassTest extends TestCase
 		$bundle         = $this->setup->generate_backup_bundle($master_key_hex, 'restore-passphrase-123');
 		$this->assertIsArray($bundle);
 
-		$data_dir = $this->temp_dir . 'mc-data/';
+		$data_dir = $this->temp_dir . 'content/data/';
 
 		MC_File_Guard::write($data_dir . MC_Keystore::WEBROOT_FILE, str_repeat('a', 64));
 		MC_File_Guard::write($data_dir . MC_Keystore::KEYS_FILE, base64_encode('invalid'));

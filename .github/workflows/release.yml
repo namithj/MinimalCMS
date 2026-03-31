@@ -80,8 +80,10 @@ jobs:
           cp -r mc-includes/vendor "$DIST_DIR/mc-includes/"
 
           # Overlay built front-end assets (gitignored – not in archive).
-          [ -d mc-admin/assets/css    ] && cp -r mc-admin/assets/css    "$DIST_DIR/mc-admin/assets/"
-          [ -d mc-admin/assets/vendor ] && cp -r mc-admin/assets/vendor "$DIST_DIR/mc-admin/assets/"
+          find admin-themes -type d \( -name css -o -name vendor \) | while IFS= read -r d; do
+            mkdir -p "$DIST_DIR/$d"
+            cp -r "$d/." "$DIST_DIR/$d/"
+          done
           find mc-content/themes -name "*.css" -o -name "*.css.map" | while IFS= read -r f; do
             cp "$f" "$DIST_DIR/$f"
           done
@@ -108,7 +110,7 @@ jobs:
             ### Installation
             1. Download `${{ env.ARTIFACT_NAME }}-${{ steps.version.outputs.version }}.zip` below
             2. Extract to your web server's document root
-            3. Visit `https://yoursite.com/mc-admin/` to run the setup wizard
+            3. Visit `https://yoursite.com/admin/` to run the setup wizard
 
             ### Requirements
             - PHP 8.2+ with the sodium extension
