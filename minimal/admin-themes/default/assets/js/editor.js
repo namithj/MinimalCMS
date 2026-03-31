@@ -20,22 +20,49 @@
 
 	window.mcEditors = window.mcEditors || {};
 
-	const TOOLBAR_FULL = [
-		'bold', 'italic', 'strikethrough', '|',
-		'heading-1', 'heading-2', 'heading-3', '|',
-		'unordered-list', 'ordered-list', 'checklist', '|',
-		'link', 'image', 'table', 'horizontal-rule', '|',
-		'code', 'quote', '|',
-		'preview', 'side-by-side', 'fullscreen', '|',
-		'undo', 'redo', '|',
-		'guide'
+		function toolbarButton( name, title, action, iconClass ) {
+		return {
+			name: name,
+			title: title,
+			action: action,
+						className: 'mc-easymde-icon ' + iconClass,
+		};
+	}
+
+		const TOOLBAR_FULL = [
+				toolbarButton( 'bold', 'Bold', EasyMDE.toggleBold, 'mc-icon-bold' ),
+				toolbarButton( 'italic', 'Italic', EasyMDE.toggleItalic, 'mc-icon-italic' ),
+				toolbarButton( 'strikethrough', 'Strikethrough', EasyMDE.toggleStrikethrough, 'mc-icon-strikethrough' ),
+		'|',
+				toolbarButton( 'heading-1', 'Heading 1', EasyMDE.toggleHeading1, 'mc-icon-h1' ),
+				toolbarButton( 'heading-2', 'Heading 2', EasyMDE.toggleHeading2, 'mc-icon-h2' ),
+				toolbarButton( 'heading-3', 'Heading 3', EasyMDE.toggleHeading3, 'mc-icon-h3' ),
+		'|',
+				toolbarButton( 'unordered-list', 'Bullet list', EasyMDE.toggleUnorderedList, 'mc-icon-ul' ),
+				toolbarButton( 'ordered-list', 'Numbered list', EasyMDE.toggleOrderedList, 'mc-icon-ol' ),
+		'|',
+				toolbarButton( 'link', 'Insert link', EasyMDE.drawLink, 'mc-icon-link' ),
+				toolbarButton( 'image', 'Insert image', EasyMDE.drawImage, 'mc-icon-image' ),
+				toolbarButton( 'table', 'Insert table', EasyMDE.drawTable, 'mc-icon-table' ),
+				toolbarButton( 'horizontal-rule', 'Horizontal rule', EasyMDE.drawHorizontalRule, 'mc-icon-hr' ),
+		'|',
+				toolbarButton( 'code', 'Code block', EasyMDE.toggleCodeBlock, 'mc-icon-code' ),
+				toolbarButton( 'quote', 'Blockquote', EasyMDE.toggleBlockquote, 'mc-icon-quote' ),
+		'|',
+				toolbarButton( 'undo', 'Undo', EasyMDE.undo, 'mc-icon-undo' ),
+				toolbarButton( 'redo', 'Redo', EasyMDE.redo, 'mc-icon-redo' ),
+		'|',
+				toolbarButton( 'guide', 'Markdown guide', 'https://www.markdownguide.org/basic-syntax/', 'mc-icon-guide' ),
 	];
 
-	const TOOLBAR_COMPACT = [
-		'bold', 'italic', '|',
-		'unordered-list', 'ordered-list', '|',
-		'link', '|',
-		'preview'
+		const TOOLBAR_COMPACT = [
+				toolbarButton( 'bold', 'Bold', EasyMDE.toggleBold, 'mc-icon-bold' ),
+				toolbarButton( 'italic', 'Italic', EasyMDE.toggleItalic, 'mc-icon-italic' ),
+		'|',
+				toolbarButton( 'unordered-list', 'Bullet list', EasyMDE.toggleUnorderedList, 'mc-icon-ul' ),
+				toolbarButton( 'ordered-list', 'Numbered list', EasyMDE.toggleOrderedList, 'mc-icon-ol' ),
+		'|',
+				toolbarButton( 'link', 'Insert link', EasyMDE.drawLink, 'mc-icon-link' ),
 	];
 
 	const form = document.querySelector( 'form[data-slug]' );
@@ -47,7 +74,7 @@
 		const mde = new EasyMDE( {
 			element:   textarea,
 			spellChecker: false,
-			autoDownloadFontAwesome: ! noToolbar,
+			autoDownloadFontAwesome: false,
 			placeholder: textarea.placeholder || '',
 			minHeight:  isMain ? '400px' : '180px',
 			autofocus:  false,

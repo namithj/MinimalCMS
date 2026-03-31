@@ -49,7 +49,7 @@ It is designed as a learning reference, a lightweight CMS for small sites, and a
 - User data encrypted with `sodium_crypto_secretbox` (256-bit key)
 - Passwords hashed with bcrypt
 - All forms protected by HMAC-based nonces
-- `mc-data/` is locked behind Apache `Deny all` + PHP `die()` double guard
+- `content/data/` is locked behind Apache `Deny all` + PHP `die()` double guard
 
 **Extensibility**
 - 92 documented hooks (44 actions, 48 filters) across all subsystems
@@ -121,7 +121,7 @@ For production or non-Docker environments:
 ```bash
 composer install                   # PHP dependencies (optional — tests/linting only)
 npm install && npm run build       # Compile SCSS assets
-# Point Apache at the project root, enable mod_rewrite, visit /mc-admin/
+# Point Apache at the project root, enable mod_rewrite, visit /admin/
 ```
 
 The **setup wizard** runs automatically on the first visit. It will:
@@ -189,8 +189,8 @@ There is no routing framework — just a clean hook system that plugins and them
 minimalcms/
 ├── index.php                    # Front controller — all requests start here
 ├── .htaccess                    # Rewrite all non-file requests to index.php
-├── mc-blog-header.php           # Orchestrates: boot → route → render
-├── mc-load.php                  # Bootstrap: constants, autoload, MC_App::boot()
+├── minimal/mc-blog-header.php   # Orchestrates: boot → route → render
+├── minimal/mc-load.php          # Bootstrap: constants, autoload, MC_App::boot()
 ├── config.sample.php            # Template config — copied to config.php on setup
 ├── composer.json                # PHP dependencies & dev scripts
 ├── package.json                 # Node dependencies & build scripts
@@ -199,9 +199,13 @@ minimalcms/
 ├── phpunit.xml                  # PHPUnit configuration
 ├── phpcs.xml.dist               # PHP CodeSniffer ruleset
 │
-├── mc-includes/                 # Core PHP classes & autoloader
+├── minimal/mc-includes/         # Core PHP classes, autoload, and admin runtime
 │   ├── autoload.php             # PSR-4 style autoloader for MC_* classes
 │   ├── functions.php            # Global helpers (mc_app, mc_site_url, mc_is_error, etc.)
+│   ├── admin/                   # Shared admin functionality (not presentation)
+│   │   ├── bootstrap.php
+│   │   ├── functions.php
+│   │   └── admin-ajax.php
 │   ├── classes/                 # 27 core classes
 │   │   ├── class-mc-app.php              # Singleton service container
 │   │   ├── class-mc-config.php           # Config loader (config.php)
@@ -227,39 +231,25 @@ minimalcms/
 │   │   ├── class-mc-plugin-manager.php   # Plugin discovery & lifecycle
 │   │   ├── class-mc-admin-bar.php        # Front-end admin toolbar
 │   │   ├── class-mc-setup.php            # First-run wizard logic
-│   │   └── class-mc-error.php            # Error container object│   │   ├── class-mc-field-registry.php   # Field type registration & rendering
-│   │   ├── class-mc-file-guard.php       # PHP Guard file I/O (read/write guarded files)│   └── vendor/                  # Composer dependencies (Parsedown, dev tools)
+│   │   ├── class-mc-file-guard.php       # PHP Guard file I/O (read/write guarded files)
+│   │   └── class-mc-error.php            # Error container object
+│   └── vendor/                  # Composer dependencies (Parsedown, dev tools)
 │
-├── mc-admin/                    # Admin panel
-│   ├── admin.php                # Admin bootstrap + auth gate
-│   ├── login.php                # Authentication
-│   ├── setup.php                # First-run wizard
-│   ├── index.php                # Dashboard
-│   ├── pages.php                # Content listing
-│   ├── edit-page.php            # Markdown editor
-│   ├── users.php                # User management
-│   ├── user-edit.php            # Create/edit user
-│   ├── plugins.php              # Plugin management
-│   ├── themes.php               # Theme management
-│   ├── settings.php             # Site settings
-│   ├── template-sections.php    # Template section management
-│   ├── form-submissions.php     # Form submission viewer
-│   ├── admin-ajax.php           # AJAX handler (mc_ajax_{action} hooks)
-│   ├── admin-header.php         # Admin layout header
-│   ├── admin-footer.php         # Admin layout footer
-│   ├── includes/
-│   │   └── admin-functions.php  # Admin helpers & menu builder
-│   ├── widgets/                 # Dashboard widgets
-│   │   ├── widget-site-info.php
-│   │   ├── widget-recent-pages.php
-│   │   └── widget-quick-links.php
-│   └── assets/
-│       ├── css/                 # Compiled stylesheets (admin.css, auth.css + .min)
-│       ├── js/                  # Admin JS entry points & modules
-│       ├── vendor/              # Third-party libs (EasyMDE, etc.)
-│       └── src/scss/            # SCSS source (admin.scss, auth.scss, variables, mixins)
+├── minimal/admin-themes/        # Admin presentation layer (theme-owned layouts)
+│   ├── default/
+│   │   ├── templates/           # Header/footer/layout fragments
+│   │   ├── pages/               # Admin page templates (dashboard, settings, editor...)
+│   │   └── assets/
+│   │       ├── css/             # Compiled admin/auth CSS (+ minified)
+│   │       ├── js/              # Admin JavaScript entry files
+│   │       ├── src/scss/        # SCSS sources
+│   │       └── vendor/
+│   └── classic/                 # Office-97-inspired admin theme
+│       ├── templates/
+│       ├── pages/
+│       └── assets/
 │
-├── mc-content/                  # User content & extensions
+├── content/                     # User content & extensions
 │   ├── pages/                   # Page content (Markdown + JSON per folder)
 │   │   └── home/                # Default home page
 │   ├── plugins/                 # Plugin directory
@@ -283,7 +273,7 @@ minimalcms/
 │           ├── index.php        # Ultimate fallback template
 │           └── src/scss/        # Theme SCSS source
 │
-├── mc-data/                     # Protected data directory
+├── content/data/               # Protected data directory
 │   ├── .htaccess                # Deny all direct access
 │   ├── keys.php                 # Encrypted keystore (sodium secretbox)
 │   ├── sessions/                # PHP session files
@@ -314,7 +304,7 @@ minimalcms/
 Each content item lives in its own folder with two files:
 
 ```
-mc-content/pages/my-page/
+content/pages/my-page/
 ├── my-page.md       # Markdown body
 └── my-page.php      # Metadata sidecar (PHP-guarded JSON)
 ```
@@ -358,7 +348,7 @@ mc_register_content_type( 'post', array(
 ) );
 ```
 
-Then create content in `mc-content/posts/{slug}/{slug}.md` + `.php` (PHP-guarded sidecar).
+Then create content in `content/posts/{slug}/{slug}.md` + `.php` (PHP-guarded sidecar).
 
 MinimalCMS ships with two bundled plugins: **forms** (form builder with submissions) and **posts** (blog content type with archives).
 
@@ -366,7 +356,7 @@ MinimalCMS ships with two bundled plugins: **forms** (form builder with submissi
 
 ## Plugin Development
 
-Plugins live in `mc-content/plugins/{plugin-name}/{plugin-name}.php` and use a standard file header:
+Plugins live in `content/plugins/{plugin-name}/{plugin-name}.php` and use a standard file header:
 
 ```php
 <?php
@@ -399,7 +389,7 @@ Activate plugins from **Admin → Plugins** or by adding the path to `config.php
 
 ## Theme Development
 
-Themes live in `mc-content/themes/{theme-name}/` and require a `theme.php` manifest (PHP-guarded JSON):
+Themes live in `content/themes/{theme-name}/` and require a `theme.php` manifest (PHP-guarded JSON):
 
 ```php
 <?php die('Access denied'); ?>
@@ -506,7 +496,7 @@ mc_remove_filter( $hook, $callback, $priority );
 
 ## JavaScript Architecture
 
-The admin UI uses **vanilla ES Modules** — no jQuery, no bundler. Source files live in `mc-admin/assets/src/js/` and are class-based with a single approved global: `window.MC`.
+The admin UI uses vanilla JavaScript (no jQuery) with theme-owned assets. Compiled admin scripts live in `minimal/admin-themes/{theme}/assets/js/` and shared vendor assets are managed by the build pipeline.
 
 ### Core Modules
 
@@ -554,11 +544,11 @@ Server data is passed via `mc_localize_script()` and accessed as `window.mcData`
 ## Security
 
 - **PHP Guard pattern**: All data files (config, settings, sidecars, theme manifests) use `<?php die('Access denied'); ?>` + `.php` extension — no web server can serve raw data, regardless of server software
-- **Encrypted keystore**: Cryptographic keys are isolated from config and stored in a sodium-encrypted keystore (`mc-data/keys.php`) with master key hierarchy (env var → above-webroot file → in-webroot guarded file)
+- **Encrypted keystore**: Cryptographic keys are isolated from config and stored in a sodium-encrypted keystore (`content/data/keys.php`) with master key hierarchy (env var → above-webroot file → in-webroot guarded file)
 - **User file encryption**: All user data (including bcrypt-hashed passwords) is encrypted with `sodium_crypto_secretbox` using a 256-bit key from the keystore
 - **Nonces**: HMAC-based tokens protect all form submissions and admin actions
 - **Capabilities**: Role-based permission system with 4 default roles (administrator, editor, author, contributor)
-- **Data protection**: `mc-data/` folder has an `.htaccess` deny rule and a PHP `die()` guard in the users file
+- **Data protection**: `content/data/` folder has an `.htaccess` deny rule and a PHP `die()` guard in the users file
 - **Output escaping**: All output must use `mc_esc_html()`, `mc_esc_attr()`, `mc_esc_url()`, `mc_esc_js()`, or `mc_esc_textarea()`
 - **Input sanitisation**: All input must use `mc_sanitize_text()`, `mc_sanitize_slug()`, `mc_sanitize_email()`, `mc_sanitize_html()`, or `mc_sanitize_filename()`
 

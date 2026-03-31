@@ -300,7 +300,6 @@
       gap: 24px;
     }
 
-    .screenshot-item { }
     .screenshot-item h4 {
       font-size: .875rem;
       font-weight: 600;
@@ -689,7 +688,7 @@
           <li>User data encrypted with <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">sodium_crypto_secretbox</code> (256-bit)</li>
           <li>Passwords hashed with bcrypt</li>
           <li>HMAC-SHA256 nonces on every form and link action</li>
-          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mc-data/</code> double-locked: Apache <em>Deny all</em> + PHP die()</li>
+          <li><code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">content/data/</code> double-locked: Apache <em>Deny all</em> + PHP die()</li>
           <li>Full sanitization &amp; escaping API</li>
         </ul>
       </div>
@@ -835,21 +834,21 @@
         <div class="arch-step">
           <div>
             <div class="arch-step-title">Bootstrap</div>
-            <div class="arch-step-file">mc-load.php · mc-settings.php</div>
+            <div class="arch-step-file">minimal/mc-load.php · MC_App::boot()</div>
             <div class="arch-step-desc">Defines constants, loads config, fires plugins, activates theme.</div>
           </div>
         </div>
         <div class="arch-step">
           <div>
             <div class="arch-step-title">URL routing</div>
-            <div class="arch-step-file">mc-includes/rewrite.php</div>
+            <div class="arch-step-file">minimal/mc-includes/rewrite.php</div>
             <div class="arch-step-desc">Resolves the request path to a content item (slug, type, archive).</div>
           </div>
         </div>
         <div class="arch-step">
           <div>
             <div class="arch-step-title">Template selection</div>
-            <div class="arch-step-file">mc-includes/template-loader.php</div>
+            <div class="arch-step-file">minimal/mc-includes/template-loader.php</div>
             <div class="arch-step-desc">Walks the template hierarchy to find the most specific match.</div>
           </div>
         </div>
@@ -869,25 +868,17 @@
 ├── index.php          <span class="cm"># front controller</span>
 ├── .htaccess          <span class="cm"># rewrite all → index.php</span>
 ├── config.php         <span class="cm"># keys in encrypted keystore, active theme/plugins</span>
-├── mc-load.php        <span class="cm"># constants &amp; autoload</span>
-├── mc-settings.php    <span class="cm"># boot sequence</span>
-├── <span class="d">mc-includes/</span>       <span class="cm"># core libraries</span>
-│   ├── hooks.php
-│   ├── rewrite.php
-│   ├── content.php
-│   ├── user.php
-│   └── …
-├── <span class="d">mc-content/</span>        <span class="cm"># all user data</span>
+├── <span class="d">minimal/</span>
+│   ├── mc-load.php    <span class="cm"># constants &amp; autoload</span>
+│   ├── mc-blog-header.php <span class="cm"># request orchestration</span>
+│   ├── <span class="d">mc-includes/</span> <span class="cm"># core classes + admin runtime</span>
+│   └── <span class="d">admin-themes/</span> <span class="cm"># admin pages/templates/assets per theme</span>
+├── <span class="d">content/</span>        <span class="cm"># all user data</span>
 │   ├── <span class="d">pages/</span>
 │   ├── <span class="d">plugins/</span>
 │   └── <span class="d">themes/</span>
 │       └── <span class="d">default/</span>
-├── <span class="d">mc-admin/</span>          <span class="cm"># admin panel</span>
-│   ├── login.php
-│   ├── setup.php
-│   ├── index.php      <span class="cm"># dashboard</span>
-│   └── …
-└── <span class="d">mc-data/</span>           <span class="cm"># encrypted; Deny all</span>
+└── <span class="d">content/data/</span>           <span class="cm"># encrypted; Deny all</span>
     └── users.php</pre>
         </div>
       </div>
@@ -909,7 +900,7 @@
       <div class="qs-step"><div class="qs-num">1</div><h4>Clone the repo</h4><p>Download or <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">git clone</code> into your web root.</p></div>
       <div class="qs-step"><div class="qs-num">2</div><h4>Install deps <em style="font-size:.7rem;font-style:normal;color:var(--muted)">(optional)</em></h4><p>Run <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">composer install</code> for tests &amp; linting. Not needed for production.</p></div>
       <div class="qs-step"><div class="qs-num">3</div><h4>Point Apache</h4><p>Set the document root to the project folder and enable <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">mod_rewrite</code>.</p></div>
-      <div class="qs-step"><div class="qs-num">4</div><h4>Run the wizard</h4><p>Visit <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">/mc-admin/</code> — the setup wizard creates your config and first admin account.</p></div>
+      <div class="qs-step"><div class="qs-num">4</div><h4>Run the wizard</h4><p>Visit <code style="font-size:.78rem;background:var(--code-bg);padding:1px 5px;border-radius:3px;color:var(--accent-lt)">/admin/</code> — the setup wizard creates your config and first admin account.</p></div>
     </div>
 
     <div class="code-block">
@@ -927,7 +918,7 @@ composer install
 # 3. Point Apache at the project root and enable mod_rewrite
 
 # 4. Open the admin panel — setup wizard runs on first visit
-open http://your-site.local/mc-admin/
+open http://your-site.local/admin/
 
 # ── Optional: build CSS assets ──────────────────────────────────
 npm install
